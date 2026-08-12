@@ -1,0 +1,47 @@
+# --- Node / PWA client ---
+node_modules/
+dist/
+build/
+.env
+.env.local
+.env.*.local
+*.log
+npm-debug.log*
+.cache/
+.parcel-cache/
+
+# --- Python / procesamiento de imagen y backend ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+.pytest_cache/
+*.ipynb_checkpoints
+
+# --- Datasets e imágenes de campo (no versionar fotos crudas) ---
+# Las fotos del dataset viven en almacenamiento compartido (Drive), no en git.
+/dataset-fotos/
+*.jpg
+*.jpeg
+*.png
+!docs/**/*.png
+!docs/**/*.jpg
+
+# --- Base de datos ---
+*.sqlite3
+*.bak
+
+# --- Credenciales y secretos ---
+*.pem
+*.key
+secrets.json
+credentials.json
+
+# --- Sistema operativo / editor ---
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
