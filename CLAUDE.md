@@ -89,9 +89,9 @@ nosotros. Un ORM esconde exactamente lo que hay que mostrarle al profesor.
 
 Los tres tienen que correr las mismas versiones que el CI. Anotarlas aquí apenas se definan:
 
-- Python: `3.__`  (declarar en `server/pyproject.toml` y en el workflow de CI)
-- Node: `__`      (declarar en `client/.nvmrc` y en el workflow de CI)
-- PostgreSQL: `__`
+- Python: `3.12` — declarado en `server/pyproject.toml` (`requires-python`) y leído por el workflow de CI desde ahí
+- Node: `24` (LTS) — declarado en `client/.nvmrc` y leído por el workflow de CI desde ahí
+- PostgreSQL: `__` (pendiente — se fija en T-12/T-13)
 
 ---
 
