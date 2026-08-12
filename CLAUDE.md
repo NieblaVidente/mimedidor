@@ -59,7 +59,8 @@ profesores evalúan este mismo proyecto desde la perspectiva de su materia (ver 
 |---|---|---|
 | Cliente | **Vite + React + TypeScript**, `vite-plugin-pwa` | Cámara vía `getUserMedia` |
 | Backend | **Python + FastAPI + Uvicorn** | El procesamiento de imagen vive en el mismo proceso |
-| Visión por computadora | **OpenCV** (`opencv-python`) | La librería OCR se decide en T-02b |
+| Visión por computadora | **OpenCV** (`opencv-python`) para preprocesamiento (T-09/T-10) | |
+| Reconocimiento de dígitos (OCR) | **Tesseract**, vía `pytesseract` | Decidido en T-02b — ver justificación abajo |
 | Base de datos | **PostgreSQL** | Acceso con `psycopg` (v3), **SQL plano, sin ORM** |
 | Pruebas unitarias | `pytest` (server) · Vitest (client) | |
 | Pruebas end-to-end | Cypress | Sprint 2 (P-08) |
@@ -85,11 +86,29 @@ rúbrica usa vocabulario de T-SQL pero no exige SQL Server. Ver §6 para la tabl
 exige procedimientos almacenados, roles con mínimo privilegio y control transaccional escritos por
 nosotros. Un ORM esconde exactamente lo que hay que mostrarle al profesor.
 
+**Tesseract (`pytesseract`) para OCR, sobre EasyOCR y el DNN de OpenCV (T-02b).** El criterio de
+esta tarjeta no es exactitud sobre hidrómetros — eso es T-11 — sino que funcione hoy y se instale
+en CI sin pelear media tarde:
+- **EasyOCR** se descarta: depende de PyTorch (una descarga pesada) y baja modelos pre-entrenados
+  de internet la primera vez que corre, lo que vuelve el pipeline de CI lento y dependiente de la
+  red en cada corrida — justo lo que un test rápido y confiable no debería tener.
+- **El OCR por DNN de OpenCV** se descarta para este sprint: requiere descargar y cablear modelos
+  `.pb`/`.onnx` aparte, desproporcionado para una tarjeta de 1 punto cuyo único objetivo es probar
+  que *alguna* librería funciona.
+- **Tesseract** gana: el motor y sus datos de entrenamiento se instalan con un solo paquete del
+  sistema (`apt-get install tesseract-ocr` en CI), no descarga nada en tiempo de ejecución, y
+  `pytesseract` es solo una envoltura fina en Python. Es la opción más madura y con menos piezas
+  móviles para un sprint de 10 días.
+
+Función mínima en `server/app/vision/reconocimiento.py`, probada en
+`server/tests/test_reconocimiento.py` con una imagen generada en el momento (sin depender de un
+archivo externo ni de una foto real todavía).
+
 ### Versiones — fijar el primer día
 
 Los tres tienen que correr las mismas versiones que el CI. Anotarlas aquí apenas se definan:
 
-- Python: `3.12` — declarado en `server/pyproject.toml` (`requires-python`) y leído por el workflow de CI desde ahí
+- Python: `3.12` — declarado en `server/.python-version` (pin exacto) y leído por el workflow de CI desde ahí. `pyproject.toml` declara `requires-python = ">=3.12"`, que es un rango de compatibilidad, no un pin — no alcanza solo, `setup-python` puede agarrar una versión más nueva y romper la instalación de dependencias sin wheels precompilados para esa versión (nos pasó en T-02b: corrió en 3.14 y Pillow falló al compilar)
 - Node: `24` (LTS) — declarado en `client/.nvmrc` y leído por el workflow de CI desde ahí
 - PostgreSQL: `__` (pendiente — se fija en T-12/T-13)
 
