@@ -12,9 +12,9 @@ En Costa Rica la lectura del consumo de agua domiciliar se realiza de forma manu
 
 | Integrante | Rol Scrum |
 |---|---|
-| José Pablo Ramírez Sánchez | Scrum Master · Product Owner |
+| José Pablo Ramírez Sánchez | Scrum Master · Equipo de desarrollo |
 | Yariel Andrey Elizondo Jiménez | Equipo de desarrollo |
-| Isaac Felipe Morún Moreira | Equipo de desarrollo |
+| Isaac Felipe Morún Moreira | Product Owner · Equipo de desarrollo |
 
 Universidad Invenio · Carrera de Tecnología de la Información y Comunicación Empresarial (TICE)
 
