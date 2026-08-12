@@ -49,6 +49,9 @@ jobs:
           cache: pip
           cache-dependency-path: server/requirements-dev.txt
 
+      - name: Instalar Tesseract OCR (motor nativo que usa pytesseract, T-02b)
+        run: sudo apt-get update && sudo apt-get install -y tesseract-ocr
+
       - name: Instalar dependencias
         run: pip install -r requirements-dev.txt
 
