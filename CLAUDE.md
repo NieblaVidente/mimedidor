@@ -299,10 +299,13 @@ versionado en git sí.
 
 ## 11. Contrato de la API
 
-Se define el primer día (T-04b) y se congela. Es lo que permite que el cliente y el servidor
-avancen en paralelo: quien hace la pantalla trabaja contra datos falsos sin esperar al backend.
+Definido en T-04b y congelado una vez que los tres lo aprueben — no se edita por cuenta propia
+después de eso. El documento completo, con ejemplos de petición/respuesta y la lista de códigos
+de error, vive en [`docs/architecture/contrato-api.md`](docs/architecture/contrato-api.md). Es lo
+que permite que el cliente y el servidor avancen en paralelo: quien hace la pantalla trabaja
+contra los ejemplos de ese documento sin esperar al backend.
 
-Propuesta base, a confirmar entre los tres:
+Resumen de rutas — para el detalle completo, ver el documento:
 
 | Método | Ruta | Qué hace |
 |---|---|---|
@@ -314,12 +317,6 @@ Propuesta base, a confirmar entre los tres:
 
 Reconocer y guardar están separados a propósito: el usuario tiene que poder **corregir** la lectura
 antes de confirmarla, porque sabemos que el reconocimiento va a fallar seguido en este sprint.
-
-Forma de los errores, uniforme en toda la API:
-
-```json
-{ "error": { "codigo": "IMAGEN_ILEGIBLE", "mensaje": "No se pudo detectar la carátula" } }
-```
 
 Nunca exponer trazas internas ni detalles del motor de base de datos en la respuesta. Eso va al
 log, no al cliente.
