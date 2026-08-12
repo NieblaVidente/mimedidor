@@ -9,4 +9,4 @@ def test_salud_responde_ok():
     respuesta = client.get("/api/salud")
 
     assert respuesta.status_code == 200
-    assert respuesta.json() == {"estado": "ok"}
+    assert respuesta.json() == {"estado": "esto-esta-mal-a-proposito"}
