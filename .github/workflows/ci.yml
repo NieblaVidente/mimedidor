@@ -73,7 +73,12 @@ jobs:
       - name: Instalar PostgreSQL 16 (motor nativo, sin contenedor)
         run: |
           sudo apt-get update
-          sudo apt-get install -y postgresql-16
+          sudo apt-get install -y postgresql-16 postgresql-client-16
+
+      - name: Arrancar PostgreSQL y esperar a que acepte conexiones
+        run: |
+          sudo systemctl enable --now postgresql
+          until pg_isready -q -h localhost; do sleep 1; done
 
       - name: Crear base de datos de prueba
         run: sudo -u postgres createdb mimedidor
