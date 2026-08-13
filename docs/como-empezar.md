@@ -158,7 +158,51 @@ Dos cosas que conviene que sepas de entrada:
 
 ---
 
-## 6. Trabajar en una tarjeta
+## 6. Cómo funciona `git pull` (no es magia)
+
+Esto conviene entenderlo antes de seguir, porque se presta a confusión: **Git nunca actualiza tus
+archivos solo.** Cuando clonás el repo, tu compu queda con una copia congelada de cómo estaba
+`main` en ese momento. Si otro integrante mergea un PR después, GitHub cambia — pero tu carpeta en
+disco se queda exactamente igual hasta que vos se lo pidas explícitamente. Podés tener el proyecto
+abierto una semana entera y Git no te va a avisar con ninguna notificación de que hay cambios
+nuevos.
+
+El comando que lo hace:
+
+```bash
+git pull origin main
+```
+
+En realidad son dos pasos en uno:
+1. **`fetch`** — baja de GitHub la información de qué cambió, pero todavía no toca tus archivos
+2. **`merge`** — recién ahí actualiza tus archivos locales con esos cambios
+
+### Cuándo correrlo
+
+**Siempre antes de crear una rama nueva** (vas a ver `git checkout main` + `git pull origin main`
+repetido dos veces más abajo en el ciclo de trabajo) — así tu rama nace desde la versión más
+reciente de `main`, no desde una vieja.
+
+Si estás a mitad de una tarjeta y alguien mergea algo mientras tanto, **tu rama actual no se
+entera sola.** Normalmente no hace falta hacer nada — tu PR se combina igual al mergear — pero si
+en algún momento querés traer esos cambios a tu rama sin esperar:
+
+```bash
+git checkout tu-rama
+git merge main
+```
+
+### Si tenés cambios sin guardar cuando hacés `pull`
+
+Git intenta combinar todo automáticamente. Si los cambios no chocan, lo resuelve solo y no ves
+nada raro. Si vos y otro integrante tocaron **la misma línea del mismo archivo**, Git se detiene y
+te pide que decidas cuál versión queda — eso se llama **conflicto de merge**. No es un error grave
+ni significa que rompiste algo; simplemente Git no puede adivinar cuál de las dos versiones
+querés, así que te lo pregunta a vos.
+
+---
+
+## 7. Trabajar en una tarjeta
 
 Este es el ciclo de todos los días. **Nunca se trabaja directo sobre `main`** — está protegida y
 GitHub va a rechazar el push (ya lo probamos).
@@ -222,7 +266,7 @@ Movés la tarjeta a "Hecho" en Trello y arrancás con la siguiente.
 
 ---
 
-## 7. Definition of Done
+## 8. Definition of Done
 
 Una tarjeta está **Hecha** cuando:
 
@@ -241,7 +285,7 @@ Acordado por los tres el 2026-08-12. Detalle en
 
 ---
 
-## 8. Si usás Claude Code
+## 9. Si usás Claude Code
 
 Abrí Claude Code **parado en la carpeta del repositorio** (`C:\dev\mimedidor`). Va a cargar
 `CLAUDE.md` automáticamente y ya va a saber el stack, las convenciones y qué no hacer.
@@ -257,7 +301,7 @@ Software II.
 
 ---
 
-## 9. Cosas que ya nos pasaron (para que no las sufras de nuevo)
+## 10. Cosas que ya nos pasaron (para que no las sufras de nuevo)
 
 | Síntoma | Causa | Solución |
 |---|---|---|
@@ -270,7 +314,7 @@ Software II.
 
 ---
 
-## 10. Enlaces
+## 11. Enlaces
 
 - **Repositorio:** https://github.com/NieblaVidente/mimedidor
 - **Tablero de Trello:** https://trello.com/b/St9jsJir/mimedidor
