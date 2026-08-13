@@ -20,4 +20,5 @@ La rúbrica describe los mecanismos de control transaccional con vocabulario de 
 
 ## Modelo
 
-Ver diagrama entidad-relación en `docs/architecture/` (tarjeta T-12).
+Diagrama entidad-relación, diccionario de datos y justificación de 3FN en
+[`docs/architecture/modelo-datos.md`](../docs/architecture/modelo-datos.md) (tarjeta T-12).
