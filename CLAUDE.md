@@ -110,7 +110,7 @@ Los tres tienen que correr las mismas versiones que el CI. Anotarlas aquí apena
 
 - Python: `3.12` — declarado en `server/.python-version` (pin exacto) y leído por el workflow de CI desde ahí. `pyproject.toml` declara `requires-python = ">=3.12"`, que es un rango de compatibilidad, no un pin — no alcanza solo, `setup-python` puede agarrar una versión más nueva y romper la instalación de dependencias sin wheels precompilados para esa versión (nos pasó en T-02b: corrió en 3.14 y Pillow falló al compilar)
 - Node: `24` (LTS) — declarado en `client/.nvmrc` y leído por el workflow de CI desde ahí
-- PostgreSQL: `__` (pendiente — se fija en T-12/T-13)
+- PostgreSQL: `16` — fijado en T-13. `database/README.md` documenta cómo correr los scripts
 
 ---
 

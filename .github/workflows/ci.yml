@@ -60,3 +60,28 @@ jobs:
 
       - name: Pruebas unitarias (pytest)
         run: pytest -v
+
+  database:
+    name: Base de datos (esquema, tablas, roles)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: database/scripts
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Instalar PostgreSQL 16 (motor nativo, sin contenedor)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-16
+
+      - name: Crear base de datos de prueba
+        run: sudo -u postgres createdb mimedidor
+
+      - name: Ejecutar scripts sobre una instancia limpia (esquema, tablas, roles)
+        run: |
+          sudo -u postgres psql -d mimedidor \
+            -v ON_ERROR_STOP=1 \
+            -v password_app='clave-de-prueba-ci' \
+            -v password_lectura='clave-de-prueba-ci' \
+            -f ejecutar_todo.sql
