@@ -4,6 +4,9 @@ Aplicación web progresiva (PWA) para el registro y la verificación del consumo
 
 Proyecto Integrador — Invenio Fest, III Trimestre 2026.
 
+> **¿Primera vez en el proyecto?** Empezá por [`docs/como-empezar.md`](docs/como-empezar.md):
+> qué instalar, cómo conectarte a GitHub y cómo trabajar una tarjeta de principio a fin.
+
 ## Problema
 
 En Costa Rica la lectura del consumo de agua domiciliar se realiza de forma manual y el abonado no tiene forma práctica de verificarla contra lo que paga. MiMedidor permite fotografiar el hidrómetro, obtener la lectura automáticamente, mantener un historial propio y contrastarlo contra la factura, sin requerir hardware adicional.
