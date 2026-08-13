@@ -1,6 +1,7 @@
 # Definition of Done — MiMedidor
 
-Acordado por el equipo (José Pablo Ramírez Sánchez, Yariel Andrey Elizondo Jiménez, Isaac Felipe Morún Moreira) el [fecha].
+Acordado por el equipo (José Pablo Ramírez Sánchez, Yariel Andrey Elizondo Jiménez, Isaac Felipe Morún Moreira) el 2026-08-12, los tres presentes. Registro completo de la ceremonia en
+[`docs/scrum/sprint-1.md`](scrum/sprint-1.md).
 
 Una tarjeta del tablero se considera **Hecha** cuando cumple todo lo siguiente:
 
@@ -16,6 +17,14 @@ Una tarjeta del tablero se considera **Hecha** cuando cumple todo lo siguiente:
 
 Las tarjetas de tipo `spike`, `campo` o `doc` que no producen código directamente solo requieren los puntos 6 y 7.
 
-## Revisión cruzada de Pull Requests
+## Quién revisa los Pull Requests
 
-Para evitar que cada integrante solo revise su propia área, las aprobaciones de PR rotan entre quienes no escribieron ese componente. El objetivo es que los tres puedan explicar y defender cualquier parte del sistema, no solo la que programaron — esto es evaluado individualmente en la Defensa Técnica de Sistemas Operativos y puede ser consultado por el profesor de Ingeniería de Software II.
+Decisión del equipo (2026-08-12): **no hay rotación fija.** Aprueba quien esté disponible en ese
+momento, priorizando que el PR se apruebe rápido y no se acumule trabajo bloqueado.
+
+**Riesgo aceptado a propósito, no un descuido:** sin rotación forzada, nada garantiza que los tres
+terminen revisando código de las tres áreas (cliente, servidor, base de datos). Eso importa porque
+la Defensa Técnica Individual de Sistemas Operativos puede preguntarle a cualquiera de los tres
+sobre cualquier parte del sistema, no solo la que programó. Si en algún momento del sprint alguien
+nota que solo está revisando (o que nadie está revisando) su propia área, es una señal para
+ajustar esto — no hace falta esperar a la retrospectiva.
