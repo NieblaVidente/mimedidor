@@ -83,10 +83,16 @@ jobs:
       - name: Crear base de datos de prueba
         run: sudo -u postgres createdb mimedidor
 
-      - name: Ejecutar scripts sobre una instancia limpia (esquema, tablas, roles)
+      - name: Ejecutar scripts sobre una instancia limpia (esquema, tablas, roles, procedimiento)
         run: |
           sudo -u postgres psql -d mimedidor \
             -v ON_ERROR_STOP=1 \
             -v password_app='clave-de-prueba-ci' \
             -v password_lectura='clave-de-prueba-ci' \
             -f ejecutar_todo.sql
+
+      - name: Verificar registrar_lectura (T-14: fuerza un error y confirma el rollback)
+        run: |
+          PGPASSWORD='clave-de-prueba-ci' psql -U mimedidor_app -h localhost -d mimedidor \
+            -v ON_ERROR_STOP=1 \
+            -f verificar_registrar_lectura.sql

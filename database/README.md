@@ -41,8 +41,37 @@ ni en el repositorio. En local usá cualquier valor; en un entorno real, general
 pasalas desde una variable de entorno, no las tipees en el historial de la terminal.
 
 `ejecutar_todo.sql` corre en orden `01_esquema.sql` → `02_tablas.sql` →
-`03_roles_permisos.sql`. Se puede correr cada archivo por separado en ese mismo orden si se
-prefiere revisar paso a paso.
+`03_roles_permisos.sql` → `04_procedimiento_registrar_lectura.sql`. Se puede correr cada
+archivo por separado en ese mismo orden si se prefiere revisar paso a paso.
+
+**Nota si volvés a correrlo sobre la misma instancia local:** los roles (`CREATE ROLE`) son
+objetos del clúster, no de la base de datos — borrar y recrear `mimedidor` con `dropdb`/`createdb`
+no borra `mimedidor_app` ni `mimedidor_lectura`. Si `03_roles_permisos.sql` falla con
+`el rol "mimedidor_app" ya existe`, borralos primero: `DROP ROLE mimedidor_app;` y
+`DROP ROLE mimedidor_lectura;` (conectado como superusuario). En CI no hace falta — cada corrida
+arranca con un clúster nuevo.
+
+## Procedimiento `registrar_lectura` (T-14)
+
+Valida que la lectura nueva no sea menor que la última registrada para ese medidor
+(`LECTURA_INVALIDA` en `docs/architecture/contrato-api.md`) e inserta la lectura junto con su
+evento de auditoría (`lectura_evento`, Opción C — ver
+`docs/architecture/modelo-datos.md` §5.2) como una sola operación atómica.
+
+Corre con los privilegios de quien lo llama (comportamiento por defecto de PostgreSQL, sin
+`SECURITY DEFINER`), así que el rol `mimedidor_app` solo puede hacer con el procedimiento lo
+mismo que ya podría hacer con `INSERT` directo sobre `lectura`/`lectura_evento` — no hay
+elevación de privilegios escondida en el procedimiento.
+
+`verificar_registrar_lectura.sql` es la prueba que exige el criterio de aceptación de T-14: crea
+datos de prueba, registra una lectura válida, **fuerza a propósito** una lectura inválida (menor
+a la anterior) y confirma que la transacción no dejó nada a medias. Todo el script corre dentro
+de un `BEGIN`/`ROLLBACK` explícito, así que no deja residuos — se puede correr tantas veces como
+haga falta, y el job `database` de CI lo corre en cada PR.
+
+```bash
+psql -d mimedidor -U mimedidor_app -v ON_ERROR_STOP=1 -f database/scripts/verificar_registrar_lectura.sql
+```
 
 ## Roles — justificación de mínimo privilegio
 
