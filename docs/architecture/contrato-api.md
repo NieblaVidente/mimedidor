@@ -247,9 +247,8 @@ Si `id` no existe: `404` con `FACTURA_NO_ENCONTRADA`.
 |---|---|---|
 | José Pablo Ramírez Sánchez | ✅ (autor de la propuesta) | |
 | Isaac Felipe Morún Moreira | ✅ | Aprobado en PR #5 |
-| Yariel Andrey Elizondo Jiménez | ⏳ pendiente | No pudo revisar: invitación de colaborador al repositorio sin aceptar a la fecha del merge. Se congela por mayoría (2 de 3); si al revisar señala un cambio necesario, se ajusta en un PR aparte |
+| Yariel Andrey Elizondo Jiménez | ✅ | "Revisado, estoy de acuerdo" — comentario en PR #5, una vez que aceptó la invitación de colaborador |
 
-Congelado por decisión del equipo con 2 de 3 aprobaciones — justificación completa en el
-comentario del PR #5. No es la ruta normal (que exige los tres), así que si esto se repite en
-otra tarjeta, hay que resolver de raíz el acceso de Yariel al repositorio en vez de acostumbrarse
-a la excepción.
+Congelado con aprobación de los tres integrantes. El PR #5 se mergeó originalmente con 2 de 3
+(ver historial del PR para esa justificación puntual, mientras Yariel no tenía acceso al
+repositorio); quedó completado apenas él pudo revisar.
