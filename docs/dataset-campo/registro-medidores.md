@@ -1,9 +1,11 @@
 # Registro del dataset de campo — T-07 / T-08
 
 Tabla viva: se va completando a medida que se toman más fotos. Cada fila es un medidor.
-Las fotos en sí **no se suben a este repositorio** — viven en almacenamiento compartido (Drive),
+Las fotos en sí **no se suben a este repositorio** — viven en la carpeta compartida de OneDrive,
 según ya está decidido en `.gitignore` (`/dataset-fotos/`). Esta tabla es el único registro que
 queda versionado en Git.
+
+**Carpeta compartida (OneDrive):** https://1drv.ms/f/c/c31b36613fb4e58a/IgATzPdfhuG3RI9f6rN32Io1AfR8DdPKv99Rl6m_NpmHbkU?e=hB1P3T
 
 ## Protocolo de captura — 6 tomas por medidor
 
