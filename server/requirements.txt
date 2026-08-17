@@ -3,3 +3,6 @@ uvicorn[standard]==0.34.0
 pillow==11.1.0
 pytesseract==0.3.13
 psycopg[binary]==3.2.3
+# headless: sin dependencias de GUI (libGL, GTK) — no hace falta mostrar ventanas en el
+# servidor ni en el runner de CI, solo procesar arrays (T-09/T-10)
+opencv-python-headless==4.10.0.84
