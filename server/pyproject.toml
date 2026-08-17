@@ -10,6 +10,9 @@ target-version = "py312"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]
+# B008: ruff no reconoce Depends(...) como el patrón válido de FastAPI para valores por
+# defecto — es la forma correcta de declarar dependencias, no un bug real (T-15).
+ignore = ["B008"]
 
 [tool.pytest.ini_options]
 pythonpath = ["."]
