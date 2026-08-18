@@ -78,6 +78,57 @@ async def reconocer_foto(
     return ReconocimientoSalida(lectura_reconocida=lectura, confianza=None)
 
 
+class LecturaHistorial(BaseModel):
+    id: UUID
+    valor: float
+    fecha: date
+    origen: str
+    consumo_desde_anterior_m3: float | None
+    dias_desde_anterior: int | None
+
+
+class HistorialSalida(BaseModel):
+    lecturas: list[LecturaHistorial]
+
+
+@router.get("", response_model=HistorialSalida)
+def listar_historial(medidor_id: UUID, conexion=Depends(obtener_conexion)) -> HistorialSalida:
+    """Historial de lecturas de un medidor, de la más vieja a la más nueva, con el consumo
+    calculado entre lecturas consecutivas (contrato de la API §4, tarjeta T-17).
+    """
+    if not db_lecturas.medidor_existe(conexion, medidor_id):
+        raise ErrorAPI(
+            "MEDIDOR_NO_ENCONTRADO",
+            f"No existe un medidor con id {medidor_id}",
+            404,
+        )
+
+    filas = db_lecturas.listar_lecturas(conexion, medidor_id)
+
+    lecturas: list[LecturaHistorial] = []
+    valor_anterior: float | None = None
+    fecha_anterior: date | None = None
+    for id_lectura, valor, fecha, origen in filas:
+        if valor_anterior is None:
+            consumo_desde_anterior_m3, dias_desde_anterior = None, None
+        else:
+            consumo_desde_anterior_m3 = float(valor) - float(valor_anterior)
+            dias_desde_anterior = (fecha - fecha_anterior).days
+        lecturas.append(
+            LecturaHistorial(
+                id=id_lectura,
+                valor=valor,
+                fecha=fecha,
+                origen=origen,
+                consumo_desde_anterior_m3=consumo_desde_anterior_m3,
+                dias_desde_anterior=dias_desde_anterior,
+            )
+        )
+        valor_anterior, fecha_anterior = valor, fecha
+
+    return HistorialSalida(lecturas=lecturas)
+
+
 @router.post("", status_code=201, response_model=LecturaSalida)
 def crear_lectura(entrada: LecturaEntrada, conexion=Depends(obtener_conexion)) -> LecturaSalida:
     """Guarda una lectura ya confirmada o corregida por el usuario (contrato de la API §3).

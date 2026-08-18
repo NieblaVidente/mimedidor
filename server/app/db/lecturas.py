@@ -52,3 +52,24 @@ def obtener_lectura_anterior(
             (str(medidor_id), lectura_id_actual),
         )
         return cur.fetchone()
+
+
+def listar_lecturas(
+    conexion, medidor_id: UUID
+) -> list[tuple[str, float, date, str]]:
+    """Todas las lecturas de un medidor, de la más vieja a la más nueva (T-17). El consumo y
+    los días entre lecturas se calculan en Python sobre esta lista (ver app/api/lecturas.py),
+    no acá: la vista `vista_historial_lecturas` que T-12 documentó nunca se implementó en T-13
+    (mismo hueco que ya resolvimos así en T-15, ver docs/architecture/modelo-datos.md §3).
+    """
+    with conexion.cursor() as cur:
+        cur.execute(
+            """
+            SELECT id, valor, fecha, origen
+            FROM mimedidor.lectura
+            WHERE medidor_id = %s
+            ORDER BY fecha ASC, creado_en ASC
+            """,
+            (str(medidor_id),),
+        )
+        return cur.fetchall()

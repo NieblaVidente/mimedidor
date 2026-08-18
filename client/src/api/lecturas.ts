@@ -1,7 +1,7 @@
 /**
- * Cliente de las dos rutas de lecturas del contrato de la API
- * (docs/architecture/contrato-api.md §2 y §3). Rutas relativas: el cliente y el servidor se
- * sirven desde el mismo origen en este sprint, no hay configuración de host aparte.
+ * Cliente de las rutas de lecturas del contrato de la API (docs/architecture/contrato-api.md
+ * §2, §3 y §4). Rutas relativas: el cliente y el servidor se sirven desde el mismo origen en
+ * este sprint, no hay configuración de host aparte.
  */
 
 export class ErrorApiLecturas extends Error {
@@ -71,4 +71,25 @@ export async function guardarLectura(datos: LecturaNueva): Promise<LecturaGuarda
   })
   if (!respuesta.ok) return lanzarError(respuesta)
   return (await respuesta.json()) as LecturaGuardada
+}
+
+// --- Historial (T-17) ---
+
+export interface LecturaHistorialItem {
+  id: string
+  valor: number
+  fecha: string
+  origen: string
+  consumo_desde_anterior_m3: number | null
+  dias_desde_anterior: number | null
+}
+
+export interface Historial {
+  lecturas: LecturaHistorialItem[]
+}
+
+export async function obtenerHistorial(medidorId: string): Promise<Historial> {
+  const respuesta = await fetch(`/api/lecturas?medidor_id=${encodeURIComponent(medidorId)}`)
+  if (!respuesta.ok) return lanzarError(respuesta)
+  return (await respuesta.json()) as Historial
 }
