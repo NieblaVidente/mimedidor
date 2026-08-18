@@ -161,6 +161,29 @@
   }
 }
 
+.visor-camara {
+  position: relative;
+  width: 100%;
+  max-width: 480px;
+}
+
+.visor-camara video {
+  width: 100%;
+  border-radius: 8px;
+  background: #000;
+}
+
+/* Guía de encuadre (T-16): un anillo centrado sobre el video para ayudar a alinear la
+   carátula circular del hidrómetro antes de disparar — mejora la foto de entrada y reduce
+   el trabajo de T-09 (detección de círculo). */
+.guia-encuadre {
+  position: absolute;
+  inset: 12% 25%;
+  border: 3px dashed rgba(255, 255, 255, 0.85);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
 .ticks {
   position: relative;
   width: 100%;
