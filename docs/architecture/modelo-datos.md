@@ -254,8 +254,8 @@ relacionadas con... auditoría").
 | Integrante | Revisó | Comentarios |
 |---|---|---|
 | Isaac Felipe Morún Moreira | ✅ (autor de la propuesta) | |
-| José Pablo Ramírez Sánchez | ⬜ | Decisiones de §5 acordadas en conversación de equipo 2026-08-13; falta revisión formal del documento |
+| José Pablo Ramírez Sánchez | ✅ | Revisado 2026-08-18 |
 | Yariel Andrey Elizondo Jiménez | ⬜ | Decisiones de §5 acordadas en conversación de equipo 2026-08-13; falta revisión formal del documento |
 
-Pendiente de aprobación formal de los otros dos integrantes en el PR antes de darla por
-congelada, igual que se hizo con el contrato de la API en T-04b.
+Pendiente de aprobación formal de Yariel en el PR antes de darla por congelada, igual que se hizo
+con el contrato de la API en T-04b.
