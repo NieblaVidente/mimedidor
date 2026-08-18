@@ -1,3 +1,5 @@
+import PantallaCaptura from './PantallaCaptura'
+import PantallaHistorial from './PantallaHistorial'
 import PantallaFactura from './PantallaFactura'
 
 function App() {
@@ -5,6 +7,8 @@ function App() {
     <main>
       <h1>MiMedidor</h1>
       <p>Lectura automática de hidrómetros por fotografía.</p>
+      <PantallaCaptura />
+      <PantallaHistorial />
       <PantallaFactura />
     </main>
   )
