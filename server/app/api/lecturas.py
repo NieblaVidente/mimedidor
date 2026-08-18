@@ -2,12 +2,17 @@ from datetime import date
 from typing import Literal
 from uuid import UUID
 
-from fastapi import APIRouter, Depends
+import cv2
+import numpy as np
+from fastapi import APIRouter, Depends, Form, UploadFile
 from pydantic import BaseModel, Field
 
 from app.db import lecturas as db_lecturas
 from app.db.conexion import obtener_conexion
 from app.errores import ErrorAPI
+from app.vision.preprocesamiento import CaratulaNoDetectada, preprocesar_caratula
+from app.vision.reconocimiento import reconocer_lectura
+from app.vision.segmentacion import segmentar_ventana_odometro
 
 router = APIRouter(prefix="/api/lecturas", tags=["lecturas"])
 
@@ -30,12 +35,54 @@ class LecturaSalida(BaseModel):
     dias_desde_anterior: int | None
 
 
+class ReconocimientoSalida(BaseModel):
+    lectura_reconocida: float
+    confianza: float | None
+
+
+@router.post("/reconocer", status_code=200, response_model=ReconocimientoSalida)
+async def reconocer_foto(
+    foto: UploadFile,
+    medidor_id: UUID = Form(...),
+    # medidor_id se recibe porque el contrato lo pide, pero no se usa acá: esta ruta no persiste
+    # nada (POST /api/lecturas sí valida el medidor cuando se guarda de verdad), y no consultar
+    # la base acá evita darle una dependencia de conexión a un endpoint puramente de visión.
+) -> ReconocimientoSalida:
+    """Corre la cadena T-09 → T-10 → T-11 sobre una foto y devuelve la lectura reconocida
+    **sin guardarla** (contrato de la API §2). Guardarla es POST /api/lecturas (T-15).
+
+    `confianza` siempre viaja en `null`: `reconocer_lectura` (T-11) no expone una medida de
+    confianza — Tesseract no la da directo, y el contrato ya contempla ese caso.
+    """
+    contenido = await foto.read()
+    arreglo = np.frombuffer(contenido, dtype=np.uint8)
+    imagen_bgr = cv2.imdecode(arreglo, cv2.IMREAD_COLOR)
+    if imagen_bgr is None:
+        raise ErrorAPI("IMAGEN_ILEGIBLE", "El archivo recibido no es una imagen válida", 422)
+
+    try:
+        caratula = preprocesar_caratula(imagen_bgr)
+    except CaratulaNoDetectada as error:
+        raise ErrorAPI(
+            "IMAGEN_ILEGIBLE", "No se pudo detectar la carátula del hidrómetro en la foto", 422
+        ) from error
+
+    ventana = segmentar_ventana_odometro(caratula.imagen)
+    lectura = reconocer_lectura(ventana.imagen)
+
+    if lectura is None:
+        raise ErrorAPI(
+            "IMAGEN_ILEGIBLE", "No se pudo leer la lectura del odómetro en la foto", 422
+        )
+
+    return ReconocimientoSalida(lectura_reconocida=lectura, confianza=None)
+
+
 @router.post("", status_code=201, response_model=LecturaSalida)
 def crear_lectura(entrada: LecturaEntrada, conexion=Depends(obtener_conexion)) -> LecturaSalida:
     """Guarda una lectura ya confirmada o corregida por el usuario (contrato de la API §3).
 
-    No hace reconocimiento de imagen — eso es POST /api/lecturas/reconocer, que depende de
-    T-09/T-10 y todavía no existe (ver la nota de alcance en la tarjeta T-15 de Trello).
+    No hace reconocimiento de imagen — eso es POST /api/lecturas/reconocer (arriba).
     """
     if not db_lecturas.medidor_existe(conexion, entrada.medidor_id):
         raise ErrorAPI(
