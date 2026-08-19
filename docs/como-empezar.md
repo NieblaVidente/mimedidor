@@ -31,7 +31,7 @@ aprobaciones, ver si el CI pasó) sin tener que abrir el navegador cada vez.
 winget install --id GitHub.cli
 ```
 
-### Node.js 24 — para el cliente (la PWA)
+### Node.js 24 — para el cliente (la aplicación web)
 
 ```bash
 winget install --id OpenJS.NodeJS
@@ -103,7 +103,7 @@ cd mimedidor
 
 ## 4. Preparar el entorno
 
-### Cliente (la PWA)
+### Cliente (la aplicación web)
 
 ```bash
 cd client
