@@ -1,4 +1,4 @@
-"""Conexión falsa compartida entre las pruebas que mockean la base de datos (T-15, T-17).
+"""Conexión falsa compartida entre las pruebas que mockean la base de datos (T-15, T-17, T-18).
 
 No se conecta a Postgres real — el job `server` del CI no lo necesita, eso ya lo cubre el job
 `database` para los scripts SQL en sí. `fetchone()` simula un `SELECT ... LIMIT 1` (una fila o

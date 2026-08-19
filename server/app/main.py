@@ -8,6 +8,7 @@ from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
+from app.api.facturas import router as facturas_router
 from app.api.lecturas import router as lecturas_router
 from app.errores import ErrorAPI
 
@@ -16,6 +17,7 @@ logger = logging.getLogger("mimedidor")
 
 app = FastAPI(title="MiMedidor API")
 app.include_router(lecturas_router)
+app.include_router(facturas_router)
 
 
 @app.get("/api/salud")
