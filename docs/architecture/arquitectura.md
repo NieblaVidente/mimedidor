@@ -131,10 +131,13 @@ declarado y lo construido, y alimentan directamente los riesgos del Sprint 2 (T-
 
 ### ① La PWA no existe todavía
 
-`CLAUDE.md` §3 lista `vite-plugin-pwa` como parte del stack, pero **no está instalado**: no hay
-manifest, no hay service worker, y el build no genera ninguno. Hoy la aplicación es una SPA normal.
-La decisión de PWA sobre nativo (T-01) sigue siendo válida y el trabajo pendiente es acotado, pero
-mientras no se haga, llamarla PWA sería inexacto.
+`vite-plugin-pwa` **no está instalado**: no hay manifest, no hay service worker, y el build no
+genera ninguno. Hoy la aplicación es una SPA normal. La decisión de PWA sobre nativo (T-01) sigue
+siendo válida y el trabajo pendiente es acotado, pero mientras no se haga, llamarla PWA sería
+inexacto.
+
+`CLAUDE.md` §3 llegó a listar el plugin como parte del stack; se corrigió al detectarlo, y el
+riesgo quedó anotado en su §13.5.
 
 ### ② Cliente y servidor no se han ejecutado juntos
 

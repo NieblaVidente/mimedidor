@@ -163,8 +163,8 @@
   <text x="980" y="682" font-size="10.5" font-weight="600" fill="#12263F">① La PWA no existe todavía</text>
   <text x="980" y="698" font-size="10" fill="#5A6B7B">No hay manifest ni service worker</text>
   <text x="980" y="712" font-size="10" fill="#5A6B7B">y <tspan font-family="Consolas, monospace">vite-plugin-pwa</tspan> no está</text>
-  <text x="980" y="726" font-size="10" fill="#5A6B7B">instalado, aunque CLAUDE.md §3 lo</text>
-  <text x="980" y="740" font-size="10" fill="#5A6B7B">da por parte del stack.</text>
+  <text x="980" y="726" font-size="10" fill="#5A6B7B">instalado. Hoy el cliente es una</text>
+  <text x="980" y="740" font-size="10" fill="#5A6B7B">SPA normal.</text>
 
   <text x="980" y="768" font-size="10.5" font-weight="600" fill="#12263F">② Cliente y servidor sin conectar</text>
   <text x="980" y="784" font-size="10" fill="#5A6B7B">Las pantallas llaman rutas</text>
