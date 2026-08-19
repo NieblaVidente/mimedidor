@@ -57,15 +57,15 @@ profesores evalúan este mismo proyecto desde la perspectiva de su materia (ver 
 
 | Capa | Tecnología | Notas |
 |---|---|---|
-| Cliente | **Vite + React + TypeScript**, `vite-plugin-pwa` | Cámara vía `getUserMedia` |
+| Cliente | **Vite + React + TypeScript** | Cámara vía `getUserMedia`. ⚠️ **La PWA todavía no está armada** — ver §13.5 |
 | Backend | **Python + FastAPI + Uvicorn** | El procesamiento de imagen vive en el mismo proceso |
-| Visión por computadora | **OpenCV** (`opencv-python`) para preprocesamiento (T-09/T-10) | |
+| Visión por computadora | **OpenCV** (`opencv-python-headless`) para preprocesamiento (T-09/T-10) | La variante `headless` no trae dependencias de interfaz gráfica: el servidor y el runner de CI procesan arreglos, no muestran ventanas |
 | Reconocimiento de dígitos (OCR) | **Tesseract**, vía `pytesseract` | Decidido en T-02b — ver justificación abajo |
 | Base de datos | **PostgreSQL** | Acceso con `psycopg` (v3), **SQL plano, sin ORM** |
 | Pruebas unitarias | `pytest` (server) · Vitest (client) | |
 | Pruebas end-to-end | Cypress | Sprint 2 (P-08) |
 | Análisis estático | `ruff` (server) · ESLint (client) | |
-| CI/CD | GitHub Actions | Dos jobs paralelos: `client` y `server` |
+| CI/CD | GitHub Actions | Tres jobs paralelos: `client`, `server` y `database`. ⚠️ **Todavía no hay entrega continua** — ver §13.7 |
 
 ### Por qué estas decisiones
 
@@ -120,9 +120,8 @@ Los tres tienen que correr las mismas versiones que el CI. Anotarlas aquí apena
 mimedidor/
 ├── CLAUDE.md            # Este archivo — contexto para el equipo y para Claude Code
 ├── README.md            # Presentación pública del proyecto
-├── client/              # PWA (Vite + React + TS)
-│   ├── src/
-│   └── tests/
+├── client/              # Aplicación web (Vite + React + TS)
+│   └── src/             # Las pruebas viven junto al código: Pantalla.tsx y Pantalla.test.tsx
 ├── server/              # API FastAPI + procesamiento de imagen
 │   ├── app/
 │   │   ├── api/         # Routers / endpoints
@@ -133,8 +132,11 @@ mimedidor/
 │   ├── scripts/         # Creación de esquema, tablas, roles, permisos, procedimientos
 │   └── migrations/      # Cambios incrementales, numerados y en orden
 ├── docs/
-│   ├── architecture/    # Diagramas, modelo entidad-relación, decisiones
-│   └── scrum/           # Registro de ceremonias, tarjetas, retrospectivas
+│   ├── architecture/    # Diagrama de arquitectura, modelo entidad-relación, contrato de la API
+│   ├── dataset-campo/   # Registro de los medidores fotografiados (T-07/T-08)
+│   ├── evidencia/       # Capturas que prueban configuración que no vive en el código
+│   ├── scrum/           # Registro de ceremonias, tarjetas, retrospectivas
+│   └── deuda-tecnica.md # Atajos tomados a propósito, con qué haría falta para cerrarlos
 └── .github/workflows/   # Pipelines de CI
 ```
 
@@ -373,3 +375,21 @@ Si estás asistiendo a un integrante de este equipo:
    personas que además llevan 4 proyectos de C++ de Sistemas Operativos.
 4. **Cypress con PWA no está confirmado por escrito** con el profesor de ISW2. No debería haber
    objeción, pero conviene tenerlo por escrito antes del Sprint 2 (P-08).
+
+Los tres siguientes salieron de dibujar el diagrama de arquitectura (T-19): son diferencias reales
+entre lo que este archivo declaraba y lo que hay en el repositorio.
+
+5. **La PWA todavía no está armada.** `vite-plugin-pwa` no está instalado y el build no genera
+   manifest ni service worker. Hoy el cliente es una aplicación de una sola página normal. Ser una
+   PWA sigue siendo el objetivo del producto (§1) y la decisión sobre nativo (T-01) sigue en pie —
+   el trabajo pendiente es acotado. Lo que no se vale mientras tanto es **describirla como si ya
+   lo fuera** en un documento de entrega.
+6. **Cliente y servidor nunca se han ejecutado juntos.** `client/src/api/*.ts` llama rutas
+   relativas (`/api/…`), que asumen mismo origen; `vite.config.ts` no tiene proxy, así que en
+   desarrollo Vite y Uvicorn escuchan en puertos distintos y no se ven. Cada capa está probada por
+   separado — las pantallas contra un módulo de API sustituido, los endpoints contra una conexión
+   sustituida — pero **el hilo completo del Sprint 1 no se ha corrido de punta a punta contra el
+   backend real**. Cerrarlo es chico (un `server.proxy` en `vite.config.ts`) y debería ser lo
+   primero del Sprint 2, antes de cualquier funcionalidad nueva.
+7. **No hay entrega continua.** El pipeline valida cada Pull Request pero no despliega a ningún
+   ambiente, y la rúbrica de Ingeniería de Software II la pide explícitamente (§7).
