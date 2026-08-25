@@ -77,7 +77,11 @@ Detalle completo en [`docs/definition-of-done.md`](docs/definition-of-done.md).
 
 ## Metodología
 
-El desarrollo se gestiona bajo Scrum, con sprints registrados en el tablero de Trello del equipo y ceremonias documentadas en [`docs/scrum/`](docs/scrum/).
+El desarrollo se gestiona bajo Scrum. Las tareas son [Issues de este repositorio](../../issues), agrupadas por *milestone* según la entrega a la que pertenecen, y etiquetadas por área, tipo, estimación en puntos y rúbrica del curso que las evalúa.
+
+Las ceremonias se registran en [`docs/scrum/`](docs/scrum/).
+
+El Sprint 1 se gestionó en Trello; ese tablero quedó congelado como archivo y su contenido está respaldado en [`docs/scrum/sprint-1-tarjetas.md`](docs/scrum/sprint-1-tarjetas.md). El historial no se migró a Issues a propósito — ver `CLAUDE.md` §9.
 
 ## Cómo ejecutar el proyecto
 

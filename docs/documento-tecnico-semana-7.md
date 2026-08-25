@@ -258,9 +258,12 @@ permitirá medir la exactitud real cuando haya uso.
 
 ## 6. Proceso de trabajo
 
-- **Scrum** con las cuatro ceremonias registradas y fechadas en
-  [`docs/scrum/`](scrum/). El tablero vive en Trello.
-- **Feature Branch Workflow**: una rama por tarjeta, `main` protegida, todo por Pull Request.
+- **Scrum** con las ceremonias registradas y fechadas en [`docs/scrum/`](scrum/). El Sprint 1 se
+  gestionó en un tablero de Trello, respaldado en
+  [`docs/scrum/sprint-1-tarjetas.md`](scrum/sprint-1-tarjetas.md); desde el Sprint 2 las tareas
+  son Issues del propio repositorio, para que cada Pull Request quede enlazado a la tarea que
+  resuelve.
+- **Feature Branch Workflow**: una rama por tarea, `main` protegida, todo por Pull Request.
 - **Definition of Done** acordado por los tres el 12 de agosto y versionado en
   [`docs/definition-of-done.md`](definition-of-done.md): rama, PR, una aprobación de otro
   integrante, CI en verde, merge, documentación actualizada y criterios de aceptación verificados.
