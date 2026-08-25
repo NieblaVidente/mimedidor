@@ -255,7 +255,11 @@ relacionadas con... auditoría").
 |---|---|---|
 | Isaac Felipe Morún Moreira | ✅ (autor de la propuesta) | |
 | José Pablo Ramírez Sánchez | ✅ | Revisado 2026-08-18 |
-| Yariel Andrey Elizondo Jiménez | ⬜ | Decisiones de §5 acordadas en conversación de equipo 2026-08-13; falta revisión formal del documento |
+| Yariel Andrey Elizondo Jiménez | ✅ | Revisado 2026-08-25, en la sesión presencial del equipo |
 
-Pendiente de aprobación formal de Yariel en el PR antes de darla por congelada, igual que se hizo
-con el contrato de la API en T-04b.
+**Aprobado por los tres.** El modelo queda congelado, igual que el contrato de la API en T-04b: si
+alguien necesita cambiarlo, se abre una tarea aparte y se avisa al resto, no se edita por cuenta
+propia.
+
+Con esto T-12 cumple el punto 6 del Definition of Done, que era el único incumplimiento que
+quedaba abierto del Sprint 1.
