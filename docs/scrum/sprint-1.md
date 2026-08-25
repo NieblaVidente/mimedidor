@@ -41,14 +41,23 @@ completa en vez de partida.
 
 ### Qué se demostró
 
-<!-- COMPLETAR: qué se mostró en la sesión, en qué orden, y qué funcionó o falló al mostrarlo. -->
+**El hilo funcional completo, corriendo en el navegador y de punta a punta**: la aplicación
+cliente hablando con la API, y la API contra PostgreSQL real. **Funcionó sin incidentes.**
 
-**El incremento que existía al momento del Review:** el hilo funcional completo — 5 rutas de API,
-3 pantallas, 6 tablas normalizadas a 3FN, 2 roles de mínimo privilegio, 1 procedimiento
-transaccional, 46 pruebas automatizadas y un pipeline de 3 jobs sobre `main` protegida.
+Lo demostrado se apoya sobre el incremento del sprint: 5 rutas de API, 3 pantallas, 6 tablas
+normalizadas a 3FN, 2 roles de mínimo privilegio, 1 procedimiento transaccional, 46 pruebas
+automatizadas y un pipeline de 3 jobs sobre `main` protegida.
 
-Ese mismo día se cerró T-21, que conectó cliente y servidor por primera vez, así que el hilo pasó
-de demostrable por partes a demostrable de punta a punta contra PostgreSQL real.
+**Vale la pena dejar constancia de que esta demostración no era posible el día anterior.** T-21 se
+cerró esa misma mañana: hasta entonces cliente y servidor nunca se habían ejecutado juntos, porque
+las pantallas llaman rutas relativas que asumen mismo origen y el servidor de desarrollo no tenía
+el proxy configurado. Cada capa estaba probada por separado, pero el sistema integrado no se había
+corrido nunca.
+
+Al conectarlo aparecieron dos errores que ninguna de las 46 pruebas podía detectar — uno de ellos
+dejaba `POST /api/lecturas`, la ruta central del producto, devolviendo error 500 contra cualquier
+base real. Los dos se corrigieron antes del Review. Ese episodio es el origen del hallazgo
+principal de la retrospectiva de más abajo.
 
 ### Revisión del Definition of Done, tarea por tarea
 
