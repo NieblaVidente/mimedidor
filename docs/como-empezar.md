@@ -217,8 +217,8 @@ convenciones de código, qué evalúa cada curso, y una lista de cosas que **no*
 
 Dos cosas que conviene que sepas de entrada:
 
-- **Si una tarjeta de Trello contradice `CLAUDE.md`, manda `CLAUDE.md`.** Varias tarjetas se
-  escribieron antes de que se cerraran decisiones técnicas; la sección §9 lista cuáles.
+- **Si un Issue contradice `CLAUDE.md`, manda `CLAUDE.md`.** Las decisiones técnicas ya cerradas
+  pesan más que lo que diga una tarea escrita antes.
 - **El contrato de la API está congelado** en
   [`docs/architecture/contrato-api.md`](architecture/contrato-api.md). Si vas a construir una
   pantalla, trabajá contra los ejemplos de ese documento sin esperar a que el backend exista.
@@ -269,12 +269,22 @@ querés, así que te lo pregunta a vos.
 
 ---
 
-## 7. Trabajar en una tarjeta
+## 7. Trabajar en una tarea
 
 Este es el ciclo de todos los días. **Nunca se trabaja directo sobre `main`** — está protegida y
 GitHub va a rechazar el push (ya lo probamos).
 
-**1. Tomá una tarjeta del Sprint Backlog en Trello** y movela a "En curso". Asignate a vos mismo.
+**1. Tomá un Issue** del milestone de la entrega en curso y asignate a vos mismo:
+
+```bash
+gh issue list --milestone "Semana 10 — Segundo avance"
+```
+
+```bash
+gh issue view 33
+```
+
+Para asignártelo: `gh issue edit 33 --add-assignee @me`
 
 **2. Actualizá tu copia local y creá una rama:**
 
@@ -285,7 +295,7 @@ git checkout -b feature/descripcion-corta
 ```
 
 Convención de nombres: `feature/` para funcionalidad nueva, `bugfix/` para correcciones.
-Una rama por tarjeta, no una rama por persona.
+Una rama por Issue, no una rama por persona.
 
 **3. Programá.** Corré las pruebas localmente antes de subir nada — si fallan acá, van a fallar en
 el CI y te van a bloquear el merge.
@@ -301,10 +311,13 @@ git push -u origin feature/descripcion-corta
 **5. Abrí el Pull Request:**
 
 ```bash
-gh pr create --title "T-09 · Descripción de la tarjeta" --body "Qué hace y cómo lo probaste"
+gh pr create --title "T-09 · Descripción de la tarea" --body "Qué hace y cómo lo probaste. Closes #33"
 ```
 
-Poné el código de la tarjeta (`T-09`) en el título. Movela a "En revisión (PR)" en Trello.
+Poné el código de la tarea (`T-09`) en el título, y **`Closes #33` en la descripción**, con el
+número del Issue. Eso hace que el Issue se cierre solo al mergear y quede enlazado al código que
+lo resolvió — no hay que acordarse de moverlo a mano, que es justamente lo que se nos olvidaba
+con el tablero.
 
 **6. Esperá el CI y la aprobación.** Para ver cómo va el pipeline:
 
@@ -329,7 +342,8 @@ git pull origin main
 git branch -d feature/descripcion-corta
 ```
 
-Movés la tarjeta a "Hecho" en Trello y arrancás con la siguiente.
+El Issue se cerró solo al mergear, gracias al `Closes #N` del Pull Request. Arrancás con el
+siguiente.
 
 ---
 
@@ -359,8 +373,8 @@ Abrí Claude Code **parado en la carpeta del repositorio** (`C:\dev\mimedidor`).
 
 No hace falta que le pegues nada más. Si querés arrancar rápido, un buen primer mensaje es:
 
-> Leé CLAUDE.md y docs/como-empezar.md. Voy a trabajar en la tarjeta T-XX de Trello: [pegá acá la
-> descripción de la tarjeta]. Creá la rama y ayudame a implementarla.
+> Leé CLAUDE.md y docs/como-empezar.md. Voy a trabajar en el Issue #NN. Leelo con
+> `gh issue view NN`, creá la rama y ayudame a implementarlo.
 
 Recordale que **no debe pushear a `main` ni aprobar PRs por vos** — la aprobación tiene que ser
 una persona real leyendo el código, porque eso es justo lo que evalúa el curso de Ingeniería de
@@ -384,7 +398,8 @@ Software II.
 ## 11. Enlaces
 
 - **Repositorio:** https://github.com/NieblaVidente/mimedidor
-- **Tablero de Trello:** https://trello.com/b/St9jsJir/mimedidor
+- **Tareas (Issues):** https://github.com/NieblaVidente/mimedidor/issues
+- **Tablero de Trello del Sprint 1** (congelado, solo lectura): https://trello.com/b/St9jsJir/mimedidor
 - **Contexto del proyecto:** [`CLAUDE.md`](../CLAUDE.md)
 - **Contrato de la API:** [`docs/architecture/contrato-api.md`](architecture/contrato-api.md)
 - **Registro de ceremonias:** [`docs/scrum/`](scrum/)

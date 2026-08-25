@@ -1,9 +1,13 @@
 # Sprint 1 — Tarjetas actualizadas
 
+> 🔒 **Archivo congelado.** Este es el respaldo versionado del tablero de Trello con el que se
+> gestionó el **Sprint 1**. Desde el Sprint 2 las tareas son
+> [Issues del repositorio](../../../../issues) — ver `CLAUDE.md` §9 para el porqué del cambio.
+>
+> **No se edita más.** Su valor es ser el registro fiel de lo que decía el tablero en su momento,
+> y sirve como evidencia de backlog para el profesor de Ingeniería de Software II.
+
 Textos listos para pegar en Trello, corregidos después de cerrar las decisiones de T-01 y T-02.
-Este archivo es el respaldo versionado del tablero: si alguien cambia una tarjeta en Trello, el
-cambio se refleja aquí por PR. Sirve además como evidencia para el profesor de Ingeniería de
-Software II, que pide ver el backlog.
 
 **Convención:** el título va en el nombre de la tarjeta, el resto en la descripción.
 
