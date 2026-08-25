@@ -138,7 +138,74 @@ Probá que funciona:
 .venv\Scripts\python.exe -m pytest -v
 ```
 
-Ambas tienen que pasar (2 pruebas). Para levantar la API: `.venv\Scripts\uvicorn.exe app.main:app --reload`.
+Ambas tienen que pasar. Para levantar la API: `.venv\Scripts\uvicorn.exe app.main:app --reload`.
+
+### Base de datos
+
+Necesitás PostgreSQL corriendo. Creá la base y corré los scripts **desde `database/scripts/`**
+(los scripts se llaman entre sí por ruta relativa, así que desde otra carpeta fallan):
+
+```bash
+createdb mimedidor
+```
+
+```bash
+cd database/scripts
+psql -d mimedidor -v ON_ERROR_STOP=1 -v password_app='clave-local' -v password_lectura='clave-local' -f ejecutar_todo.sql
+```
+
+Eso crea el esquema, las tablas, los dos roles y el procedimiento transaccional. Si te falla con
+*"el rol mimedidor_app ya existe"*, es porque los roles son objetos del clúster y no de la base
+— borralos con `DROP ROLE` y volvé a correrlo (está explicado en `database/README.md`).
+
+---
+
+## 4b. Levantar el sistema completo
+
+Las tres piezas por separado no alcanzan: hasta la tarjeta T-21 nunca se habían ejecutado juntas,
+y en cuanto se hizo aparecieron dos errores que ninguna prueba unitaria podía ver. Así se levanta
+todo, en tres terminales:
+
+**Terminal 1 — la API**, con las credenciales de la base en variables de entorno:
+
+```bash
+cd server
+PGHOST=localhost PGDATABASE=mimedidor PGUSER=mimedidor_app PGPASSWORD=clave-local .venv/Scripts/uvicorn.exe app.main:app --reload
+```
+
+**Terminal 2 — el cliente:**
+
+```bash
+cd client
+npm run dev
+```
+
+**Terminal 3 — comprobar que se hablan entre sí:**
+
+```bash
+curl http://localhost:5173/api/salud
+```
+
+Tiene que responder `{"estado":"ok"}`. Fijate que el puerto es el **5173** (el de Vite), no el
+8000: `client/vite.config.ts` tiene un proxy que manda todo lo que empiece con `/api` al servidor.
+Sin ese proxy el navegador le pediría `/api/...` al servidor de Vite y recibiría el `index.html`
+en vez de la respuesta de la API — que es exactamente el bug que arregló T-21.
+
+Después abrí `http://localhost:5173` en el navegador. Para probar el hilo completo necesitás un
+medidor en la base; podés crear uno con la cadena mínima usuario → vivienda → medidor (hay un
+ejemplo en `server/tests/test_integracion_db.py`).
+
+### Pruebas contra la base real
+
+Con la base levantada y las variables de entorno puestas:
+
+```bash
+cd server
+.venv/Scripts/python.exe -m pytest tests/test_integracion_db.py -v
+```
+
+Si no hay base disponible se saltan solas, así que no estorban. En CI sí corren siempre, en el
+job `Base de datos`.
 
 ---
 

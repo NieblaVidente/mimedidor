@@ -96,3 +96,26 @@ jobs:
           PGPASSWORD='clave-de-prueba-ci' psql -U mimedidor_app -h localhost -d mimedidor \
             -v ON_ERROR_STOP=1 \
             -f verificar_registrar_lectura.sql
+
+      # Los pasos de abajo corren el código Python de acceso a datos contra esta misma base real.
+      # Van acá y no en el job `server` a propósito: ese job no tiene PostgreSQL, y estas pruebas
+      # existen justamente para cubrir lo que las pruebas con conexión falsa no pueden ver — la
+      # frontera entre Python y SQL. Ver el docstring de server/tests/test_integracion_db.py.
+      - uses: actions/setup-python@v5
+        with:
+          python-version-file: server/.python-version
+          cache: pip
+          cache-dependency-path: server/requirements-dev.txt
+
+      - name: Instalar dependencias del servidor
+        working-directory: server
+        run: pip install -r requirements-dev.txt
+
+      - name: "Pruebas de integración contra la base real (T-21)"
+        working-directory: server
+        env:
+          PGHOST: localhost
+          PGDATABASE: mimedidor
+          PGUSER: mimedidor_app
+          PGPASSWORD: clave-de-prueba-ci
+        run: pytest tests/test_integracion_db.py -v
