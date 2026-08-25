@@ -25,8 +25,13 @@ def llamar_registrar_lectura(
     04_procedimiento_registrar_lectura.sql) — el llamador la traduce al código del contrato.
     """
     with conexion.cursor() as cur:
+        # `%s::numeric` no es adorno. El procedimiento declara `p_valor numeric`, y psycopg manda
+        # los float de Python como `double precision`. El cast de `double precision` a `numeric`
+        # en PostgreSQL es de asignación, no implícito, y para resolver a qué procedimiento
+        # llamar PostgreSQL solo considera los implícitos: sin el cast explícito la llamada
+        # falla con "no existe el procedimiento", aunque el procedimiento exista.
         cur.execute(
-            "CALL mimedidor.registrar_lectura(%s, %s, %s, %s, %s, NULL)",
+            "CALL mimedidor.registrar_lectura(%s::uuid, %s::numeric, %s, %s, %s, NULL)",
             (str(medidor_id), valor, fecha, origen, foto_url),
         )
         fila = cur.fetchone()
