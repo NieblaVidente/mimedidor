@@ -1,0 +1,10 @@
+# MiMedidor — normaliza finales de línea para que un checkout en Windows nunca rompa un
+# script que corre en el runner de CI (Ubuntu). Sin esto, un CRLF colado en el shebang de un
+# .sh falla con "bad interpreter" en Linux, aunque en Windows nunca se note el problema.
+
+* text=auto eol=lf
+
+*.sh text eol=lf
+*.sql text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf

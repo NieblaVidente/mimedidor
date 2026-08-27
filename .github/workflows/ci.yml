@@ -97,6 +97,14 @@ jobs:
             -v ON_ERROR_STOP=1 \
             -f verificar_registrar_lectura.sql
 
+      - name: Fijar contraseña del superusuario (solo para que los scripts de T-29 se conecten por TCP)
+        run: sudo -u postgres psql -c "ALTER USER postgres PASSWORD 'clave-superusuario-ci';"
+
+      - name: "Verificar respaldo y restauración (T-29: respalda, restaura y compara los datos)"
+        run: |
+          chmod +x respaldar.sh restaurar.sh verificar_restauracion.sh
+          PGPASSWORD='clave-superusuario-ci' ./verificar_restauracion.sh mimedidor localhost 5432 postgres
+
       # Los pasos de abajo corren el código Python de acceso a datos contra esta misma base real.
       # Van acá y no en el job `server` a propósito: ese job no tiene PostgreSQL, y estas pruebas
       # existen justamente para cubrir lo que las pruebas con conexión falsa no pueden ver — la
