@@ -83,11 +83,41 @@ inmediato en la forma de trabajar:
 
 ### Asignación de tareas
 
-<!-- COMPLETAR: quién toma cada Issue.
-     Recordar la acción 5 de la retrospectiva: asignar cruzando áreas a propósito, para que cada
-     integrante toque cliente, servidor y base de datos durante el sprint. Si se asigna por
-     comodidad, la acción queda escrita pero no hecha, y es la que atiende el riesgo de la
-     Defensa Técnica Individual. -->
+| Integrante | Issues | Puntos |
+|---|---|---|
+| Yariel | #33 Manual de usuario (3) · #34 Manual técnico (3) | 6 |
+| Isaac | #35 Casos de uso (2) · #36 Evidencia de pruebas (2) · #39 Respaldo y recuperación (3) | 7 |
+| José Pablo | #32 Cypress end-to-end (5) · #37 Retroalimentación (3) · #40 Registro de ceremonias (2) | 10 |
+
+#37 está asignado **para triaje, no para ejecutar**: el trabajo todavía no se conoce porque
+depende de la retroalimentación del profesor. Cuando llegue se reparte entre los tres.
+
+#31 (T-21, 3 puntos) no aparece en el reparto porque ya estaba cerrado el día del Planning.
+
+**Cómo se repartió, y por qué así.** En el Sprint 1 los tres trabajaron en silos bastante
+marcados: Yariel solo tocó visión por computadora, Isaac solo base de datos, y José Pablo el
+resto — infraestructura, API y cliente. Eso contradice lo que advierte `CLAUDE.md` §2 y es un
+riesgo directo para la Defensa Técnica Individual, donde a cualquiera le pueden preguntar por
+cualquier parte del sistema.
+
+La acción 5 de la retrospectiva pedía cruzar áreas. Este sprint lo hace fácil: **ocho de las
+nueve tareas comprometidas son documentación**, porque es lo que exige el entregable de la
+semana 10. Y escribir documentación es la mejor excusa para tener que entender algo — el manual
+técnico obliga a recorrer instalación, base de datos y API; los casos de uso obligan a recorrer
+el cliente. Se cruza sin frenar trabajo técnico.
+
+Por eso Yariel, que venía solo de visión, toma los dos manuales; e Isaac, que venía solo de base
+de datos, toma casos de uso y evidencia de pruebas además del respaldo, que sí es su área.
+
+**La otra mitad de la acción 5 es quién revisa.** Cada Pull Request lo revisa quien sí conoce el
+área que documenta: la parte de base de datos del manual técnico la revisa Isaac, la del cliente
+la revisa José Pablo. Ahí es donde se transfiere el conocimiento de verdad, y no cuesta tiempo
+extra.
+
+**Sobre el reparto de carga.** En el Sprint 1 José Pablo hizo 22 puntos contra 13 de Yariel y 10
+de Isaac — el doble. Este reparto (6 / 7 / 10) sigue cargándolo más, pero mucho menos, y los 3
+puntos de #37 son de triaje, no de trabajo cierto. Queda anotado para vigilarlo en la próxima
+retrospectiva.
 
 ### Salidas de campo (T-07)
 
