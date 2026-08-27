@@ -207,6 +207,37 @@ cd server
 Si no hay base disponible se saltan solas, así que no estorban. En CI sí corren siempre, en el
 job `Base de datos`.
 
+### Prueba end-to-end (Cypress)
+
+Recorre el hilo completo como lo haría un abonado: cámara → lectura → historial → factura →
+comparación, contra el sistema entero corriendo. Nada sustituido.
+
+Antes de correrla, sembrá un medidor de prueba (la API no tiene ninguna ruta para crear
+medidores, así que tiene que existir en la base):
+
+```bash
+cd database/scripts
+psql -d mimedidor -v ON_ERROR_STOP=1 -f datos_de_prueba.sql
+```
+
+Con la API y el cliente levantados (§4b), en otra terminal:
+
+```bash
+cd client
+npm run e2e
+```
+
+Para verla correr paso a paso en una ventana, útil cuando algo falla: `npm run e2e:abrir`.
+
+**Tiene que correr en un navegador Chromium** — Electron (el que Cypress trae y usa por defecto),
+Chrome o Edge. La prueba necesita una cámara falsa, que se activa con unos parámetros propios de
+Chromium; **en Firefox no existen** y la prueba fallaría por el navegador, no por el código. Para
+elegir uno: `npx cypress run --browser edge`.
+
+La prueba deja datos en la base (las lecturas y facturas que registra). No molesta para volver a
+correrla, pero si querés partir de cero: borrá la base, volvé a correr `ejecutar_todo.sql` y
+después `datos_de_prueba.sql`.
+
 ---
 
 ## 5. Lo primero que tenés que leer

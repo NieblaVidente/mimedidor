@@ -22,3 +22,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Cypress: capturas y videos de las corridas, se regeneran solas
+cypress/screenshots
+cypress/videos
+cypress/downloads
