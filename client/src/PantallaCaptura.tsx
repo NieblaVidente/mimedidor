@@ -6,7 +6,15 @@ import { ErrorApi } from './api/errores'
 type Estado = 'inicio' | 'camara' | 'reconociendo' | 'revisando' | 'guardando' | 'guardado'
 
 function fechaHoyISO(): string {
-  return new Date().toISOString().slice(0, 10)
+  // OJO: `new Date().toISOString()` da la fecha en UTC, no la fecha local — en Costa Rica
+  // (UTC-6), entre las 18:00 y la medianoche, UTC ya está en el día siguiente. Con esa fecha
+  // "de mañana" el servidor la rechazaba con FECHA_INVALIDA (T-35) siendo todavía hoy acá.
+  // Se arma a mano con los componentes locales para evitar la conversión a UTC.
+  const hoy = new Date()
+  const año = hoy.getFullYear()
+  const mes = String(hoy.getMonth() + 1).padStart(2, '0')
+  const dia = String(hoy.getDate()).padStart(2, '0')
+  return `${año}-${mes}-${dia}`
 }
 
 function PantallaCaptura() {
@@ -16,6 +24,9 @@ function PantallaCaptura() {
   const [medidorId, setMedidorId] = useState('')
   const [estado, setEstado] = useState<Estado>('inicio')
   const [valorTexto, setValorTexto] = useState('')
+  // Hoy por defecto, pero editable (T-35): antes se guardaba siempre con la fecha de hoy, sin
+  // contemplar que el abonado normalmente toma la foto en el patio y registra la lectura después.
+  const [fecha, setFecha] = useState(fechaHoyISO())
   const [origen, setOrigen] = useState<'reconocimiento' | 'manual'>('manual')
   const [mensajeError, setMensajeError] = useState<string | null>(null)
   const [lecturaGuardada, setLecturaGuardada] = useState<LecturaGuardada | null>(null)
@@ -100,7 +111,7 @@ function PantallaCaptura() {
       const lectura = await guardarLectura({
         medidor_id: medidorId,
         valor: valorNumerico,
-        fecha: fechaHoyISO(),
+        fecha,
         origen,
       })
       setLecturaGuardada(lectura)
@@ -116,6 +127,7 @@ function PantallaCaptura() {
   function manejarRegistrarOtra() {
     setEstado('inicio')
     setValorTexto('')
+    setFecha(fechaHoyISO())
     setMensajeError(null)
     setLecturaGuardada(null)
   }
@@ -166,6 +178,14 @@ function PantallaCaptura() {
               ? 'Lectura reconocida automáticamente — revisala antes de confirmar.'
               : 'Ingresada manualmente.'}
           </p>
+          <label htmlFor="fecha-lectura">Fecha de la lectura</label>
+          <input
+            id="fecha-lectura"
+            type="date"
+            value={fecha}
+            max={fechaHoyISO()}
+            onChange={(evento) => setFecha(evento.target.value)}
+          />
           <button type="button" onClick={manejarConfirmar} disabled={estado === 'guardando'}>
             {estado === 'guardando' ? 'Guardando…' : 'Confirmar lectura'}
           </button>

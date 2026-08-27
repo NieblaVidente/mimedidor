@@ -42,7 +42,10 @@ CREATE TABLE mimedidor.lectura (
     id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     medidor_id  uuid NOT NULL REFERENCES mimedidor.medidor(id),
     valor       numeric(10, 2) NOT NULL CHECK (valor >= 0),
-    fecha       date NOT NULL,
+    -- Defensa en profundidad de T-35: la API ya rechaza una fecha futura antes de llegar acá
+    -- (server/app/api/lecturas.py), pero este CHECK protege también a quien escriba en la
+    -- tabla sin pasar por la API (ej. un script de datos futuro).
+    fecha       date NOT NULL CHECK (fecha <= CURRENT_DATE),
     -- Permite calcular la exactitud real del reconocimiento en T-11.
     origen      text NOT NULL CHECK (origen IN ('reconocimiento', 'manual')),
     foto_url    text,
