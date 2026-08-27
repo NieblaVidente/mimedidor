@@ -40,7 +40,13 @@ generalizar la detección de la ventana del odómetro contra el dataset completo
 
 ---
 
-## T-13 · La vista y la función del modelo de datos nunca se escribieron
+## T-13 · La vista y la función del modelo de datos nunca se escribieron — CERRADA (T-34)
+
+> ✅ **Cerrada el 2026-08-27.** Se eligió la opción 2 de las dos de abajo: corregir
+> `modelo-datos.md` §3 para que describa la realidad (cálculo en Python), en vez de escribir la
+> vista y la función. Justificación completa en `modelo-datos.md` §3 y en el PR de T-34
+> ([#44](https://github.com/NieblaVidente/mimedidor/issues/44)). Se deja el resto de esta
+> entrada tal cual quedó escrita originalmente, como registro de la decisión.
 
 **Qué se hizo.** `docs/architecture/modelo-datos.md` §3 dice que los campos derivados del contrato
 de la API se resolverían en la base de datos: `vista_historial_lecturas` (con `LAG()`, para el
