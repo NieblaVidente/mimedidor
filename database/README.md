@@ -73,6 +73,42 @@ haga falta, y el job `database` de CI lo corre en cada PR.
 psql -d mimedidor -U mimedidor_app -v ON_ERROR_STOP=1 -f database/scripts/verificar_registrar_lectura.sql
 ```
 
+## Respaldo y recuperación (T-29)
+
+| | |
+|---|---|
+| Tipo | Lógico completo, `pg_dump -Fc` (formato *custom*: comprimido y con restauración selectiva vía `pg_restore`, a diferencia de un volcado plano en texto) |
+| Alcance | La base completa, más los roles del clúster aparte con `pg_dumpall --roles-only` — los roles no son objetos de la base de datos sino del clúster (ver la nota de §"Cómo correr los scripts" arriba) |
+| Frecuencia | Diaria en desarrollo activo, y **obligatoria antes de cada entrega** |
+| Retención | Los últimos 7 respaldos de cada tipo, en rotación — `respaldar.sh` borra los más viejos automáticamente |
+| Restauración | Siempre contra una base de datos **nueva** (`createdb` + `pg_restore`), nunca sobre la activa |
+
+```bash
+# Respaldar (destino, base, host, puerto y usuario son opcionales; valores por defecto abajo)
+PGPASSWORD='...' database/scripts/respaldar.sh database/backups mimedidor localhost 5432 postgres
+
+# Restaurar un respaldo puntual en una base nueva, para verificarlo o recuperarse de un desastre
+PGPASSWORD='...' database/scripts/restaurar.sh database/backups/mimedidor_20260825_030000.dump
+
+# Prueba automatizada de extremo a extremo (inserta un dato, respalda, restaura, verifica y limpia)
+PGPASSWORD='...' database/scripts/verificar_restauracion.sh
+```
+
+Los respaldos reales (`.dump`/`.sql` generados) **nunca se suben al repositorio** — `.gitignore`
+los excluye de `database/backups/`, igual que las fotos del dataset de campo viven en
+almacenamiento compartido y no en git. Lo que sí queda versionado son los scripts que los
+generan y los restauran, que es lo reproducible.
+
+**Por qué esta prueba no es solo "correr el script una vez y confiar":**
+`verificar_restauracion.sh` no solo ejecuta `pg_dump`/`pg_restore` — inserta una fila con un
+valor único, respalda, restaura en una base aparte, y **confirma que esa fila específica
+sobrevivió** con el mismo valor. Un respaldo que se genera sin errores pero no se puede leer de
+vuelta (por ejemplo, por una versión de `pg_dump` incompatible con `pg_restore`) pasaría
+desapercibido si solo se mira que el comando no falló; esta prueba lo detecta porque compara el
+dato, no solo el código de salida. El job `database` de CI la corre en cada PR, así que la
+evidencia de que la restauración funciona no depende de que alguien la haya corrido a mano una
+vez y lo recuerde.
+
 ## Roles — justificación de mínimo privilegio
 
 | Rol | Permisos | Por qué esos y no más |

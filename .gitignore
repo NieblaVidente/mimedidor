@@ -33,6 +33,11 @@ env/
 *.sqlite3
 *.bak
 
+# --- Respaldos (T-29): viven en almacenamiento compartido, no en git ---
+database/backups/*.dump
+database/backups/*.sql
+!database/backups/.gitkeep
+
 # --- Credenciales y secretos ---
 *.pem
 *.key
