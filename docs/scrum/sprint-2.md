@@ -121,9 +121,38 @@ retrospectiva.
 
 ### Salidas de campo (T-07)
 
-<!-- COMPLETAR: zonas, días y responsable de cada salida.
-     La retrospectiva concluyó que el 2 de 12 del Sprint 1 no fue solo el clima: la tarea nunca
-     tuvo fecha ni dueño por zona. Dejarlo otra vez como "cuando se pueda" repite el problema. -->
+**Meta revisada: 6 medidores nuevos, 2 por integrante.** Sumados a los 2 ya registrados, el
+dataset quedaría en 8.
+
+Se bajó desde los 12 originales a propósito. Esa cifra se fijó cuando había dos semanas por
+delante y no había llovido; el Sprint 1 cerró con 2. Comprometer una meta que se pueda cumplir
+vale más que fallar la misma meta dos sprints seguidos, y 8 medidores ya permiten aplicar el
+criterio de alcance por marca de T-08 con algo de sentido.
+
+**Zonas: cada integrante sale en su propia provincia.** Los tres viven en provincias distintas,
+así que no hay riesgo de pisarse ni de duplicar medidores.
+
+Esto además mejora la muestra más de lo que parece. El protocolo de captura pedía repartir zonas
+"para no sesgar la muestra hacia un solo barrio": tres provincias distintas dan variedad real de
+marcas de hidrómetro, de antigüedad de instalación y de condiciones de la caja — que es
+justamente lo que necesita la decisión de T-08 para no acotar el MVP sobre una muestra
+engañosa.
+
+**Fechas: sin fecha fija.** Cada quien sale entre semana cuando pueda.
+
+> ⚠️ **Riesgo aceptado explícitamente.** La retrospectiva de este mismo día concluyó que el 2 de
+> 12 del Sprint 1 no se explica solo por la lluvia: la tarea nunca tuvo fecha ni dueño por zona,
+> y "cuando se pueda" no genera urgencia. El equipo decidió igualmente no fijar fechas, por la
+> carga de los 4 proyectos de C++ en paralelo. Queda anotado igual que el riesgo de la revisión
+> de PRs sin rotación fija en `docs/definition-of-done.md`: si se nota que no avanza, se revisa.
+>
+> **Mitigación acordada sin costo extra:** el daily asíncrono de la acción 4 sirve como señal
+> temprana. Si pasan varios días sin que nadie reporte una salida, se detecta a mitad de sprint
+> y no al cerrarlo.
+
+**Recordatorio operativo:** lo que hace útil una foto es la lectura real transcrita a mano en el
+momento de tomarla. Sin ese dato la foto no sirve para medir exactitud, que es el propósito
+completo de la tarea.
 
 ### Riesgo principal del sprint
 
