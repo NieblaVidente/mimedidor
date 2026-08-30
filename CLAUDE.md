@@ -63,9 +63,9 @@ profesores evalúan este mismo proyecto desde la perspectiva de su materia (ver 
 | Reconocimiento de dígitos (OCR) | **Tesseract**, vía `pytesseract` | Decidido en T-02b — ver justificación abajo |
 | Base de datos | **PostgreSQL** | Acceso con `psycopg` (v3), **SQL plano, sin ORM** |
 | Pruebas unitarias | `pytest` (server) · Vitest (client) | |
-| Pruebas end-to-end | Cypress | Sprint 2 (P-08) |
+| Pruebas end-to-end | Cypress | Implementadas en T-22. Corren el hilo completo contra el backend real en cada PR |
 | Análisis estático | `ruff` (server) · ESLint (client) | |
-| CI/CD | GitHub Actions | Tres jobs paralelos: `client`, `server` y `database`. ⚠️ **Todavía no hay entrega continua** — ver §13.7 |
+| CI/CD | GitHub Actions | Cuatro jobs paralelos: `client`, `server`, `database` y `e2e`. Los cuatro son obligatorios para mergear. ⚠️ **Todavía no hay entrega continua** — ver §13.7 |
 
 ### Por qué estas decisiones
 
@@ -391,14 +391,22 @@ Si estás asistiendo a un integrante de este equipo:
 
 ## 13. Riesgos abiertos
 
+> **Los riesgos cerrados no se borran ni se renumeran: se marcan.** Otras secciones de este archivo
+> referencian riesgos por número (§13.5, §13.7); renumerar los rompe. Además, dejar el registro de
+> qué se identificó y qué lo cerró es evidencia, y borrarlo la pierde.
+
 1. **Rúbrica de Señales y Sistemas sin publicar.** Es el eslabón más débil hasta que se confirme.
 2. **Fragmentación del parque de medidores.** El alcance del MVP depende de qué tan concentrada
    salga la muestra de marcas en el dataset de campo. Criterio ya definido: si una marca aparece en
    ≥ 60 % de la muestra, el MVP se acota a ella.
 3. **Carga simultánea de infraestructura y funcionalidad** en un sprint de 10 días, con tres
    personas que además llevan 4 proyectos de C++ de Sistemas Operativos.
-4. **Cypress con PWA no está confirmado por escrito** con el profesor de ISW2. No debería haber
-   objeción, pero conviene tenerlo por escrito antes del Sprint 2 (P-08).
+4. **Cypress con PWA no está confirmado por escrito** con el profesor de ISW2. Sigue abierto, pero
+   cambió de forma: desde T-22 Cypress funciona y corre en CI, así que la parte de «¿sirve
+   Cypress?» está respondida. Lo que no está probado es la combinación, porque el cliente todavía
+   no es una PWA (§13.5): cuando se agreguen manifest y service worker hay que volver a correr la
+   prueba end-to-end y confirmar que el service worker no interfiere. Conviene tenerlo por escrito
+   antes de la semana 10, no después.
 
 Los tres siguientes salieron de dibujar el diagrama de arquitectura (T-19): son diferencias reales
 entre lo que este archivo declaraba y lo que hay en el repositorio.
@@ -408,12 +416,14 @@ entre lo que este archivo declaraba y lo que hay en el repositorio.
    PWA sigue siendo el objetivo del producto (§1) y la decisión sobre nativo (T-01) sigue en pie —
    el trabajo pendiente es acotado. Lo que no se vale mientras tanto es **describirla como si ya
    lo fuera** en un documento de entrega.
-6. **Cliente y servidor nunca se han ejecutado juntos.** `client/src/api/*.ts` llama rutas
-   relativas (`/api/…`), que asumen mismo origen; `vite.config.ts` no tiene proxy, así que en
-   desarrollo Vite y Uvicorn escuchan en puertos distintos y no se ven. Cada capa está probada por
-   separado — las pantallas contra un módulo de API sustituido, los endpoints contra una conexión
-   sustituida — pero **el hilo completo del Sprint 1 no se ha corrido de punta a punta contra el
-   backend real**. Cerrarlo es chico (un `server.proxy` en `vite.config.ts`) y debería ser lo
-   primero del Sprint 2, antes de cualquier funcionalidad nueva.
+6. ✅ **CERRADO — Cliente y servidor nunca se han ejecutado juntos.** Cerrado en T-21 (#31, PR #28,
+   commit `575680a`, 2026-08-25). El proxy vive en `client/vite.config.ts:17` y reenvía `/api` a
+   `http://localhost:8000`; desde T-22 (#32, PR #50) la prueba end-to-end corre el hilo completo
+   contra el backend real en cada PR, así que el riesgo no puede volver en silencio.
+
+   **Lo que dejó de lección:** al conectarlos aparecieron dos errores que ninguna prueba veía,
+   porque cada capa se probaba contra una sustitución de la otra. De ahí salió la acción de la
+   retrospectiva de que toda funcionalidad que toque base de datos o HTTP lleve al menos una prueba
+   contra la cosa real.
 7. **No hay entrega continua.** El pipeline valida cada Pull Request pero no despliega a ningún
    ambiente, y la rúbrica de Ingeniería de Software II la pide explícitamente (§7).
