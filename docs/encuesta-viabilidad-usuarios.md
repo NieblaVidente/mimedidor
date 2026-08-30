@@ -98,7 +98,7 @@ No identifican a la persona. Se llenan antes de empezar.
 **Leer antes de empezar:**
 
 > Estamos haciendo un proyecto de la universidad sobre el consumo de agua en los hogares. Son unas
-> 20 preguntas de sí o no, toma como cinco minutos y es anónimo — no anotamos su nombre ni su
+> 26 preguntas de sí o no, toma como cinco minutos y es anónimo — no anotamos su nombre ni su
 > dirección. Puede no contestar lo que no quiera, y puede parar cuando guste. ¿Le parece bien?
 
 ---
@@ -176,7 +176,7 @@ No identifican a la persona. Se llenan antes de empezar.
 |---|---|---|---|
 | E1 | ¿Usaría MiMedidor si fuera gratuito? | ☐ | ☐ |
 | E2 | ¿Pagaría una suscripción mensual pequeña por un servicio así? | ☐ | ☐ |
-| E3 | ¿Compraría un aparato de entre ₡75.000 y ₡225.000 que midiera su consumo automáticamente? | ☐ | ☐ |
+| E3 | ¿Compraría un aparato de entre ₡75.000 y ₡215.000 que midiera su consumo automáticamente? | ☐ | ☐ |
 | E4 | ¿Cree que saber su consumo real le ayudaría a gastar menos agua? | ☐ | ☐ |
 | E5 | ¿Cree que le ayudaría a detectar un cobro equivocado? | ☐ | ☐ |
 

@@ -83,17 +83,73 @@ inmediato en la forma de trabajar:
 
 ### Asignación de tareas
 
-<!-- COMPLETAR: quién toma cada Issue.
-     Recordar la acción 5 de la retrospectiva: asignar cruzando áreas a propósito, para que cada
-     integrante toque cliente, servidor y base de datos durante el sprint. Si se asigna por
-     comodidad, la acción queda escrita pero no hecha, y es la que atiende el riesgo de la
-     Defensa Técnica Individual. -->
+Acordada el 2026-08-29, con nueve días de sprint por delante.
+
+| Issue | Tarea | Puntos | Quién | Área |
+|---|---|---|---|---|
+| #29 | T-07 · Recolectar fotografías de campo | 5 | los tres | campo |
+| #52 | T-35 · Fecha de la lectura | 3 | Isaac | cliente + servidor |
+| #43 | T-33 · Unificar el manejo de errores del cliente | 1 | Yariel | cliente |
+| #34 | T-24 · Manual técnico del repositorio | 3 | Yariel | documentación |
+| #33 | T-23 · Manual de usuario | 3 | José Pablo | documentación |
+| #40 | T-30 · Registrar las ceremonias | 2 | José Pablo | documentación |
+
+#### Cómo se aplicó la acción 5 de la retrospectiva
+
+La acción pedía asignar **cruzando áreas a propósito**, por el riesgo de la Defensa Técnica
+Individual. Para no asignarlo por intuición se contó qué ha tocado cada quien en `main`:
+
+| | Commits | Áreas tocadas | Nunca ha tocado |
+|---|---|---|---|
+| José Pablo | 32 | cliente, servidor, documentación, base de datos | — |
+| Isaac | 9 | base de datos, documentación, CI | **cliente, servidor** |
+| Yariel | 3 | servidor, documentación | **cliente, base de datos** |
+
+De ahí salen dos decisiones que no son las cómodas:
+
+- **T-35 a Isaac** en vez de a quien ya conoce el cliente. Es la única tarjeta del backlog que toca
+  cliente y servidor a la vez, o sea exactamente sus dos áreas en blanco, y la parte de validación
+  en la tabla cae en su terreno conocido, así que no arranca de cero.
+- **T-23 pasa de Yariel a José Pablo.** Yariel tenía los dos manuales, lo que lo habría dejado otro
+  sprint entero sin tocar código, con 3 commits acumulados. Se le libera T-23 y se le da T-33, que
+  es cliente puro y de 1 punto: entrada barata a su área en blanco. José Pablo absorbe el manual
+  porque ya tocó todas las áreas y un documento más no le crea silo.
+
+#### Aviso sobre el alcance
+
+**Esto agrega 9 puntos por encima del compromiso de 26.** T-07 (5) y T-33 (1) estaban en «Fuera del
+compromiso»; T-35 (3) es posterior al Planning —salió al escribir la prueba end-to-end de T-22—.
+Del compromiso original quedan 8 puntos vivos (#33, #34, #40), así que el trabajo pendiente real
+son **17 puntos en nueve días**, con cuatro proyectos de C++ de Sistemas Operativos en paralelo.
+
+Se deja escrito en vez de repartirlo en silencio. **Si algo tiene que caerse, el orden es T-33
+primero** (1 punto, deuda técnica que no bloquea nada) y T-24 después, que ya viene reducido. T-07
+no se cae: es el cuello de botella del proyecto entero.
 
 ### Salidas de campo (T-07)
 
-<!-- COMPLETAR: zonas, días y responsable de cada salida.
-     La retrospectiva concluyó que el 2 de 12 del Sprint 1 no fue solo el clima: la tarea nunca
-     tuvo fecha ni dueño por zona. Dejarlo otra vez como "cuando se pueda" repite el problema. -->
+> ⚠️ **Sección incompleta a propósito.** Falta lo único que hace que esta tarjeta avance: zonas,
+> días y dueño de cada salida. Eso no se puede decidir desde el repositorio, lo definen los tres.
+
+La retrospectiva concluyó que el 2 de 12 del Sprint 1 **no fue solo el clima**: la tarea nunca tuvo
+fecha ni dueño por zona. Asignarla a los tres, como se acaba de hacer, no arregla eso por sí solo —
+una tarea de tres dueños y ninguna fecha es una tarea de nadie.
+
+Lo que hay que llenar en el próximo Daily, antes de que pase otro fin de semana:
+
+| Zona | Día | Responsable | Medidores previstos |
+|---|---|---|---|
+| <!-- --> | | | |
+| <!-- --> | | | |
+| <!-- --> | | | |
+
+Recordatorios del Issue #29 que se pierden si no se anotan acá:
+
+- **Revisar la meta de 12 medidores.** Se fijó cuando quedaban dos semanas y no había llovido.
+- **La lectura real se transcribe en el momento de tomar la foto.** Sin ese dato la foto no sirve
+  para medir exactitud, que es para lo que se está recolectando.
+- **Al menos 3 medidores en condiciones adversas deliberadas**, y zonas repartidas entre los tres
+  para no sesgar la muestra a un solo barrio.
 
 ### Riesgo principal del sprint
 
@@ -101,9 +157,28 @@ Con la integración cerrada, **el dataset pasa a ser el riesgo principal del pro
 medidores, y es el único que no se resuelve programando. Bloquea la medición del reconocimiento,
 la decisión de alcance por marca y la calibración de la segmentación.
 
-### Pendiente de entrada externa
+### Retroalimentación del profesor sobre el primer avance
 
-La **retroalimentación del profesor** sobre el avance de la semana 7 todavía no se ha recibido; la
-entrega se aplazó a esta semana presencial. Es entrada obligatoria del Issue #37, porque el
-entregable de la semana 10 exige evidencia de haberla atendido. Cuando llegue, tiene prioridad
-máxima aunque obligue a recortar otra cosa.
+**Recibida** en la sesión presencial de la semana 8. Registrada el 2026-08-29 por José Pablo
+Ramírez Sánchez (Scrum Master), que fue quien la recibió.
+
+**Qué dijo:** que el proyecto va bien como va. **No dio ninguna observación específica ni pidió
+ningún cambio.**
+
+> ⚠️ Este registro es una **paráfrasis**, no una cita textual. El Issue #37 pedía anotar la
+> retroalimentación palabra por palabra; la evaluación fue verbal y no se transcribió en el
+> momento, así que lo que queda es el resumen de quien la recibió. Se anota la limitación en vez
+> de simular una cita que nadie tomó.
+
+**Qué se atiende a raíz de esto:** nada, porque no hubo puntos concretos que atender. No se abren
+tarjetas nuevas y no se recorta nada del sprint.
+
+**Riesgo que esto deja abierto.** La Guía de Entregables §3.3 exige para la semana 10 «evidencia
+de que se incorporó la retroalimentación recibida en la semana 7». Con una evaluación sin
+observaciones, la única evidencia posible es este registro, y es delgada. Conviene **pedirle al
+profesor al menos un punto concreto a mejorar** antes de la semana 10 — no para inventar trabajo,
+sino porque el entregable exige mostrar algo incorporado y hoy no hay de dónde. Si aun así no hay
+observaciones, este registro fechado es la respuesta y se presenta tal cual.
+
+Con esto el Issue #37 queda cerrado. Si el profesor da observaciones más adelante, se abre una
+tarjeta nueva enlazada a esta sección en vez de reabrirlo.
