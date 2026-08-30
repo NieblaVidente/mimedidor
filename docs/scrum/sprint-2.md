@@ -83,7 +83,46 @@ inmediato en la forma de trabajar:
 
 ### Asignación de tareas
 
-Acordada el 2026-08-29, con nueve días de sprint por delante.
+| Integrante | Issues | Puntos |
+|---|---|---|
+| Yariel | #33 Manual de usuario (3) · #34 Manual técnico (3) | 6 |
+| Isaac | #35 Casos de uso (2) · #36 Evidencia de pruebas (2) · #39 Respaldo y recuperación (3) | 7 |
+| José Pablo | #32 Cypress end-to-end (5) · #37 Retroalimentación (3) · #40 Registro de ceremonias (2) | 10 |
+
+#37 está asignado **para triaje, no para ejecutar**: el trabajo todavía no se conoce porque
+depende de la retroalimentación del profesor. Cuando llegue se reparte entre los tres.
+
+#31 (T-21, 3 puntos) no aparece en el reparto porque ya estaba cerrado el día del Planning.
+
+**Cómo se repartió, y por qué así.** En el Sprint 1 los tres trabajaron en silos bastante
+marcados: Yariel solo tocó visión por computadora, Isaac solo base de datos, y José Pablo el
+resto — infraestructura, API y cliente. Eso contradice lo que advierte `CLAUDE.md` §2 y es un
+riesgo directo para la Defensa Técnica Individual, donde a cualquiera le pueden preguntar por
+cualquier parte del sistema.
+
+La acción 5 de la retrospectiva pedía cruzar áreas. Este sprint lo hace fácil: **ocho de las
+nueve tareas comprometidas son documentación**, porque es lo que exige el entregable de la
+semana 10. Y escribir documentación es la mejor excusa para tener que entender algo — el manual
+técnico obliga a recorrer instalación, base de datos y API; los casos de uso obligan a recorrer
+el cliente. Se cruza sin frenar trabajo técnico.
+
+Por eso Yariel, que venía solo de visión, toma los dos manuales; e Isaac, que venía solo de base
+de datos, toma casos de uso y evidencia de pruebas además del respaldo, que sí es su área.
+
+**La otra mitad de la acción 5 es quién revisa.** Cada Pull Request lo revisa quien sí conoce el
+área que documenta: la parte de base de datos del manual técnico la revisa Isaac, la del cliente
+la revisa José Pablo. Ahí es donde se transfiere el conocimiento de verdad, y no cuesta tiempo
+extra.
+
+**Sobre el reparto de carga.** En el Sprint 1 José Pablo hizo 22 puntos contra 13 de Yariel y 10
+de Isaac — el doble. Este reparto (6 / 7 / 10) sigue cargándolo más, pero mucho menos, y los 3
+puntos de #37 son de triaje, no de trabajo cierto. Queda anotado para vigilarlo en la próxima
+retrospectiva.
+
+#### Reasignación a mitad de sprint — 2026-08-29
+
+Al cerrar la entrega de la semana 7, siete de las nueve tareas comprometidas estaban hechas. Se
+repartió lo que quedaba vivo, más dos tarjetas que no venían del compromiso.
 
 | Issue | Tarea | Puntos | Quién | Área |
 |---|---|---|---|---|
@@ -94,62 +133,60 @@ Acordada el 2026-08-29, con nueve días de sprint por delante.
 | #33 | T-23 · Manual de usuario | 3 | José Pablo | documentación |
 | #40 | T-30 · Registrar las ceremonias | 2 | José Pablo | documentación |
 
-#### Cómo se aplicó la acción 5 de la retrospectiva
+**T-35 va a Isaac** y no a quien ya conoce el cliente. Es la única tarjeta del backlog que toca
+cliente y servidor a la vez, que son sus dos áreas en blanco: contando los commits de `main`,
+Isaac nunca había tocado `client/` ni `server/`, y Yariel nunca `client/` ni `database/`. La parte
+de validación en la tabla cae en su terreno conocido, así que no arranca de cero. Por la misma
+razón Yariel toma T-33, que es cliente puro y de 1 punto.
 
-La acción pedía asignar **cruzando áreas a propósito**, por el riesgo de la Defensa Técnica
-Individual. Para no asignarlo por intuición se contó qué ha tocado cada quien en `main`:
+> ⚠️ **T-23 pasó de Yariel a José Pablo, y esa decisión hay que revisarla.** Se tomó sin ver el
+> razonamiento del Planning que está más arriba, porque vivía en una rama sin mergear. Allí los dos
+> manuales se le daban a Yariel **a propósito**, con revisores asignados por área para que la
+> transferencia de conocimiento ocurriera en la revisión y no solo en la escritura. Ese mecanismo
+> es mejor que el criterio de «que toque código» con el que se reasignó, porque cruza áreas sin
+> frenar trabajo técnico. **Queda pendiente que el equipo confirme si T-23 vuelve a Yariel.**
 
-| | Commits | Áreas tocadas | Nunca ha tocado |
-|---|---|---|---|
-| José Pablo | 32 | cliente, servidor, documentación, base de datos | — |
-| Isaac | 9 | base de datos, documentación, CI | **cliente, servidor** |
-| Yariel | 3 | servidor, documentación | **cliente, base de datos** |
-
-De ahí salen dos decisiones que no son las cómodas:
-
-- **T-35 a Isaac** en vez de a quien ya conoce el cliente. Es la única tarjeta del backlog que toca
-  cliente y servidor a la vez, o sea exactamente sus dos áreas en blanco, y la parte de validación
-  en la tabla cae en su terreno conocido, así que no arranca de cero.
-- **T-23 pasa de Yariel a José Pablo.** Yariel tenía los dos manuales, lo que lo habría dejado otro
-  sprint entero sin tocar código, con 3 commits acumulados. Se le libera T-23 y se le da T-33, que
-  es cliente puro y de 1 punto: entrada barata a su área en blanco. José Pablo absorbe el manual
-  porque ya tocó todas las áreas y un documento más no le crea silo.
-
-#### Aviso sobre el alcance
-
-**Esto agrega 9 puntos por encima del compromiso de 26.** T-07 (5) y T-33 (1) estaban en «Fuera del
-compromiso»; T-35 (3) es posterior al Planning —salió al escribir la prueba end-to-end de T-22—.
-Del compromiso original quedan 8 puntos vivos (#33, #34, #40), así que el trabajo pendiente real
-son **17 puntos en nueve días**, con cuatro proyectos de C++ de Sistemas Operativos en paralelo.
-
-Se deja escrito en vez de repartirlo en silencio. **Si algo tiene que caerse, el orden es T-33
-primero** (1 punto, deuda técnica que no bloquea nada) y T-24 después, que ya viene reducido. T-07
-no se cae: es el cuello de botella del proyecto entero.
+**Sobre el alcance.** El reparto agrega 9 puntos sobre el compromiso de 26: T-07 (5) y T-33 (1)
+estaban en «Fuera del compromiso», y T-35 (3) es posterior al Planning —salió al escribir la
+prueba end-to-end de T-22—. Del compromiso original quedaban 8 puntos vivos, así que el trabajo
+pendiente real son 17 puntos. Si algo tiene que caerse, el orden es **T-33 primero** (1 punto,
+deuda técnica que no bloquea nada) y **T-24 después**, que ya viene reducido. T-07 no se cae: es
+el cuello de botella del proyecto entero.
 
 ### Salidas de campo (T-07)
 
-> ⚠️ **Sección incompleta a propósito.** Falta lo único que hace que esta tarjeta avance: zonas,
-> días y dueño de cada salida. Eso no se puede decidir desde el repositorio, lo definen los tres.
+**Meta revisada: 6 medidores nuevos, 2 por integrante.** Sumados a los 2 ya registrados, el
+dataset quedaría en 8.
 
-La retrospectiva concluyó que el 2 de 12 del Sprint 1 **no fue solo el clima**: la tarea nunca tuvo
-fecha ni dueño por zona. Asignarla a los tres, como se acaba de hacer, no arregla eso por sí solo —
-una tarea de tres dueños y ninguna fecha es una tarea de nadie.
+Se bajó desde los 12 originales a propósito. Esa cifra se fijó cuando había dos semanas por
+delante y no había llovido; el Sprint 1 cerró con 2. Comprometer una meta que se pueda cumplir
+vale más que fallar la misma meta dos sprints seguidos, y 8 medidores ya permiten aplicar el
+criterio de alcance por marca de T-08 con algo de sentido.
 
-Lo que hay que llenar en el próximo Daily, antes de que pase otro fin de semana:
+**Zonas: cada integrante sale en su propia provincia.** Los tres viven en provincias distintas,
+así que no hay riesgo de pisarse ni de duplicar medidores.
 
-| Zona | Día | Responsable | Medidores previstos |
-|---|---|---|---|
-| <!-- --> | | | |
-| <!-- --> | | | |
-| <!-- --> | | | |
+Esto además mejora la muestra más de lo que parece. El protocolo de captura pedía repartir zonas
+"para no sesgar la muestra hacia un solo barrio": tres provincias distintas dan variedad real de
+marcas de hidrómetro, de antigüedad de instalación y de condiciones de la caja — que es
+justamente lo que necesita la decisión de T-08 para no acotar el MVP sobre una muestra
+engañosa.
 
-Recordatorios del Issue #29 que se pierden si no se anotan acá:
+**Fechas: sin fecha fija.** Cada quien sale entre semana cuando pueda.
 
-- **Revisar la meta de 12 medidores.** Se fijó cuando quedaban dos semanas y no había llovido.
-- **La lectura real se transcribe en el momento de tomar la foto.** Sin ese dato la foto no sirve
-  para medir exactitud, que es para lo que se está recolectando.
-- **Al menos 3 medidores en condiciones adversas deliberadas**, y zonas repartidas entre los tres
-  para no sesgar la muestra a un solo barrio.
+> ⚠️ **Riesgo aceptado explícitamente.** La retrospectiva de este mismo día concluyó que el 2 de
+> 12 del Sprint 1 no se explica solo por la lluvia: la tarea nunca tuvo fecha ni dueño por zona,
+> y "cuando se pueda" no genera urgencia. El equipo decidió igualmente no fijar fechas, por la
+> carga de los 4 proyectos de C++ en paralelo. Queda anotado igual que el riesgo de la revisión
+> de PRs sin rotación fija en `docs/definition-of-done.md`: si se nota que no avanza, se revisa.
+>
+> **Mitigación acordada sin costo extra:** el daily asíncrono de la acción 4 sirve como señal
+> temprana. Si pasan varios días sin que nadie reporte una salida, se detecta a mitad de sprint
+> y no al cerrarlo.
+
+**Recordatorio operativo:** lo que hace útil una foto es la lectura real transcrita a mano en el
+momento de tomarla. Sin ese dato la foto no sirve para medir exactitud, que es el propósito
+completo de la tarea.
 
 ### Riesgo principal del sprint
 
