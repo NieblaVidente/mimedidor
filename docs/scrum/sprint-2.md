@@ -101,9 +101,28 @@ Con la integración cerrada, **el dataset pasa a ser el riesgo principal del pro
 medidores, y es el único que no se resuelve programando. Bloquea la medición del reconocimiento,
 la decisión de alcance por marca y la calibración de la segmentación.
 
-### Pendiente de entrada externa
+### Retroalimentación del profesor sobre el primer avance
 
-La **retroalimentación del profesor** sobre el avance de la semana 7 todavía no se ha recibido; la
-entrega se aplazó a esta semana presencial. Es entrada obligatoria del Issue #37, porque el
-entregable de la semana 10 exige evidencia de haberla atendido. Cuando llegue, tiene prioridad
-máxima aunque obligue a recortar otra cosa.
+**Recibida** en la sesión presencial de la semana 8. Registrada el 2026-08-29 por José Pablo
+Ramírez Sánchez (Scrum Master), que fue quien la recibió.
+
+**Qué dijo:** que el proyecto va bien como va. **No dio ninguna observación específica ni pidió
+ningún cambio.**
+
+> ⚠️ Este registro es una **paráfrasis**, no una cita textual. El Issue #37 pedía anotar la
+> retroalimentación palabra por palabra; la evaluación fue verbal y no se transcribió en el
+> momento, así que lo que queda es el resumen de quien la recibió. Se anota la limitación en vez
+> de simular una cita que nadie tomó.
+
+**Qué se atiende a raíz de esto:** nada, porque no hubo puntos concretos que atender. No se abren
+tarjetas nuevas y no se recorta nada del sprint.
+
+**Riesgo que esto deja abierto.** La Guía de Entregables §3.3 exige para la semana 10 «evidencia
+de que se incorporó la retroalimentación recibida en la semana 7». Con una evaluación sin
+observaciones, la única evidencia posible es este registro, y es delgada. Conviene **pedirle al
+profesor al menos un punto concreto a mejorar** antes de la semana 10 — no para inventar trabajo,
+sino porque el entregable exige mostrar algo incorporado y hoy no hay de dónde. Si aun así no hay
+observaciones, este registro fechado es la respuesta y se presenta tal cual.
+
+Con esto el Issue #37 queda cerrado. Si el profesor da observaciones más adelante, se abre una
+tarjeta nueva enlazada a esta sección en vez de reabrirlo.
