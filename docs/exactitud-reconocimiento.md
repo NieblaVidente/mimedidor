@@ -88,7 +88,8 @@ resolver el problema de las líneas divisorias, que es la causa raíz que queda 
 
 - **Más dataset.** Con 2 fotos casi idénticas de un solo medidor no se puede saber si el problema
   de las líneas divisorias se repite igual en otros modelos, ni calibrar nada con confianza.
-  Bloqueado por T-07/T-08 (meta: 12 medidores).
+  Bloqueado por T-07/T-08 (meta vigente: 8 medidores, revisada en el Sprint Planning del
+  Sprint 2 desde los 12 originales).
 - **Manejar las líneas divisorias explícitamente** — por ejemplo, detectarlas y borrarlas antes
   de pasarle la imagen a Tesseract, o segmentar cada casilla de dígito por separado y reconocerla
   individualmente en vez de pedirle a Tesseract que lea la fila completa de una sola vez.
