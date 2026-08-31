@@ -7,7 +7,8 @@ vi.mock('./api/facturas', async () => {
   return { ...real, guardarFactura: vi.fn(), obtenerComparacion: vi.fn() }
 })
 
-import { ErrorApiFacturas, guardarFactura, obtenerComparacion } from './api/facturas'
+import { guardarFactura, obtenerComparacion } from './api/facturas'
+import { ErrorApi } from './api/errores'
 import PantallaFactura from './PantallaFactura'
 
 beforeEach(() => {
@@ -108,7 +109,7 @@ describe('PantallaFactura', () => {
   it('muestra el error del servidor si falla el registro', async () => {
     const usuario = userEvent.setup()
     vi.mocked(guardarFactura).mockRejectedValue(
-      new ErrorApiFacturas('MEDIDOR_NO_ENCONTRADO', 'No existe ese medidor'),
+      new ErrorApi('MEDIDOR_NO_ENCONTRADO', 'No existe ese medidor'),
     )
 
     await completarFormulario(usuario)

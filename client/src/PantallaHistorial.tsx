@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { ErrorApiLecturas, obtenerHistorial, type LecturaHistorialItem } from './api/lecturas'
+import { obtenerHistorial, type LecturaHistorialItem } from './api/lecturas'
+import { ErrorApi } from './api/errores'
 
 type Estado = 'inicio' | 'cargando' | 'listo' | 'error'
 
@@ -29,7 +30,7 @@ function PantallaHistorial() {
       setEstado('listo')
     } catch (error) {
       setMensajeError(
-        error instanceof ErrorApiLecturas ? error.message : 'No se pudo cargar el historial.',
+        error instanceof ErrorApi ? error.message : 'No se pudo cargar el historial.',
       )
       setEstado('error')
     }

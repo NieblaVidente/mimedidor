@@ -7,7 +7,8 @@ vi.mock('./api/lecturas', async () => {
   return { ...real, obtenerHistorial: vi.fn() }
 })
 
-import { ErrorApiLecturas, obtenerHistorial } from './api/lecturas'
+import { obtenerHistorial } from './api/lecturas'
+import { ErrorApi } from './api/errores'
 import PantallaHistorial from './PantallaHistorial'
 
 beforeEach(() => {
@@ -74,7 +75,7 @@ describe('PantallaHistorial', () => {
   it('muestra el error del servidor si falla la carga', async () => {
     const usuario = userEvent.setup()
     vi.mocked(obtenerHistorial).mockRejectedValue(
-      new ErrorApiLecturas('MEDIDOR_NO_ENCONTRADO', 'No existe ese medidor'),
+      new ErrorApi('MEDIDOR_NO_ENCONTRADO', 'No existe ese medidor'),
     )
 
     await cargarHistorial(usuario)
