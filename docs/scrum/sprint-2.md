@@ -130,7 +130,7 @@ repartió lo que quedaba vivo, más dos tarjetas que no venían del compromiso.
 | #52 | T-35 · Fecha de la lectura | 3 | Isaac | cliente + servidor |
 | #43 | T-33 · Unificar el manejo de errores del cliente | 1 | Yariel | cliente |
 | #34 | T-24 · Manual técnico del repositorio | 3 | Yariel | documentación |
-| #33 | T-23 · Manual de usuario | 3 | José Pablo | documentación |
+| #33 | T-23 · Manual de usuario | 3 | José Pablo ⚠️ | documentación |
 | #40 | T-30 · Registrar las ceremonias | 2 | José Pablo | documentación |
 
 **T-35 va a Isaac** y no a quien ya conoce el cliente. Es la única tarjeta del backlog que toca
@@ -139,12 +139,18 @@ Isaac nunca había tocado `client/` ni `server/`, y Yariel nunca `client/` ni `d
 de validación en la tabla cae en su terreno conocido, así que no arranca de cero. Por la misma
 razón Yariel toma T-33, que es cliente puro y de 1 punto.
 
-> ⚠️ **T-23 pasó de Yariel a José Pablo, y esa decisión hay que revisarla.** Se tomó sin ver el
+> ⚠️ **T-23 pasó de Yariel a José Pablo, y esa decisión se revirtió.** Se había tomado sin ver el
 > razonamiento del Planning que está más arriba, porque vivía en una rama sin mergear. Allí los dos
 > manuales se le daban a Yariel **a propósito**, con revisores asignados por área para que la
 > transferencia de conocimiento ocurriera en la revisión y no solo en la escritura. Ese mecanismo
 > es mejor que el criterio de «que toque código» con el que se reasignó, porque cruza áreas sin
-> frenar trabajo técnico. **Queda pendiente que el equipo confirme si T-23 vuelve a Yariel.**
+> frenar trabajo técnico.
+>
+> **Resuelto el 2026-08-31: T-23 (#33) vuelve a Yariel**, restituyendo el reparto del Planning. Para
+> entonces Yariel ya había cerrado T-24 (#62) y T-33 (#61), así que tenía capacidad libre y el
+> manual de usuario es continuación natural del manual técnico que acababa de escribir. La revisión
+> la hace José Pablo, que es quien conoce el cliente — que es la mitad de la acción 5 que la
+> reasignación se había saltado.
 
 **Sobre el alcance.** El reparto agrega 9 puntos sobre el compromiso de 26: T-07 (5) y T-33 (1)
 estaban en «Fuera del compromiso», y T-35 (3) es posterior al Planning —salió al escribir la
@@ -219,3 +225,78 @@ observaciones, este registro fechado es la respuesta y se presenta tal cual.
 
 Con esto el Issue #37 queda cerrado. Si el profesor da observaciones más adelante, se abre una
 tarjeta nueva enlazada a esta sección en vez de reabrirlo.
+
+---
+
+## Daily Scrum — registro semanal
+
+La acción 4 de la retrospectiva del Sprint 1 comprometió un «daily asíncrono de tres líneas
+(ayer / hoy / bloqueos) y registro semanal en `docs/scrum/`», con el Scrum Master como responsable
+y frecuencia diaria.
+
+### Semana del 25 al 31 de agosto
+
+**No se hizo ningún Daily Scrum esta semana.** Ni presencial ni asíncrono, ningún día. El equipo
+estuvo en clases presenciales y la ceremonia simplemente no se convocó.
+
+Queda escrito así, sin adornarlo. Un registro inventado no sirve para la Defensa Técnica Individual
+y el profesor lo nota; un incumplimiento anotado con su fecha sí es evidencia de que el equipo se
+audita.
+
+#### Qué sí avanzó, según el historial del repositorio
+
+Que no hubiera ceremonia no significa que no hubiera trabajo. Esto no es un daily reconstruido a
+posteriori —nadie reportó nada en su momento— sino lo que `git` y los Issues registran por su
+cuenta:
+
+| Integrante | PR mergeados | Qué cerró |
+|---|---|---|
+| José Pablo | 9 | T-21 integración, T-22 Cypress, migración a Issues, registro de ceremonias del Sprint 1 y del Planning, T-27, T-36, T-37, T-38 |
+| Isaac | 4 | T-29 respaldo y recuperación, T-25 casos de uso, T-26 evidencia de pruebas, encuesta de viabilidad |
+| Yariel | 2 | T-33 errores del cliente, T-24 manual técnico de instalación |
+
+Once Issues cerrados en la ventana. El sprint avanzó **a pesar** de no tener daily, no gracias a él.
+
+#### Lectura honesta
+
+El daily no se cayó por falta de trabajo ni por desorganización: se cayó porque **el formato
+elegido no encaja con cómo trabaja este equipo**. Se acordó un daily asíncrono por chat para un
+grupo que se ve en persona varias veces por semana en clase. Escribir tres líneas por chat a
+alguien que uno va a ver esa misma mañana no tiene sentido práctico, y por eso no ocurrió ni una
+vez.
+
+La retrospectiva del Sprint 1 concluyó que el registro de ceremonias se había caído porque **nadie
+era dueño de la tarea**. Se nombró dueño y aun así se cayó. La causa, entonces, no era solo la
+falta de dueño: era también el formato. Repetir la acción 4 sin cambiarla la haría fallar otra vez.
+
+#### Decisión: se cambia el formato, no el compromiso
+
+| | Antes (acción 4) | Desde ahora |
+|---|---|---|
+| Cuándo | Diario, asíncrono por chat | Presencial, al inicio de la clase en que coincidan los tres |
+| Qué | Ayer / hoy / bloqueos, por escrito | Ayer / hoy / bloqueos, hablado |
+| Registro | Semanal en `docs/scrum/` | Igual: semanal acá, y es lo único que se versiona |
+| Responsable | Scrum Master | Scrum Master (José Pablo), sin cambio |
+
+Se conserva lo que el profesor evalúa —el registro fechado y semanal— y se cambia el ritual que lo
+alimenta, para que sea uno que el equipo vaya a sostener de verdad.
+
+> **Criterio de fracaso, escrito por adelantado.** Si al cerrar la semana del 1 al 7 de setiembre
+> tampoco hay registro, el problema no es el formato sino que el equipo no está haciendo dailies, y
+> eso entra a la retrospectiva del Sprint 2 como hallazgo — no como una acción más que se vuelve a
+> escribir igual.
+
+#### Estado del sprint al 31 de agosto
+
+Quedan **7 días** (cierra el 7 de setiembre) y estas tarjetas vivas:
+
+| Issue | Tarea | Puntos | Quién |
+|---|---|---|---|
+| #29 | T-07 · Recolectar fotografías de campo | 5 | los tres |
+| #52 | T-35 · Fecha de la lectura | 3 | Isaac |
+| #33 | T-23 · Manual de usuario | 3 | Yariel |
+| #40 | T-30 · Registrar las ceremonias | 2 | José Pablo — se cierra con este registro |
+
+**El bloqueo real del sprint es T-07.** Va en 2 medidores de los 8 de la meta revisada, y detrás de
+él están parados T-08 (#30) y T-32 (#42). Es lo único de esta lista que no se resuelve programando,
+y la mitigación que se había acordado para vigilarlo era justamente el daily que no ocurrió.
