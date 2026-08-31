@@ -130,7 +130,7 @@ repartió lo que quedaba vivo, más dos tarjetas que no venían del compromiso.
 | #52 | T-35 · Fecha de la lectura | 3 | Isaac | cliente + servidor |
 | #43 | T-33 · Unificar el manejo de errores del cliente | 1 | Yariel | cliente |
 | #34 | T-24 · Manual técnico del repositorio | 3 | Yariel | documentación |
-| #33 | T-23 · Manual de usuario | 3 | José Pablo | documentación |
+| #33 | T-23 · Manual de usuario | 3 | José Pablo ⚠️ | documentación |
 | #40 | T-30 · Registrar las ceremonias | 2 | José Pablo | documentación |
 
 **T-35 va a Isaac** y no a quien ya conoce el cliente. Es la única tarjeta del backlog que toca
@@ -139,12 +139,18 @@ Isaac nunca había tocado `client/` ni `server/`, y Yariel nunca `client/` ni `d
 de validación en la tabla cae en su terreno conocido, así que no arranca de cero. Por la misma
 razón Yariel toma T-33, que es cliente puro y de 1 punto.
 
-> ⚠️ **T-23 pasó de Yariel a José Pablo, y esa decisión hay que revisarla.** Se tomó sin ver el
+> ⚠️ **T-23 pasó de Yariel a José Pablo, y esa decisión se revirtió.** Se había tomado sin ver el
 > razonamiento del Planning que está más arriba, porque vivía en una rama sin mergear. Allí los dos
 > manuales se le daban a Yariel **a propósito**, con revisores asignados por área para que la
 > transferencia de conocimiento ocurriera en la revisión y no solo en la escritura. Ese mecanismo
 > es mejor que el criterio de «que toque código» con el que se reasignó, porque cruza áreas sin
-> frenar trabajo técnico. **Queda pendiente que el equipo confirme si T-23 vuelve a Yariel.**
+> frenar trabajo técnico.
+>
+> **Resuelto el 2026-08-31: T-23 (#33) vuelve a Yariel**, restituyendo el reparto del Planning. Para
+> entonces Yariel ya había cerrado T-24 (#62) y T-33 (#61), así que tenía capacidad libre y el
+> manual de usuario es continuación natural del manual técnico que acababa de escribir. La revisión
+> la hace José Pablo, que es quien conoce el cliente — que es la mitad de la acción 5 que la
+> reasignación se había saltado.
 
 **Sobre el alcance.** El reparto agrega 9 puntos sobre el compromiso de 26: T-07 (5) y T-33 (1)
 estaban en «Fuera del compromiso», y T-35 (3) es posterior al Planning —salió al escribir la
@@ -288,8 +294,8 @@ Quedan **7 días** (cierra el 7 de setiembre) y estas tarjetas vivas:
 |---|---|---|---|
 | #29 | T-07 · Recolectar fotografías de campo | 5 | los tres |
 | #52 | T-35 · Fecha de la lectura | 3 | Isaac |
-| #33 | T-23 · Manual de usuario | 3 | José Pablo |
-| #40 | T-30 · Registrar las ceremonias | 2 | José Pablo |
+| #33 | T-23 · Manual de usuario | 3 | Yariel |
+| #40 | T-30 · Registrar las ceremonias | 2 | José Pablo — se cierra con este registro |
 
 **El bloqueo real del sprint es T-07.** Va en 2 medidores de los 8 de la meta revisada, y detrás de
 él están parados T-08 (#30) y T-32 (#42). Es lo único de esta lista que no se resuelve programando,
