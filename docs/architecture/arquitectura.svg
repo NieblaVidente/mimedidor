@@ -1,0 +1,185 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1240 1000" width="1240" height="1000" font-family="Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif">
+  <title>MiMedidor — Arquitectura de la solución (Sprint 1)</title>
+  <desc>Diagrama de arquitectura: navegador del abonado (Vite/React/TypeScript), servidor FastAPI con módulo de visión por computadora, base de datos PostgreSQL 16, y pipeline de integración continua en GitHub Actions.</desc>
+
+  <defs>
+    <marker id="flecha" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#44546A"/>
+    </marker>
+    <marker id="flechaCI" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#5E48A8"/>
+    </marker>
+    <marker id="flechaInt" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#7A8899"/>
+    </marker>
+  </defs>
+
+  <rect x="0" y="0" width="1240" height="1000" fill="#FFFFFF"/>
+
+  <!-- ============================ TÍTULO ============================ -->
+  <text x="40" y="44" font-size="26" font-weight="700" fill="#12263F">MiMedidor — Arquitectura de la solución</text>
+  <text x="40" y="70" font-size="13" fill="#5A6B7B">Sprint 1 · Universidad Invenio · TICE · Tarjeta T-19 — refleja el estado real del repositorio, no el diseño aspiracional</text>
+
+  <!-- ============================ CLIENTE ============================ -->
+  <rect x="40" y="92" width="890" height="202" rx="10" fill="#EEF4FB" stroke="#2F6FB5" stroke-width="1.5"/>
+  <text x="60" y="118" font-size="15" font-weight="700" fill="#1B4E80">NAVEGADOR DEL ABONADO</text>
+  <text x="910" y="115" font-size="11.5" text-anchor="end" fill="#2F6FB5">Vite 8 · React 19 · TypeScript 6</text>
+  <text x="910" y="133" font-size="10.5" text-anchor="end" fill="#B26A00">se sirve como archivos estáticos (build de Vite)</text>
+
+  <rect x="60" y="148" width="272" height="56" rx="6" fill="#FFFFFF" stroke="#9DBFE0"/>
+  <text x="74" y="169" font-size="12.5" font-weight="600" fill="#12263F" font-family="Consolas, monospace">PantallaCaptura.tsx</text>
+  <text x="74" y="188" font-size="10.5" fill="#5A6B7B">cámara → reconocer → corregir</text>
+
+  <rect x="349" y="148" width="272" height="56" rx="6" fill="#FFFFFF" stroke="#9DBFE0"/>
+  <text x="363" y="169" font-size="12.5" font-weight="600" fill="#12263F" font-family="Consolas, monospace">PantallaHistorial.tsx</text>
+  <text x="363" y="188" font-size="10.5" fill="#5A6B7B">lecturas + consumo entre ellas</text>
+
+  <rect x="638" y="148" width="272" height="56" rx="6" fill="#FFFFFF" stroke="#9DBFE0"/>
+  <text x="652" y="169" font-size="12.5" font-weight="600" fill="#12263F" font-family="Consolas, monospace">PantallaFactura.tsx</text>
+  <text x="652" y="188" font-size="10.5" fill="#5A6B7B">factura + comparación</text>
+
+  <rect x="60" y="216" width="416" height="56" rx="6" fill="#FFFFFF" stroke="#9DBFE0"/>
+  <text x="74" y="237" font-size="12.5" font-weight="600" fill="#12263F" font-family="Consolas, monospace">camara.ts</text>
+  <text x="74" y="256" font-size="10.5" fill="#5A6B7B">getUserMedia + canvas → Blob JPEG. Aislado para poder probar las pantallas.</text>
+
+  <rect x="493" y="216" width="417" height="56" rx="6" fill="#FFFFFF" stroke="#9DBFE0"/>
+  <text x="507" y="237" font-size="12.5" font-weight="600" fill="#12263F" font-family="Consolas, monospace">api/lecturas.ts · api/facturas.ts</text>
+  <text x="507" y="256" font-size="10.5" fill="#5A6B7B">cliente HTTP (fetch), traduce los errores del contrato</text>
+
+  <!-- ================= FLUJO CLIENTE ↔ SERVIDOR ================= -->
+  <line x1="200" y1="294" x2="200" y2="350" stroke="#44546A" stroke-width="2" marker-end="url(#flecha)"/>
+  <text x="192" y="326" font-size="10.5" text-anchor="end" fill="#44546A">peticiones</text>
+
+  <line x1="770" y1="350" x2="770" y2="294" stroke="#44546A" stroke-width="2" marker-end="url(#flecha)"/>
+  <text x="778" y="326" font-size="10.5" fill="#44546A">respuestas</text>
+
+  <text x="485" y="313" font-size="10.5" text-anchor="middle" fill="#12263F" font-family="Consolas, monospace">POST /api/lecturas/reconocer  ·  POST /api/lecturas  ·  GET /api/lecturas</text>
+  <text x="485" y="331" font-size="10.5" text-anchor="middle" fill="#12263F" font-family="Consolas, monospace">POST /api/facturas  ·  GET /api/facturas/{id}/comparacion</text>
+  <text x="485" y="347" font-size="10" text-anchor="middle" fill="#8A6100">JSON y multipart · rutas relativas: asumen cliente y servidor en el mismo origen (ver pendiente ②)</text>
+
+  <!-- ============================ SERVIDOR ============================ -->
+  <rect x="40" y="352" width="890" height="300" rx="10" fill="#EAF5EE" stroke="#2E7D32" stroke-width="1.5"/>
+  <text x="60" y="378" font-size="15" font-weight="700" fill="#1E5B23">SERVIDOR — API y procesamiento de imagen en el mismo proceso</text>
+  <text x="910" y="378" font-size="11.5" text-anchor="end" fill="#2E7D32">Python 3.12 · FastAPI · Uvicorn</text>
+
+  <rect x="60" y="394" width="850" height="46" rx="6" fill="#FFFFFF" stroke="#A8CFB0"/>
+  <text x="74" y="413" font-size="12.5" font-weight="600" fill="#12263F" font-family="Consolas, monospace">main.py</text>
+  <text x="74" y="431" font-size="10.5" fill="#5A6B7B">middleware de logs estructurados a stdout (ruta, código, duración, id de petición) · manejadores de error que nunca exponen trazas internas</text>
+
+  <rect x="60" y="456" width="416" height="100" rx="6" fill="#FFFFFF" stroke="#A8CFB0"/>
+  <text x="74" y="477" font-size="12.5" font-weight="600" fill="#12263F" font-family="Consolas, monospace">api/lecturas.py · api/facturas.py</text>
+  <text x="74" y="496" font-size="10.5" fill="#5A6B7B">Routers. Validan la entrada con Pydantic y</text>
+  <text x="74" y="512" font-size="10.5" fill="#5A6B7B">aplican las reglas del contrato de la API.</text>
+  <text x="74" y="533" font-size="10.5" fill="#5A6B7B">Calculan consumo y comparación en Python,</text>
+  <text x="74" y="549" font-size="10.5" fill="#5A6B7B">no en SQL (ver nota en el documento).</text>
+
+  <rect x="493" y="456" width="417" height="100" rx="6" fill="#FFFFFF" stroke="#A8CFB0"/>
+  <text x="507" y="477" font-size="12.5" font-weight="600" fill="#12263F" font-family="Consolas, monospace">vision/  — no importa nada de FastAPI</text>
+  <text x="507" y="497" font-size="10.5" fill="#5A6B7B">preprocesamiento.py — detecta la carátula y</text>
+  <text x="507" y="513" font-size="10.5" fill="#5A6B7B">corrige la perspectiva  (OpenCV)</text>
+  <text x="507" y="533" font-size="10.5" fill="#5A6B7B">segmentacion.py — recorta el odómetro  (OpenCV)</text>
+  <text x="507" y="549" font-size="10.5" fill="#5A6B7B">reconocimiento.py — dígitos  (pytesseract → Tesseract)</text>
+
+  <line x1="476" y1="506" x2="491" y2="506" stroke="#7A8899" stroke-width="1.6" marker-start="url(#flechaInt)" marker-end="url(#flechaInt)"/>
+
+  <rect x="60" y="572" width="850" height="58" rx="6" fill="#FFFFFF" stroke="#A8CFB0"/>
+  <text x="74" y="592" font-size="12.5" font-weight="600" fill="#12263F" font-family="Consolas, monospace">db/  — conexion.py · lecturas.py · facturas.py</text>
+  <text x="74" y="612" font-size="10.5" fill="#5A6B7B">psycopg v3, SQL plano sin ORM. Una conexión por petición. Las credenciales salen de variables de entorno de libpq.</text>
+
+  <line x1="268" y1="556" x2="268" y2="570" stroke="#7A8899" stroke-width="1.6" marker-end="url(#flechaInt)"/>
+
+  <!-- ================= FLUJO SERVIDOR ↔ BASE DE DATOS ================= -->
+  <line x1="200" y1="652" x2="200" y2="708" stroke="#44546A" stroke-width="2" marker-end="url(#flecha)"/>
+  <line x1="770" y1="708" x2="770" y2="652" stroke="#44546A" stroke-width="2" marker-end="url(#flecha)"/>
+
+  <text x="485" y="676" font-size="10.5" text-anchor="middle" fill="#12263F" font-family="Consolas, monospace">CALL mimedidor.registrar_lectura(...)  ·  SELECT / INSERT sobre el esquema</text>
+  <text x="485" y="694" font-size="10" text-anchor="middle" fill="#5A6B7B">el servidor se conecta con el rol <tspan font-family="Consolas, monospace" fill="#9C4500">mimedidor_app</tspan>, que no puede borrar filas ni alterar el esquema</text>
+
+  <!-- ============================ BASE DE DATOS ============================ -->
+  <rect x="40" y="710" width="890" height="206" rx="10" fill="#FDF1E3" stroke="#B26A00" stroke-width="1.5"/>
+  <text x="60" y="736" font-size="15" font-weight="700" fill="#8A5200">BASE DE DATOS</text>
+  <text x="910" y="736" font-size="11.5" text-anchor="end" fill="#B26A00">PostgreSQL 16 · esquema propio <tspan font-family="Consolas, monospace">mimedidor</tspan></text>
+
+  <rect x="60" y="752" width="416" height="100" rx="6" fill="#FFFFFF" stroke="#E0BE8C"/>
+  <text x="74" y="773" font-size="12.5" font-weight="600" fill="#12263F">Tablas — normalizadas a 3FN</text>
+  <text x="74" y="794" font-size="10.5" fill="#5A6B7B" font-family="Consolas, monospace">usuario · vivienda · medidor</text>
+  <text x="74" y="812" font-size="10.5" fill="#5A6B7B" font-family="Consolas, monospace">lectura · factura</text>
+  <text x="74" y="834" font-size="10.5" fill="#5A6B7B" font-family="Consolas, monospace">lectura_evento <tspan font-family="Segoe UI, Arial, sans-serif">— bitácora de auditoría</tspan></text>
+
+  <rect x="493" y="752" width="417" height="100" rx="6" fill="#FFFFFF" stroke="#E0BE8C"/>
+  <text x="507" y="773" font-size="12.5" font-weight="600" fill="#12263F" font-family="Consolas, monospace">registrar_lectura</text>
+  <text x="507" y="793" font-size="10.5" fill="#5A6B7B">Procedimiento PL/pgSQL. Valida que el hidrómetro</text>
+  <text x="507" y="809" font-size="10.5" fill="#5A6B7B">no retroceda y escribe la lectura y su evento de</text>
+  <text x="507" y="825" font-size="10.5" fill="#5A6B7B">auditoría en una sola transacción atómica:</text>
+  <text x="507" y="843" font-size="10.5" fill="#5A6B7B">si una falla, no queda ninguna de las dos.</text>
+
+  <line x1="491" y1="802" x2="478" y2="802" stroke="#7A8899" stroke-width="1.6" marker-end="url(#flechaInt)"/>
+
+  <rect x="60" y="866" width="850" height="42" rx="6" fill="#FFFFFF" stroke="#E0BE8C"/>
+  <text x="74" y="892" font-size="10.5" fill="#5A6B7B">Roles con mínimo privilegio: <tspan font-family="Consolas, monospace" fill="#9C4500">mimedidor_app</tspan> (SELECT/INSERT/UPDATE, sin DELETE ni DDL) y <tspan font-family="Consolas, monospace" fill="#9C4500">mimedidor_lectura</tspan> (solo SELECT). Acceso por defecto revocado.</text>
+
+  <!-- ============================ COLUMNA CI ============================ -->
+  <rect x="960" y="92" width="240" height="520" rx="10" fill="#F3F0FA" stroke="#5E48A8" stroke-width="1.5"/>
+  <text x="980" y="118" font-size="13" font-weight="700" fill="#4A3690">INTEGRACIÓN CONTINUA</text>
+  <text x="980" y="136" font-size="10.5" fill="#5E48A8">GitHub Actions · 3 jobs en cada PR</text>
+
+  <rect x="980" y="152" width="200" height="100" rx="6" fill="#FFFFFF" stroke="#BDB0DC"/>
+  <text x="994" y="172" font-size="11.5" font-weight="600" fill="#12263F">Cliente</text>
+  <text x="994" y="191" font-size="10" fill="#5A6B7B">ESLint · tsc · build de Vite</text>
+  <text x="994" y="207" font-size="10" fill="#5A6B7B">Vitest sobre jsdom</text>
+  <text x="994" y="229" font-size="10" fill="#5A6B7B">Instala con <tspan font-family="Consolas, monospace">npm ci</tspan>, así que</text>
+  <text x="994" y="243" font-size="10" fill="#5A6B7B">detecta dependencias no declaradas</text>
+
+  <rect x="980" y="264" width="200" height="100" rx="6" fill="#FFFFFF" stroke="#BDB0DC"/>
+  <text x="994" y="284" font-size="11.5" font-weight="600" fill="#12263F">Servidor</text>
+  <text x="994" y="303" font-size="10" fill="#5A6B7B">ruff · pytest</text>
+  <text x="994" y="325" font-size="10" fill="#5A6B7B">Instala Tesseract como paquete</text>
+  <text x="994" y="339" font-size="10" fill="#5A6B7B">del sistema: las pruebas de OCR</text>
+  <text x="994" y="353" font-size="10" fill="#5A6B7B">corren de verdad, no simuladas</text>
+
+  <rect x="980" y="376" width="200" height="112" rx="6" fill="#FFFFFF" stroke="#BDB0DC"/>
+  <text x="994" y="396" font-size="11.5" font-weight="600" fill="#12263F">Base de datos</text>
+  <text x="994" y="415" font-size="10" fill="#5A6B7B">PostgreSQL 16 real, sin contenedor</text>
+  <text x="994" y="437" font-size="10" fill="#5A6B7B">Corre los scripts sobre una</text>
+  <text x="994" y="451" font-size="10" fill="#5A6B7B">instancia limpia y fuerza un error</text>
+  <text x="994" y="465" font-size="10" fill="#5A6B7B">para confirmar que el ROLLBACK</text>
+  <text x="994" y="479" font-size="10" fill="#5A6B7B">no deja nada a medias</text>
+
+  <rect x="980" y="500" width="200" height="96" rx="6" fill="#FFFFFF" stroke="#BDB0DC" stroke-dasharray="4 3"/>
+  <text x="994" y="520" font-size="11" font-weight="600" fill="#4A3690">Rama main protegida</text>
+  <text x="994" y="539" font-size="10" fill="#5A6B7B">No se puede pushear directo.</text>
+  <text x="994" y="555" font-size="10" fill="#5A6B7B">Todo entra por Pull Request con</text>
+  <text x="994" y="571" font-size="10" fill="#5A6B7B">al menos una aprobación y los</text>
+  <text x="994" y="587" font-size="10" fill="#5A6B7B">tres checks en verde.</text>
+
+  <line x1="956" y1="193" x2="934" y2="193" stroke="#5E48A8" stroke-width="1.4" stroke-dasharray="5 3" marker-end="url(#flechaCI)"/>
+  <line x1="956" y1="502" x2="934" y2="502" stroke="#5E48A8" stroke-width="1.4" stroke-dasharray="5 3" marker-end="url(#flechaCI)"/>
+  <line x1="956" y1="813" x2="934" y2="813" stroke="#5E48A8" stroke-width="1.4" stroke-dasharray="5 3" marker-end="url(#flechaCI)"/>
+
+  <!-- ============================ PENDIENTES ============================ -->
+  <rect x="960" y="632" width="240" height="284" rx="10" fill="#FFF6F6" stroke="#C0392B" stroke-width="1.5"/>
+  <text x="980" y="658" font-size="12.5" font-weight="700" fill="#A5281B">PENDIENTES DE ARQUITECTURA</text>
+
+  <text x="980" y="682" font-size="10.5" font-weight="600" fill="#12263F">① La PWA no existe todavía</text>
+  <text x="980" y="698" font-size="10" fill="#5A6B7B">No hay manifest ni service worker</text>
+  <text x="980" y="712" font-size="10" fill="#5A6B7B">y <tspan font-family="Consolas, monospace">vite-plugin-pwa</tspan> no está</text>
+  <text x="980" y="726" font-size="10" fill="#5A6B7B">instalado. Hoy el cliente es una</text>
+  <text x="980" y="740" font-size="10" fill="#5A6B7B">SPA normal.</text>
+
+  <text x="980" y="768" font-size="10.5" font-weight="600" fill="#12263F">② Cliente y servidor sin conectar</text>
+  <text x="980" y="784" font-size="10" fill="#5A6B7B">Las pantallas llaman rutas</text>
+  <text x="980" y="798" font-size="10" fill="#5A6B7B">relativas, que asumen un mismo</text>
+  <text x="980" y="812" font-size="10" fill="#5A6B7B">origen. Vite no tiene proxy, así</text>
+  <text x="980" y="826" font-size="10" fill="#5A6B7B">que en desarrollo nunca se han</text>
+  <text x="980" y="840" font-size="10" fill="#5A6B7B">ejecutado contra el backend real.</text>
+
+  <text x="980" y="868" font-size="10.5" font-weight="600" fill="#12263F">③ No hay entrega continua</text>
+  <text x="980" y="884" font-size="10" fill="#5A6B7B">El pipeline valida cada PR pero</text>
+  <text x="980" y="898" font-size="10" fill="#5A6B7B">no despliega a ningún ambiente.</text>
+
+  <!-- ============================ FLUJO PRINCIPAL ============================ -->
+  <rect x="40" y="930" width="1160" height="62" rx="8" fill="#F5F7FA" stroke="#C9D3DE"/>
+  <text x="58" y="948" font-size="11" font-weight="700" fill="#12263F">Flujo de una lectura</text>
+  <text x="58" y="966" font-size="10.5" fill="#44546A">① el abonado toma la foto en el navegador → ② <tspan font-family="Consolas, monospace">POST /api/lecturas/reconocer</tspan>, que no persiste nada → ③ OpenCV corrige la perspectiva y recorta el odómetro, Tesseract lee los dígitos</text>
+  <text x="58" y="982" font-size="10.5" fill="#44546A">→ ④ el abonado confirma o corrige la lectura a mano → ⑤ <tspan font-family="Consolas, monospace">POST /api/lecturas</tspan> → ⑥ el procedimiento escribe la lectura y su evento de auditoría en una sola transacción</text>
+</svg>

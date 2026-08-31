@@ -31,7 +31,7 @@ aprobaciones, ver si el CI pasó) sin tener que abrir el navegador cada vez.
 winget install --id GitHub.cli
 ```
 
-### Node.js 24 — para el cliente (la PWA)
+### Node.js 24 — para el cliente (la aplicación web)
 
 ```bash
 winget install --id OpenJS.NodeJS
@@ -103,7 +103,7 @@ cd mimedidor
 
 ## 4. Preparar el entorno
 
-### Cliente (la PWA)
+### Cliente (la aplicación web)
 
 ```bash
 cd client
@@ -138,7 +138,105 @@ Probá que funciona:
 .venv\Scripts\python.exe -m pytest -v
 ```
 
-Ambas tienen que pasar (2 pruebas). Para levantar la API: `.venv\Scripts\uvicorn.exe app.main:app --reload`.
+Ambas tienen que pasar. Para levantar la API: `.venv\Scripts\uvicorn.exe app.main:app --reload`.
+
+### Base de datos
+
+Necesitás PostgreSQL corriendo. Creá la base y corré los scripts **desde `database/scripts/`**
+(los scripts se llaman entre sí por ruta relativa, así que desde otra carpeta fallan):
+
+```bash
+createdb mimedidor
+```
+
+```bash
+cd database/scripts
+psql -d mimedidor -v ON_ERROR_STOP=1 -v password_app='clave-local' -v password_lectura='clave-local' -f ejecutar_todo.sql
+```
+
+Eso crea el esquema, las tablas, los dos roles y el procedimiento transaccional. Si te falla con
+*"el rol mimedidor_app ya existe"*, es porque los roles son objetos del clúster y no de la base
+— borralos con `DROP ROLE` y volvé a correrlo (está explicado en `database/README.md`).
+
+---
+
+## 4b. Levantar el sistema completo
+
+Las tres piezas por separado no alcanzan: hasta la tarjeta T-21 nunca se habían ejecutado juntas,
+y en cuanto se hizo aparecieron dos errores que ninguna prueba unitaria podía ver. Así se levanta
+todo, en tres terminales:
+
+**Terminal 1 — la API**, con las credenciales de la base en variables de entorno:
+
+```bash
+cd server
+PGHOST=localhost PGDATABASE=mimedidor PGUSER=mimedidor_app PGPASSWORD=clave-local .venv/Scripts/uvicorn.exe app.main:app --reload
+```
+
+**Terminal 2 — el cliente:**
+
+```bash
+cd client
+npm run dev
+```
+
+**Terminal 3 — comprobar que se hablan entre sí:**
+
+```bash
+curl http://localhost:5173/api/salud
+```
+
+Tiene que responder `{"estado":"ok"}`. Fijate que el puerto es el **5173** (el de Vite), no el
+8000: `client/vite.config.ts` tiene un proxy que manda todo lo que empiece con `/api` al servidor.
+Sin ese proxy el navegador le pediría `/api/...` al servidor de Vite y recibiría el `index.html`
+en vez de la respuesta de la API — que es exactamente el bug que arregló T-21.
+
+Después abrí `http://localhost:5173` en el navegador. Para probar el hilo completo necesitás un
+medidor en la base; podés crear uno con la cadena mínima usuario → vivienda → medidor (hay un
+ejemplo en `server/tests/test_integracion_db.py`).
+
+### Pruebas contra la base real
+
+Con la base levantada y las variables de entorno puestas:
+
+```bash
+cd server
+.venv/Scripts/python.exe -m pytest tests/test_integracion_db.py -v
+```
+
+Si no hay base disponible se saltan solas, así que no estorban. En CI sí corren siempre, en el
+job `Base de datos`.
+
+### Prueba end-to-end (Cypress)
+
+Recorre el hilo completo como lo haría un abonado: cámara → lectura → historial → factura →
+comparación, contra el sistema entero corriendo. Nada sustituido.
+
+Antes de correrla, sembrá un medidor de prueba (la API no tiene ninguna ruta para crear
+medidores, así que tiene que existir en la base):
+
+```bash
+cd database/scripts
+psql -d mimedidor -v ON_ERROR_STOP=1 -f datos_de_prueba.sql
+```
+
+Con la API y el cliente levantados (§4b), en otra terminal:
+
+```bash
+cd client
+npm run e2e
+```
+
+Para verla correr paso a paso en una ventana, útil cuando algo falla: `npm run e2e:abrir`.
+
+**Tiene que correr en un navegador Chromium** — Electron (el que Cypress trae y usa por defecto),
+Chrome o Edge. La prueba necesita una cámara falsa, que se activa con unos parámetros propios de
+Chromium; **en Firefox no existen** y la prueba fallaría por el navegador, no por el código. Para
+elegir uno: `npx cypress run --browser edge`.
+
+La prueba deja datos en la base (las lecturas y facturas que registra). No molesta para volver a
+correrla, pero si querés partir de cero: borrá la base, volvé a correr `ejecutar_todo.sql` y
+después `datos_de_prueba.sql`.
 
 ---
 
@@ -150,8 +248,8 @@ convenciones de código, qué evalúa cada curso, y una lista de cosas que **no*
 
 Dos cosas que conviene que sepas de entrada:
 
-- **Si una tarjeta de Trello contradice `CLAUDE.md`, manda `CLAUDE.md`.** Varias tarjetas se
-  escribieron antes de que se cerraran decisiones técnicas; la sección §9 lista cuáles.
+- **Si un Issue contradice `CLAUDE.md`, manda `CLAUDE.md`.** Las decisiones técnicas ya cerradas
+  pesan más que lo que diga una tarea escrita antes.
 - **El contrato de la API está congelado** en
   [`docs/architecture/contrato-api.md`](architecture/contrato-api.md). Si vas a construir una
   pantalla, trabajá contra los ejemplos de ese documento sin esperar a que el backend exista.
@@ -202,12 +300,22 @@ querés, así que te lo pregunta a vos.
 
 ---
 
-## 7. Trabajar en una tarjeta
+## 7. Trabajar en una tarea
 
 Este es el ciclo de todos los días. **Nunca se trabaja directo sobre `main`** — está protegida y
 GitHub va a rechazar el push (ya lo probamos).
 
-**1. Tomá una tarjeta del Sprint Backlog en Trello** y movela a "En curso". Asignate a vos mismo.
+**1. Tomá un Issue** del milestone de la entrega en curso y asignate a vos mismo:
+
+```bash
+gh issue list --milestone "Semana 10 — Segundo avance"
+```
+
+```bash
+gh issue view 33
+```
+
+Para asignártelo: `gh issue edit 33 --add-assignee @me`
 
 **2. Actualizá tu copia local y creá una rama:**
 
@@ -218,7 +326,7 @@ git checkout -b feature/descripcion-corta
 ```
 
 Convención de nombres: `feature/` para funcionalidad nueva, `bugfix/` para correcciones.
-Una rama por tarjeta, no una rama por persona.
+Una rama por Issue, no una rama por persona.
 
 **3. Programá.** Corré las pruebas localmente antes de subir nada — si fallan acá, van a fallar en
 el CI y te van a bloquear el merge.
@@ -234,10 +342,13 @@ git push -u origin feature/descripcion-corta
 **5. Abrí el Pull Request:**
 
 ```bash
-gh pr create --title "T-09 · Descripción de la tarjeta" --body "Qué hace y cómo lo probaste"
+gh pr create --title "T-09 · Descripción de la tarea" --body "Qué hace y cómo lo probaste. Closes #33"
 ```
 
-Poné el código de la tarjeta (`T-09`) en el título. Movela a "En revisión (PR)" en Trello.
+Poné el código de la tarea (`T-09`) en el título, y **`Closes #33` en la descripción**, con el
+número del Issue. Eso hace que el Issue se cierre solo al mergear y quede enlazado al código que
+lo resolvió — no hay que acordarse de moverlo a mano, que es justamente lo que se nos olvidaba
+con el tablero.
 
 **6. Esperá el CI y la aprobación.** Para ver cómo va el pipeline:
 
@@ -262,7 +373,8 @@ git pull origin main
 git branch -d feature/descripcion-corta
 ```
 
-Movés la tarjeta a "Hecho" en Trello y arrancás con la siguiente.
+El Issue se cerró solo al mergear, gracias al `Closes #N` del Pull Request. Arrancás con el
+siguiente.
 
 ---
 
@@ -292,8 +404,8 @@ Abrí Claude Code **parado en la carpeta del repositorio** (`C:\dev\mimedidor`).
 
 No hace falta que le pegues nada más. Si querés arrancar rápido, un buen primer mensaje es:
 
-> Leé CLAUDE.md y docs/como-empezar.md. Voy a trabajar en la tarjeta T-XX de Trello: [pegá acá la
-> descripción de la tarjeta]. Creá la rama y ayudame a implementarla.
+> Leé CLAUDE.md y docs/como-empezar.md. Voy a trabajar en el Issue #NN. Leelo con
+> `gh issue view NN`, creá la rama y ayudame a implementarlo.
 
 Recordale que **no debe pushear a `main` ni aprobar PRs por vos** — la aprobación tiene que ser
 una persona real leyendo el código, porque eso es justo lo que evalúa el curso de Ingeniería de
@@ -317,7 +429,8 @@ Software II.
 ## 11. Enlaces
 
 - **Repositorio:** https://github.com/NieblaVidente/mimedidor
-- **Tablero de Trello:** https://trello.com/b/St9jsJir/mimedidor
+- **Tareas (Issues):** https://github.com/NieblaVidente/mimedidor/issues
+- **Tablero de Trello del Sprint 1** (congelado, solo lectura): https://trello.com/b/St9jsJir/mimedidor
 - **Contexto del proyecto:** [`CLAUDE.md`](../CLAUDE.md)
 - **Contrato de la API:** [`docs/architecture/contrato-api.md`](architecture/contrato-api.md)
 - **Registro de ceremonias:** [`docs/scrum/`](scrum/)

@@ -1,9 +1,9 @@
 # MiMedidor — Contexto del proyecto
 
 > **Este archivo es la fuente de verdad del proyecto.** Claude Code lo carga automáticamente al
-> abrir el repositorio. Si algo aquí contradice una tarjeta de Trello, **manda este archivo** —
-> varias tarjetas se escribieron antes de que se cerraran decisiones técnicas y quedaron
-> desactualizadas (ver §9).
+> abrir el repositorio. Si algo aquí contradice un Issue o una tarjeta vieja de Trello, **manda
+> este archivo** — varias tarjetas del Sprint 1 se escribieron antes de que se cerraran
+> decisiones técnicas y quedaron desactualizadas (ver §9).
 >
 > Se actualiza como cualquier otro archivo: rama, PR y aprobación. No lo edites directo en `main`.
 
@@ -57,15 +57,15 @@ profesores evalúan este mismo proyecto desde la perspectiva de su materia (ver 
 
 | Capa | Tecnología | Notas |
 |---|---|---|
-| Cliente | **Vite + React + TypeScript**, `vite-plugin-pwa` | Cámara vía `getUserMedia` |
+| Cliente | **Vite + React + TypeScript** | Cámara vía `getUserMedia`. ⚠️ **La PWA todavía no está armada** — ver §13.5 |
 | Backend | **Python + FastAPI + Uvicorn** | El procesamiento de imagen vive en el mismo proceso |
-| Visión por computadora | **OpenCV** (`opencv-python`) para preprocesamiento (T-09/T-10) | |
+| Visión por computadora | **OpenCV** (`opencv-python-headless`) para preprocesamiento (T-09/T-10) | La variante `headless` no trae dependencias de interfaz gráfica: el servidor y el runner de CI procesan arreglos, no muestran ventanas |
 | Reconocimiento de dígitos (OCR) | **Tesseract**, vía `pytesseract` | Decidido en T-02b — ver justificación abajo |
 | Base de datos | **PostgreSQL** | Acceso con `psycopg` (v3), **SQL plano, sin ORM** |
 | Pruebas unitarias | `pytest` (server) · Vitest (client) | |
-| Pruebas end-to-end | Cypress | Sprint 2 (P-08) |
+| Pruebas end-to-end | Cypress | Implementadas en T-22. Corren el hilo completo contra el backend real en cada PR |
 | Análisis estático | `ruff` (server) · ESLint (client) | |
-| CI/CD | GitHub Actions | Dos jobs paralelos: `client` y `server` |
+| CI/CD | GitHub Actions | Cuatro jobs paralelos: `client`, `server`, `database` y `e2e`. Los cuatro son obligatorios para mergear. ⚠️ **Todavía no hay entrega continua** — ver §13.7 |
 
 ### Por qué estas decisiones
 
@@ -120,9 +120,8 @@ Los tres tienen que correr las mismas versiones que el CI. Anotarlas aquí apena
 mimedidor/
 ├── CLAUDE.md            # Este archivo — contexto para el equipo y para Claude Code
 ├── README.md            # Presentación pública del proyecto
-├── client/              # PWA (Vite + React + TS)
-│   ├── src/
-│   └── tests/
+├── client/              # Aplicación web (Vite + React + TS)
+│   └── src/             # Las pruebas viven junto al código: Pantalla.tsx y Pantalla.test.tsx
 ├── server/              # API FastAPI + procesamiento de imagen
 │   ├── app/
 │   │   ├── api/         # Routers / endpoints
@@ -133,8 +132,11 @@ mimedidor/
 │   ├── scripts/         # Creación de esquema, tablas, roles, permisos, procedimientos
 │   └── migrations/      # Cambios incrementales, numerados y en orden
 ├── docs/
-│   ├── architecture/    # Diagramas, modelo entidad-relación, decisiones
-│   └── scrum/           # Registro de ceremonias, tarjetas, retrospectivas
+│   ├── architecture/    # Diagrama de arquitectura, modelo entidad-relación, contrato de la API
+│   ├── dataset-campo/   # Registro de los medidores fotografiados (T-07/T-08)
+│   ├── evidencia/       # Capturas que prueban configuración que no vive en el código
+│   ├── scrum/           # Registro de ceremonias y respaldo del tablero del Sprint 1
+│   └── deuda-tecnica.md # Atajos tomados a propósito, con qué haría falta para cerrarlos
 └── .github/workflows/   # Pipelines de CI
 ```
 
@@ -188,7 +190,7 @@ Equivalencias que usamos y que hay que documentar en la entrega:
 | `THROW` | `RAISE EXCEPTION 'mensaje'` |
 | `XACT_ABORT` | No existe y **no hace falta**: PostgreSQL aborta la transacción completa por defecto ante cualquier error no capturado |
 
-**No escribas T-SQL.** Si una tarjeta de Trello dice `XACT_ABORT`, la tarjeta está desactualizada
+**No escribas T-SQL.** Si una tarjeta vieja del Sprint 1 dice `XACT_ABORT`, está desactualizada
 (ver §9).
 
 Entidades mínimas del modelo (T-12): `usuario`, `vivienda`, `medidor`, `lectura`, `factura`.
@@ -250,22 +252,42 @@ contradicen documentos escritos que circulan.
 
 ---
 
-## 9. Tarjetas de Trello desactualizadas
+## 9. Dónde vive el trabajo: GitHub Issues
 
-El tablero se escribió antes de que se cerraran T-01 y T-02. Estas tarjetas contienen información
-que ya no aplica. **Cuando la tarjeta y este archivo se contradigan, manda este archivo.**
+**Desde el Sprint 2, las tareas son Issues de este repositorio.** Trello quedó como archivo de
+solo lectura del Sprint 1.
 
-| Tarjeta | Qué dice mal | Qué vale |
-|---|---|---|
-| T-01 | Presenta PWA vs. nativo como decisión abierta | **Cerrada: PWA.** Ver §3 |
-| T-02 | "Confirmar con el profesor que el motor es SQL Server" | **Cerrada: PostgreSQL.** La parte de OCR sigue abierta en T-02b |
-| T-05 | "el linter del lenguaje elegido" | `ruff` y ESLint, dos jobs. Ver §3 |
-| T-13 | Vocabulario de SQL Server para usuarios y roles | En Postgres el usuario es un rol con `LOGIN` |
-| T-14 | `TRY...CATCH` y `XACT_ABORT` | PL/pgSQL. Ver la tabla de §6 |
-| T-15 / T-16 | No nombran tecnología concreta | FastAPI y React. Ver §3 |
+Por qué se cambió: tener las tareas en el mismo lugar que el código permite que un Pull Request
+cierre su tarea sola (`Closes #31`), que cada tarea enlace a los commits que la resolvieron, y que
+no haya que mantener dos tableros sincronizados a mano — algo que en el Sprint 1 costó varias
+correcciones.
 
-Los textos corregidos y listos para pegar están en
-[`docs/scrum/sprint-1-tarjetas.md`](docs/scrum/sprint-1-tarjetas.md).
+Cómo están organizados los Issues:
+
+| Etiqueta | Para qué |
+|---|---|
+| `área: …` | Dónde vive el trabajo: cliente, servidor, base de datos, infraestructura, documentación |
+| `rúbrica: …` | Qué curso lo evalúa. Sirve para mostrarle a cada profesor su parte |
+| `tipo: …` | `feature`, `doc` o `campo` |
+| `puntos: …` | Estimación, misma escala del Sprint 1 |
+
+El **milestone** agrupa lo que entra en cada entrega (`Semana 10 — Segundo avance`).
+
+### El historial del Sprint 1
+
+No se migró a Issues **a propósito**: recrear a mano 21 tarjetas ya cerradas les habría puesto
+fecha de hoy, y eso daría a entender que todo el Sprint 1 se hizo en un día. Un registro falso es
+peor que no tenerlo, sobre todo con la Defensa Técnica Individual de por medio.
+
+El historial vive en dos lugares, los dos válidos como evidencia:
+
+- El tablero de Trello, congelado.
+- [`docs/scrum/sprint-1-tarjetas.md`](docs/scrum/sprint-1-tarjetas.md), que es el respaldo
+  versionado en git del contenido de esas tarjetas.
+
+Ese archivo también documenta qué tarjetas del Sprint 1 quedaron desactualizadas frente a las
+decisiones técnicas que se cerraron después (T-01, T-02, T-05, T-13, T-14, T-15/T-16). Si alguna
+vez lo consultás: **cuando una tarjeta vieja y este archivo se contradigan, manda este archivo.**
 
 ---
 
@@ -281,25 +303,29 @@ feature/descripcion-corta    → funcionalidad nueva
 bugfix/descripcion-corta     → corrección de errores
 ```
 
-Una rama por tarjeta de Trello. Mencioná el código de la tarjeta en el título del PR:
+Una rama por Issue. Mencioná el código de la tarea en el título del PR:
 `T-09 · Corrección de perspectiva de la carátula`.
+
+**Escribí `Closes #N` en la descripción del PR**, con el número del Issue. Así el Issue se cierra
+solo al mergear y queda enlazado al código que lo resolvió — que es medio punto de haberse pasado
+a Issues.
 
 PRs chicos. Un PR de 800 líneas no lo revisa nadie de verdad, y la aprobación se vuelve un trámite
 que el profesor va a notar.
 
 ### Definition of Done
 
-Una tarjeta está Hecha cuando:
+Un Issue está Hecho cuando:
 
 1. El código está en una rama `feature/` o `bugfix/`.
-2. Se abrió un Pull Request hacia `main`.
+2. Se abrió un Pull Request hacia `main`, con `Closes #N`.
 3. Al menos otro integrante aprobó el PR.
 4. Los checks de CI pasaron en verde.
 5. El PR fue mergeado a `main`.
 6. La documentación asociada quedó actualizada si aplica.
-7. Los criterios de aceptación de la tarjeta se cumplen y fueron verificados.
+7. Los criterios de aceptación del Issue se cumplen y fueron verificados.
 
-Para tarjetas de tipo `spike`, `campo` o `doc` que no producen código, aplican solo 6 y 7.
+Para Issues de tipo `doc` o `campo` que no producen código, aplican solo 6 y 7.
 
 ### Ceremonias
 
@@ -346,8 +372,8 @@ log, no al cliente.
 
 Si estás asistiendo a un integrante de este equipo:
 
-1. **Leé la tarjeta de Trello antes de escribir código**, y contrastala con §9 — puede estar
-   desactualizada.
+1. **Leé el Issue antes de escribir código** (`gh issue view N`), y contrastalo con §3 y §8: las
+   decisiones técnicas ya cerradas mandan sobre lo que diga el Issue.
 2. **Respetá el stack de §3.** No propongas cambiar de framework, agregar un ORM, meter Docker ni
    introducir un servicio nuevo. Esas decisiones ya se tomaron y tienen razones anotadas.
 3. **Nunca hagas commit ni push a `main`.** Creá una rama `feature/` o `bugfix/`.
@@ -365,11 +391,39 @@ Si estás asistiendo a un integrante de este equipo:
 
 ## 13. Riesgos abiertos
 
+> **Los riesgos cerrados no se borran ni se renumeran: se marcan.** Otras secciones de este archivo
+> referencian riesgos por número (§13.5, §13.7); renumerar los rompe. Además, dejar el registro de
+> qué se identificó y qué lo cerró es evidencia, y borrarlo la pierde.
+
 1. **Rúbrica de Señales y Sistemas sin publicar.** Es el eslabón más débil hasta que se confirme.
 2. **Fragmentación del parque de medidores.** El alcance del MVP depende de qué tan concentrada
    salga la muestra de marcas en el dataset de campo. Criterio ya definido: si una marca aparece en
    ≥ 60 % de la muestra, el MVP se acota a ella.
 3. **Carga simultánea de infraestructura y funcionalidad** en un sprint de 10 días, con tres
    personas que además llevan 4 proyectos de C++ de Sistemas Operativos.
-4. **Cypress con PWA no está confirmado por escrito** con el profesor de ISW2. No debería haber
-   objeción, pero conviene tenerlo por escrito antes del Sprint 2 (P-08).
+4. **Cypress con PWA no está confirmado por escrito** con el profesor de ISW2. Sigue abierto, pero
+   cambió de forma: desde T-22 Cypress funciona y corre en CI, así que la parte de «¿sirve
+   Cypress?» está respondida. Lo que no está probado es la combinación, porque el cliente todavía
+   no es una PWA (§13.5): cuando se agreguen manifest y service worker hay que volver a correr la
+   prueba end-to-end y confirmar que el service worker no interfiere. Conviene tenerlo por escrito
+   antes de la semana 10, no después.
+
+Los tres siguientes salieron de dibujar el diagrama de arquitectura (T-19): son diferencias reales
+entre lo que este archivo declaraba y lo que hay en el repositorio.
+
+5. **La PWA todavía no está armada.** `vite-plugin-pwa` no está instalado y el build no genera
+   manifest ni service worker. Hoy el cliente es una aplicación de una sola página normal. Ser una
+   PWA sigue siendo el objetivo del producto (§1) y la decisión sobre nativo (T-01) sigue en pie —
+   el trabajo pendiente es acotado. Lo que no se vale mientras tanto es **describirla como si ya
+   lo fuera** en un documento de entrega.
+6. ✅ **CERRADO — Cliente y servidor nunca se han ejecutado juntos.** Cerrado en T-21 (#31, PR #28,
+   commit `575680a`, 2026-08-25). El proxy vive en `client/vite.config.ts:17` y reenvía `/api` a
+   `http://localhost:8000`; desde T-22 (#32, PR #50) la prueba end-to-end corre el hilo completo
+   contra el backend real en cada PR, así que el riesgo no puede volver en silencio.
+
+   **Lo que dejó de lección:** al conectarlos aparecieron dos errores que ninguna prueba veía,
+   porque cada capa se probaba contra una sustitución de la otra. De ahí salió la acción de la
+   retrospectiva de que toda funcionalidad que toque base de datos o HTTP lleve al menos una prueba
+   contra la cosa real.
+7. **No hay entrega continua.** El pipeline valida cada Pull Request pero no despliega a ningún
+   ambiente, y la rúbrica de Ingeniería de Software II la pide explícitamente (§7).

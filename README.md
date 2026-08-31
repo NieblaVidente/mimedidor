@@ -25,18 +25,18 @@ Universidad Invenio · Carrera de Tecnología de la Información y Comunicación
 
 | Capa | Tecnología | Justificación |
 |---|---|---|
-| Cliente | PWA con Vite + React + TypeScript | Instalable sin tienda de aplicaciones; compatible con pruebas end-to-end estándar (Cypress); reversible a nativo si el proyecto continúa. |
+| Cliente | Vite + React + TypeScript | Instalable sin tienda de aplicaciones; compatible con pruebas end-to-end estándar (Cypress); reversible a nativo si el proyecto continúa. **La PWA en sí (manifest y service worker) todavía no está armada** — ver `CLAUDE.md` §13.5. |
 | Backend | Python + FastAPI + Uvicorn | Permite ejecutar el procesamiento de imagen en el mismo proceso, sin un servicio adicional. |
-| Procesamiento de imagen | OpenCV + librería OCR *(a confirmar en T-02b)* | Corrección de perspectiva, segmentación y reconocimiento de dígitos. |
+| Procesamiento de imagen | OpenCV + Tesseract (vía `pytesseract`) | Corrección de perspectiva, segmentación y reconocimiento de dígitos. La librería de OCR quedó decidida en T-02b. |
 | Base de datos | PostgreSQL | Motor relacional, autorizado por el profesor de Base de Datos. Ver `/database/README.md` para la equivalencia de mecanismos de control de errores respecto a la rúbrica. |
-| CI/CD | GitHub Actions | Pipeline de integración y entrega continuas. |
+| CI/CD | GitHub Actions | Integración continua con tres jobs (cliente, servidor y base de datos) en cada Pull Request. **La entrega continua todavía no está** — ver `CLAUDE.md` §13.7. |
 
 ## Estructura del repositorio
 
 ```
 mimedidor/
 ├── CLAUDE.md            # Contexto del proyecto — leer antes de trabajar
-├── client/              # Aplicación PWA
+├── client/              # Aplicación web (Vite + React + TS)
 ├── server/              # API backend y procesamiento de imagen
 ├── database/
 │   ├── scripts/         # Creación de esquema, roles, permisos
@@ -77,7 +77,11 @@ Detalle completo en [`docs/definition-of-done.md`](docs/definition-of-done.md).
 
 ## Metodología
 
-El desarrollo se gestiona bajo Scrum, con sprints registrados en el tablero de Trello del equipo y ceremonias documentadas en [`docs/scrum/`](docs/scrum/).
+El desarrollo se gestiona bajo Scrum. Las tareas son [Issues de este repositorio](../../issues), agrupadas por *milestone* según la entrega a la que pertenecen, y etiquetadas por área, tipo, estimación en puntos y rúbrica del curso que las evalúa.
+
+Las ceremonias se registran en [`docs/scrum/`](docs/scrum/).
+
+El Sprint 1 se gestionó en Trello; ese tablero quedó congelado como archivo y su contenido está respaldado en [`docs/scrum/sprint-1-tarjetas.md`](docs/scrum/sprint-1-tarjetas.md). El historial no se migró a Issues a propósito — ver `CLAUDE.md` §9.
 
 ## Cómo ejecutar el proyecto
 

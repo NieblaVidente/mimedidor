@@ -154,7 +154,11 @@ def crear_lectura(entrada: LecturaEntrada, conexion=Depends(obtener_conexion)) -
     except Exception as error:
         mensaje = str(error)
         if "LECTURA_INVALIDA" in mensaje:
-            detalle = mensaje.split("LECTURA_INVALIDA:", 1)[-1].strip()
+            # Solo la primera línea. psycopg adjunta al mensaje el bloque CONTEXT de PostgreSQL,
+            # que trae el nombre del procedimiento PL/pgSQL, su firma completa y el número de
+            # línea donde se lanzó — detalles del motor que no pueden salir hacia el cliente
+            # (CLAUDE.md §11). El detalle completo igual queda en el log del servidor.
+            detalle = mensaje.split("LECTURA_INVALIDA:", 1)[-1].splitlines()[0].strip()
             raise ErrorAPI("LECTURA_INVALIDA", detalle, 422) from error
         raise
 

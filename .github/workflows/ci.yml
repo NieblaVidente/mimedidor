@@ -96,3 +96,130 @@ jobs:
           PGPASSWORD='clave-de-prueba-ci' psql -U mimedidor_app -h localhost -d mimedidor \
             -v ON_ERROR_STOP=1 \
             -f verificar_registrar_lectura.sql
+
+      - name: Fijar contraseña del superusuario (solo para que los scripts de T-29 se conecten por TCP)
+        run: sudo -u postgres psql -c "ALTER USER postgres PASSWORD 'clave-superusuario-ci';"
+
+      - name: "Verificar respaldo y restauración (T-29: respalda, restaura y compara los datos)"
+        run: |
+          chmod +x respaldar.sh restaurar.sh verificar_restauracion.sh
+          PGPASSWORD='clave-superusuario-ci' ./verificar_restauracion.sh mimedidor localhost 5432 postgres
+
+      # Los pasos de abajo corren el código Python de acceso a datos contra esta misma base real.
+      # Van acá y no en el job `server` a propósito: ese job no tiene PostgreSQL, y estas pruebas
+      # existen justamente para cubrir lo que las pruebas con conexión falsa no pueden ver — la
+      # frontera entre Python y SQL. Ver el docstring de server/tests/test_integracion_db.py.
+      - uses: actions/setup-python@v5
+        with:
+          python-version-file: server/.python-version
+          cache: pip
+          cache-dependency-path: server/requirements-dev.txt
+
+      - name: Instalar dependencias del servidor
+        working-directory: server
+        run: pip install -r requirements-dev.txt
+
+      - name: "Pruebas de integración contra la base real (T-21)"
+        working-directory: server
+        env:
+          PGHOST: localhost
+          PGDATABASE: mimedidor
+          PGUSER: mimedidor_app
+          PGPASSWORD: clave-de-prueba-ci
+        run: pytest tests/test_integracion_db.py -v
+
+  e2e:
+    name: End-to-end (Cypress)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # --- Base de datos ---------------------------------------------------------------------
+      # Igual que el job `database`: PostgreSQL nativo, sin contenedores (CLAUDE.md §8).
+      - name: Instalar y arrancar PostgreSQL 16
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-16 postgresql-client-16
+          sudo systemctl enable --now postgresql
+          until pg_isready -q -h localhost; do sleep 1; done
+
+      - name: Crear la base y aplicar el esquema
+        working-directory: database/scripts
+        run: |
+          sudo -u postgres createdb mimedidor
+          sudo -u postgres psql -d mimedidor \
+            -v ON_ERROR_STOP=1 \
+            -v password_app='clave-de-prueba-ci' \
+            -v password_lectura='clave-de-prueba-ci' \
+            -f ejecutar_todo.sql
+
+      # El hilo empieza registrando una lectura sobre un medidor que ya exista: el contrato de la
+      # API no expone ninguna ruta para crearlos. Este script siembra uno, más una lectura de
+      # hace 5 días para que haya un período real que medir.
+      - name: Sembrar los datos de prueba
+        working-directory: database/scripts
+        run: sudo -u postgres psql -d mimedidor -v ON_ERROR_STOP=1 -f datos_de_prueba.sql
+
+      # --- Servidor --------------------------------------------------------------------------
+      - uses: actions/setup-python@v5
+        with:
+          python-version-file: server/.python-version
+          cache: pip
+          cache-dependency-path: server/requirements-dev.txt
+
+      - name: Instalar Tesseract y las dependencias del servidor
+        working-directory: server
+        run: |
+          sudo apt-get install -y tesseract-ocr
+          pip install -r requirements-dev.txt
+
+      - name: Levantar la API
+        working-directory: server
+        env:
+          PGHOST: localhost
+          PGDATABASE: mimedidor
+          PGUSER: mimedidor_app
+          PGPASSWORD: clave-de-prueba-ci
+        run: nohup uvicorn app.main:app --port 8000 > /tmp/api.log 2>&1 &
+
+      # --- Cliente ---------------------------------------------------------------------------
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: client/.nvmrc
+          cache: npm
+          cache-dependency-path: client/package-lock.json
+
+      - name: Instalar las dependencias del cliente
+        working-directory: client
+        run: npm ci
+
+      # El binario de Cypress se baja en un script de postinstalación, y hay entornos que los
+      # bloquean por defecto. Si ya está, este paso no hace nada.
+      - name: Asegurar el binario de Cypress
+        working-directory: client
+        run: npx cypress install
+
+      - name: Levantar el cliente
+        working-directory: client
+        run: nohup npm run dev > /tmp/cliente.log 2>&1 &
+
+      - name: Esperar a que los dos respondan
+        run: |
+          until curl -sf http://localhost:8000/api/salud > /dev/null; do sleep 1; done
+          until curl -sf http://localhost:5173/ > /dev/null; do sleep 1; done
+          # Que el proxy del cliente llegue a la API es la premisa de toda la prueba (T-21).
+          curl -sf http://localhost:5173/api/salud | grep -q '"estado":"ok"'
+
+      # --- La prueba -------------------------------------------------------------------------
+      # Chrome y no Electron: viene preinstalado en el runner y evita las dependencias de sistema
+      # que pide Electron. Tiene que ser un navegador Chromium — la prueba necesita la cámara
+      # falsa que se configura en cypress.config.ts, y Firefox no la tiene.
+      - name: Correr la prueba end-to-end
+        working-directory: client
+        run: npx cypress run --browser chrome
+
+      - name: Logs del servidor y del cliente si algo falló
+        if: failure()
+        run: |
+          echo "===== API ====="; cat /tmp/api.log || true
+          echo "===== CLIENTE ====="; cat /tmp/cliente.log || true
