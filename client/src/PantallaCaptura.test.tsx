@@ -18,7 +18,8 @@ vi.mock('./api/lecturas', async () => {
 })
 
 import { abrirCamara, capturarFotograma } from './camara'
-import { ErrorApiLecturas, guardarLectura, reconocerFoto } from './api/lecturas'
+import { guardarLectura, reconocerFoto } from './api/lecturas'
+import { ErrorApi } from './api/errores'
 import PantallaCaptura from './PantallaCaptura'
 
 const streamFalso = { getTracks: () => [{ stop: vi.fn() }] } as unknown as MediaStream
@@ -73,7 +74,7 @@ describe('PantallaCaptura', () => {
   it('deja corregir la lectura a mano cuando el reconocimiento falla', async () => {
     const usuario = userEvent.setup()
     vi.mocked(reconocerFoto).mockRejectedValue(
-      new ErrorApiLecturas('IMAGEN_ILEGIBLE', 'No se pudo leer'),
+      new ErrorApi('IMAGEN_ILEGIBLE', 'No se pudo leer'),
     )
     vi.mocked(guardarLectura).mockResolvedValue({
       ...LECTURA_GUARDADA_BASE,
@@ -128,7 +129,7 @@ describe('PantallaCaptura', () => {
     const usuario = userEvent.setup()
     vi.mocked(reconocerFoto).mockResolvedValue({ lectura_reconocida: 1284, confianza: null })
     vi.mocked(guardarLectura).mockRejectedValue(
-      new ErrorApiLecturas('LECTURA_INVALIDA', 'El valor es menor que la última lectura'),
+      new ErrorApi('LECTURA_INVALIDA', 'El valor es menor que la última lectura'),
     )
 
     await avanzarHastaCamara(usuario)

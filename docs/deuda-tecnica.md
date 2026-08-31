@@ -70,23 +70,23 @@ o corregir el documento."*
 
 ---
 
-## T-16 / T-17 / T-18 · Clase de error duplicada en el cliente
+## ✅ CERRADO — T-16 / T-17 / T-18 · Clase de error duplicada en el cliente
 
-**Qué se hizo.** `client/src/api/lecturas.ts` y `client/src/api/facturas.ts` declaran cada uno su
-propia clase de error (`ErrorApiLecturas` y `ErrorApiFacturas`) y su propia función `lanzarError`,
-que son idénticas salvo el nombre.
+**Qué se hizo (cuando se registró la deuda).** `client/src/api/lecturas.ts` y
+`client/src/api/facturas.ts` declaraban cada uno su propia clase de error (`ErrorApiLecturas` y
+`ErrorApiFacturas`) y su propia función `lanzarError`, idénticas salvo el nombre.
 
 **Por qué pasó.** Las ramas de T-16, T-17 y T-18 salieron de `main` por separado, antes de que
 ninguna de las anteriores estuviera mergeada, porque los compañeros todavía no habían revisado
 nada. Se prefirió duplicar unas pocas líneas antes que encadenar los Pull Requests entre sí, que
 habría hecho que aprobar uno arrastrara código no revisado de los otros.
 
-**Por qué es deuda.** Dos clases que hacen lo mismo se desincronizan: si mañana el contrato agrega
+**Por qué era deuda.** Dos clases que hacen lo mismo se desincronizan: si mañana el contrato agrega
 un campo al cuerpo de error, hay que acordarse de tocar los dos archivos.
 
-**Qué haría falta para cerrarla.** Extraer la clase y `lanzarError` a un `client/src/api/errores.ts`
-compartido, y que los dos módulos lo importen. Ahora que las tres ramas están en `main`, el cambio
-es directo y no tiene conflictos.
-
-**Tarjeta de seguimiento.** Anotado para crear en el Sprint 2: *"Unificar el manejo de errores del
-cliente en `api/errores.ts`."*
+**Cómo se cerró.** T-33 (#43): se extrajo una única clase `ErrorApi` y `lanzarError` a
+`client/src/api/errores.ts`. `lecturas.ts` y `facturas.ts` la importan desde ahí en vez de
+declararla cada uno, y `PantallaCaptura.tsx`, `PantallaHistorial.tsx` y `PantallaFactura.tsx`
+(con sus pruebas) importan `ErrorApi` directo de `./api/errores` en lugar de los dos nombres
+duplicados que exportaban antes `lecturas.ts`/`facturas.ts`. Las pruebas del cliente (`npm run
+test`), el linter (`npm run lint`) y el build (`npm run build`) siguen en verde.

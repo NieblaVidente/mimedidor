@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { abrirCamara, capturarFotograma, detenerCamara } from './camara'
-import { ErrorApiLecturas, guardarLectura, reconocerFoto, type LecturaGuardada } from './api/lecturas'
+import { guardarLectura, reconocerFoto, type LecturaGuardada } from './api/lecturas'
+import { ErrorApi } from './api/errores'
 
 type Estado = 'inicio' | 'camara' | 'reconociendo' | 'revisando' | 'guardando' | 'guardado'
 
@@ -73,7 +74,7 @@ function PantallaCaptura() {
       setValorTexto('')
       setOrigen('manual')
       setMensajeError(
-        error instanceof ErrorApiLecturas
+        error instanceof ErrorApi
           ? 'No se pudo leer la lectura automáticamente. Escribila a mano.'
           : 'Ocurrió un error inesperado al reconocer la foto. Podés escribir la lectura a mano.',
       )
@@ -106,7 +107,7 @@ function PantallaCaptura() {
       setEstado('guardado')
     } catch (error) {
       setMensajeError(
-        error instanceof ErrorApiLecturas ? error.message : 'No se pudo guardar la lectura.',
+        error instanceof ErrorApi ? error.message : 'No se pudo guardar la lectura.',
       )
       setEstado('revisando')
     }
