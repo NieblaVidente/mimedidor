@@ -27,6 +27,10 @@ env/
 *.jpeg
 *.png
 !docs/**/*.png
+# Los iconos de la aplicación son código, no fotos de campo: sin ellos el manifest de la PWA
+# apunta a archivos que no existen y el navegador deja de ofrecer la instalación, sin que
+# nada falle de forma visible.
+!client/public/*.png
 !docs/**/*.jpg
 
 # --- Base de datos ---
