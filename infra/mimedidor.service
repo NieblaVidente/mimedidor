@@ -1,0 +1,31 @@
+# systemd — proceso de la API. Destino: /etc/systemd/system/mimedidor.service
+
+[Unit]
+Description=MiMedidor — API y visión por computadora
+After=network.target postgresql.service
+Wants=postgresql.service
+
+[Service]
+Type=exec
+User=mimedidor
+Group=mimedidor
+WorkingDirectory=/opt/mimedidor/servidor
+
+# Las credenciales viven fuera del directorio que sincroniza el despliegue, para que
+# `rsync --delete` no las borre y para que nunca entren al repositorio.
+EnvironmentFile=/etc/mimedidor.env
+
+# Escucha solo en loopback: se llega por nginx, nunca directo desde afuera.
+ExecStart=/opt/mimedidor/venv/bin/uvicorn app.main:app --host 127.0.0.1 --port 8000
+
+Restart=on-failure
+RestartSec=5
+
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/mimedidor
+
+[Install]
+WantedBy=multi-user.target
