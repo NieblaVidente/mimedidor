@@ -29,14 +29,15 @@ el código como red de seguridad, no como el camino verificado.
    de 2 fotos casi idénticas del mismo medidor, no sobre variedad real de ángulos/iluminación.
 
 **Qué haría falta para cerrarla.** Volver a correr `test_segmentar_ventana_funciona_sobre_salidas_reales_de_t09`
-a medida que crezca el dataset de T-07 (meta: 12 medidores), y si aparecen medidores de otra
+a medida que crezca el dataset de T-07 (meta vigente: **8 medidores**, revisada en el Sprint
+Planning del Sprint 2 desde los 12 originales), y si aparecen medidores de otra
 marca/modelo, confirmar que la franja de búsqueda sigue sirviendo o recalibrarla. Si el recorte de
 respaldo llega a activarse en la práctica con fotos reales, es señal de que la franja necesita
 ajustarse o de que hace falta un método menos dependiente de la posición (por ejemplo, detectar la
 ventana por su propio contraste sin acotar antes por posición).
 
 **Tarjeta de seguimiento.** Anotado para crear en el Sprint 2: *"Revalidar y, si hace falta,
-generalizar la detección de la ventana del odómetro contra el dataset completo de 12 medidores."*
+generalizar la detección de la ventana del odómetro contra el dataset completo."*
 
 ---
 
