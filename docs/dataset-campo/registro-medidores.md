@@ -36,9 +36,9 @@ confirmada" — no adivinar ni usar el nombre del operador como si fuera la marc
 
 | # | Código | Marca | Modelo | N.º serie | Lectura real | Fecha | Hora | Tomado por | Zona | Clima / condición | Tomas logradas (de 6) |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| 1 | Medidor1 | ARAD (confirmada) | — | — | 025888 m³ | 2026-07-31 | 10:00 | José Pablo | Casa de José Pablo | Oscuro/nublado | 1 — primer plano del odómetro |
-| 2 | Medidor2 | No confirmada (carátula dice "ASADA Tronadora", que es el operador, no el fabricante; etiqueta del cuerpo dice modelo `MJ-SDC`, serie `2423279`, no se ve fabricante) | MJ-SDC | 2423279 | 0051069 m³ | 2026-08-16 | 14:50 | Yariel | Casa de Yariel | Oscuro, minutos antes de llover — condición adversa | 2 — carátula frontal/ángulo natural (capturas 1 y 2, casi idénticas) + contexto (captura 3) |
-| 3 | Medidor3 | ACTARIS (confirmada) | MULTIMAG | 255875 | Mostrada: `452991` · Volumen: **4529,91 m³** (ver nota) | 2026-08-17 | — | Isaac | No consta | Caja a ras de suelo, tierra suelta, sombra parcial; la captura2 se tomó con flash | 3 — carátula frontal (c2), ángulo natural (c1), contexto (c3 y c4) |
+| 1 | Medidor1 | ARAD (confirmada) | — | — | Mostrada: `025888` (1 rojo) · Volumen: **2588,8 m³** | 2026-07-31 | 10:00 | José Pablo | Casa de José Pablo | Oscuro/nublado | 1 — primer plano del odómetro |
+| 2 | Medidor2 | No confirmada (carátula dice "ASADA Tronadora", que es el operador, no el fabricante; etiqueta del cuerpo dice modelo `MJ-SDC`, serie `2423279`, no se ve fabricante) | MJ-SDC | 2423279 | Mostrada: `0051069` (2 rojos) · Volumen: **510,69 m³** | 2026-08-16 | 14:50 | Yariel | Casa de Yariel | Oscuro, minutos antes de llover — condición adversa | 2 — carátula frontal/ángulo natural (capturas 1 y 2, casi idénticas) + contexto (captura 3) |
+| 3 | Medidor3 | ACTARIS (confirmada) | MULTIMAG | 255875 | Mostrada: `452991` (2 rojos) · Volumen: **4529,91 m³** | 2026-08-17 | — | Isaac | No consta | Caja a ras de suelo, tierra suelta, sombra parcial; la captura2 se tomó con flash | 3 — carátula frontal (c2), ángulo natural (c1), contexto (c3 y c4) |
 
 **Total: 3 de 8 medidores** (meta revisada en el Planning del Sprint 2: 6 nuevos, 2 por
 integrante, sobre los 2 ya registrados). Ninguno con las 6 tomas completas todavía. Isaac lleva
@@ -66,14 +66,34 @@ un perfil doméstico.
 facturado, y la factura del operador viene en m³. Si se guarda la cadena mostrada como si fuera
 m³, la comparación —que es la función central de MiMedidor— queda desviada por un factor de 100.
 
-⚠️ **Pendiente de confirmar con quien tomó cada lectura:** Medidor1 (`025888`) y Medidor2
-(`0051069`) se registraron antes de esta distinción y no consta cuántos de sus dígitos eran rojos.
-Hasta confirmarlo, su columna de volumen queda sin llenar en vez de asumirse.
+### El hallazgo: la cantidad de dígitos rojos cambia según el medidor
+
+Confirmado con quienes tomaron cada lectura:
+
+| Medidor | Marca | Dígitos rojos | Mostrada | Volumen real | Factor |
+|---|---|---|---|---|---|
+| Medidor1 | ARAD | **1** | `025888` | 2588,8 m³ | ×10 |
+| Medidor2 | MJ-SDC | **2** | `0051069` | 510,69 m³ | ×100 |
+| Medidor3 | ACTARIS | **2** | `452991` | 4529,91 m³ | ×100 |
+
+**No es una constante del sistema: es una propiedad de cada medidor.** Con un solo modelo en el
+dataset se podía confundir con un desfase global y corregirlo con una división fija. Con tres
+modelos y dos escalas distintas queda claro que la posición del punto decimal tiene que viajar con
+el medidor, no con el código.
+
+Esto era una decisión aplazada a propósito, no un descuido. `server/app/vision/reconocimiento.py`
+lo dejó anotado en su propio docstring:
+
+> «Algunos odómetros marcan en rojo los últimos dígitos para indicar una fracción de m³; decidir
+> esa convención de punto decimal no es parte del alcance de T-11 (no hay todavía evidencia
+> suficiente de campo para fijarla) y queda para una tarjeta futura una vez que el dataset de
+> T-07/T-08 crezca.»
+
+**Esa condición ya se cumplió.** El dataset creció lo suficiente para fijar la convención, y
+además demostró que no puede ser única. Queda registrado en un Issue aparte.
 
 ## Pendiente
 
-- Confirmar cuántos dígitos rojos tienen Medidor1 y Medidor2, para poder llenar su columna de
-  volumen (ver la nota de arriba)
 - Completar las tomas que faltan de Medidor3 (ángulo inclinado, primer plano del odómetro,
   etiqueta del cuerpo) y anotar su zona, que no consta
 - Completar las tomas que faltan de Medidor1 (contexto, ángulo inclinado, etiqueta del cuerpo —
