@@ -38,11 +38,44 @@ confirmada" — no adivinar ni usar el nombre del operador como si fuera la marc
 |---|---|---|---|---|---|---|---|---|---|---|---|
 | 1 | Medidor1 | ARAD (confirmada) | — | — | 025888 m³ | 2026-07-31 | 10:00 | José Pablo | Casa de José Pablo | Oscuro/nublado | 1 — primer plano del odómetro |
 | 2 | Medidor2 | No confirmada (carátula dice "ASADA Tronadora", que es el operador, no el fabricante; etiqueta del cuerpo dice modelo `MJ-SDC`, serie `2423279`, no se ve fabricante) | MJ-SDC | 2423279 | 0051069 m³ | 2026-08-16 | 14:50 | Yariel | Casa de Yariel | Oscuro, minutos antes de llover — condición adversa | 2 — carátula frontal/ángulo natural (capturas 1 y 2, casi idénticas) + contexto (captura 3) |
+| 3 | Medidor3 | ACTARIS (confirmada) | MULTIMAG | 255875 | Mostrada: `452991` · Volumen: **4529,91 m³** (ver nota) | 2026-08-17 | — | Isaac | No consta | Caja a ras de suelo, tierra suelta, sombra parcial; la captura2 se tomó con flash | 3 — carátula frontal (c2), ángulo natural (c1), contexto (c3 y c4) |
 
-**Total: 2 de 12 medidores mínimos.** Ninguno con las 6 tomas completas todavía.
+**Total: 3 de 8 medidores** (meta revisada en el Planning del Sprint 2: 6 nuevos, 2 por
+integrante, sobre los 2 ya registrados). Ninguno con las 6 tomas completas todavía. Isaac lleva
+1 de sus 2.
+
+### ⚠️ Dos columnas de lectura, y por qué
+
+Desde Medidor3 se registran **dos valores distintos**, porque sirven a dos propósitos que no son
+el mismo:
+
+- **Mostrada** — la cadena de dígitos tal como aparece en el odómetro, sin punto decimal. Es la
+  verdad de referencia contra la que se mide el reconocimiento (T-32): el OCR tiene que reproducir
+  esos caracteres, no interpretarlos.
+- **Volumen** — el valor físico en m³, con los dígitos rojos tratados como decimales. Es el que
+  usa el producto para calcular consumo y contrastarlo contra la factura.
+
+En Medidor3 los dos últimos dígitos son **rojos**, y en un hidrómetro los rojos son la parte
+decimal. `452991` mostrado equivale a `4529,91 m³`.
+
+La verificación de sentido común lo respalda: 452 991 m³ acumulados serían del orden de 3 000 m³
+por mes, imposible en una casa; 4 529,91 m³ dan unos 30 m³ mensuales durante doce años, que sí es
+un perfil doméstico.
+
+**Esto importa más allá del registro.** El producto compara consumo medido contra consumo
+facturado, y la factura del operador viene en m³. Si se guarda la cadena mostrada como si fuera
+m³, la comparación —que es la función central de MiMedidor— queda desviada por un factor de 100.
+
+⚠️ **Pendiente de confirmar con quien tomó cada lectura:** Medidor1 (`025888`) y Medidor2
+(`0051069`) se registraron antes de esta distinción y no consta cuántos de sus dígitos eran rojos.
+Hasta confirmarlo, su columna de volumen queda sin llenar en vez de asumirse.
 
 ## Pendiente
 
+- Confirmar cuántos dígitos rojos tienen Medidor1 y Medidor2, para poder llenar su columna de
+  volumen (ver la nota de arriba)
+- Completar las tomas que faltan de Medidor3 (ángulo inclinado, primer plano del odómetro,
+  etiqueta del cuerpo) y anotar su zona, que no consta
 - Completar las tomas que faltan de Medidor1 (contexto, ángulo inclinado, etiqueta del cuerpo —
   esta última podría revelar la marca real de Medidor2 también, si se repite el modelo)
 - Seguir sumando medidores en cuanto el clima lo permita, repartiendo zonas entre los tres para no
