@@ -57,7 +57,7 @@ profesores evalúan este mismo proyecto desde la perspectiva de su materia (ver 
 
 | Capa | Tecnología | Notas |
 |---|---|---|
-| Cliente | **Vite + React + TypeScript** | Cámara vía `getUserMedia`. ⚠️ **La PWA todavía no está armada** — ver §13.5 |
+| Cliente | **Vite + React + TypeScript** | Cámara vía `getUserMedia`. PWA armada en T-31: `vite-plugin-pwa` genera manifest y trabajador de servicio en el build |
 | Backend | **Python + FastAPI + Uvicorn** | El procesamiento de imagen vive en el mismo proceso |
 | Visión por computadora | **OpenCV** (`opencv-python-headless`) para preprocesamiento (T-09/T-10) | La variante `headless` no trae dependencias de interfaz gráfica: el servidor y el runner de CI procesan arreglos, no muestran ventanas |
 | Reconocimiento de dígitos (OCR) | **Tesseract**, vía `pytesseract` | Decidido en T-02b — ver justificación abajo |
@@ -401,21 +401,27 @@ Si estás asistiendo a un integrante de este equipo:
    ≥ 60 % de la muestra, el MVP se acota a ella.
 3. **Carga simultánea de infraestructura y funcionalidad** en un sprint de 10 días, con tres
    personas que además llevan 4 proyectos de C++ de Sistemas Operativos.
-4. **Cypress con PWA no está confirmado por escrito** con el profesor de ISW2. Sigue abierto, pero
-   cambió de forma: desde T-22 Cypress funciona y corre en CI, así que la parte de «¿sirve
-   Cypress?» está respondida. Lo que no está probado es la combinación, porque el cliente todavía
-   no es una PWA (§13.5): cuando se agreguen manifest y service worker hay que volver a correr la
-   prueba end-to-end y confirmar que el service worker no interfiere. Conviene tenerlo por escrito
-   antes de la semana 10, no después.
+4. **La prueba end-to-end no cubre el camino con trabajador de servicio.** Cypress corre contra
+   `npm run dev` (ver `client/cypress.config.ts`, que apunta al 5173), y T-31 dejó el trabajador
+   de servicio **desactivado en desarrollo** a propósito: uno cacheando durante `vite dev` esconde
+   los cambios que uno acaba de hacer. La consecuencia es que la combinación Cypress + PWA no está
+   probada — **no se rompió, simplemente no se ejercita**. En producción el trabajador de servicio
+   sí está activo, así que ese camino hoy no tiene cobertura automatizada. Cerrarlo implica correr
+   Cypress contra `vite preview` en un job aparte, y eso no entró en el alcance de T-31.
 
 Los tres siguientes salieron de dibujar el diagrama de arquitectura (T-19): son diferencias reales
 entre lo que este archivo declaraba y lo que hay en el repositorio.
 
-5. **La PWA todavía no está armada.** `vite-plugin-pwa` no está instalado y el build no genera
-   manifest ni service worker. Hoy el cliente es una aplicación de una sola página normal. Ser una
-   PWA sigue siendo el objetivo del producto (§1) y la decisión sobre nativo (T-01) sigue en pie —
-   el trabajo pendiente es acotado. Lo que no se vale mientras tanto es **describirla como si ya
-   lo fuera** en un documento de entrega.
+5. ✅ **CERRADO — La PWA todavía no está armada.** Cerrado en T-31 (#41). El build genera
+   `manifest.webmanifest`, `sw.js` y los iconos PNG de 192 y 512 px; `registerSW.js` queda
+   inyectado en el `index.html`. Con eso la justificación de la decisión T-01 —web sobre nativo,
+   porque «se instala desde el navegador sin pasar por una tienda»— deja de estar a medias.
+
+   **Lo que el trabajador de servicio hace y lo que no:** guarda los archivos del build para que
+   la aplicación abra rápido y sobreviva a una conexión intermitente. **No cachea `/api`**, a
+   propósito: una lectura o un historial servidos desde caché serían datos viejos presentados como
+   actuales, que es exactamente lo que este producto no puede hacer. El funcionamiento sin
+   conexión —guardar una lectura tomada sin señal y sincronizarla después— sigue sin existir.
 6. ✅ **CERRADO — Cliente y servidor nunca se han ejecutado juntos.** Cerrado en T-21 (#31, PR #28,
    commit `575680a`, 2026-08-25). El proxy vive en `client/vite.config.ts:17` y reenvía `/api` a
    `http://localhost:8000`; desde T-22 (#32, PR #50) la prueba end-to-end corre el hilo completo

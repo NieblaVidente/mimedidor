@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512"
+     font-family="Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif">
+  <title>MiMedidor</title>
+
+  <!-- Fondo a sangre completa: los iconos "maskable" se recortan en círculo o en
+       cuadrado redondeado según el sistema, así que no puede haber transparencia. -->
+  <rect width="512" height="512" fill="#1B4E80"/>
+
+  <!-- Carátula del hidrómetro. Todo el contenido vive dentro del 80 % central,
+       que es la zona segura que ningún recorte del sistema llega a comer. -->
+  <circle cx="256" cy="256" r="150" fill="#FFFFFF"/>
+  <circle cx="256" cy="256" r="150" fill="none" stroke="#2F6FB5" stroke-width="10"/>
+
+  <!-- Ventana del odómetro, que es lo que la aplicación fotografía y lee. -->
+  <rect x="146" y="212" width="220" height="76" rx="10" fill="#12263F"/>
+  <text x="238" y="270" font-size="52" font-weight="700" fill="#FFFFFF"
+        text-anchor="middle" letter-spacing="4">045</text>
+  <!-- Los últimos dígitos van en rojo, igual que en un hidrómetro real: son la
+       fracción de metro cúbico. -->
+  <rect x="292" y="216" width="70" height="68" rx="6" fill="#C0392B"/>
+  <text x="327" y="270" font-size="52" font-weight="700" fill="#FFFFFF"
+        text-anchor="middle" letter-spacing="4">29</text>
+
+  <!-- Gota: el dominio es agua, y desambigua el icono de un medidor eléctrico. -->
+  <path d="M256 318c-26 30-40 50-40 68a40 40 0 0 0 80 0c0-18-14-38-40-68z" fill="#2F6FB5"/>
+
+  <!-- Marcas del dial, para que se lea como un medidor y no como un reloj. -->
+  <g stroke="#8FB4D9" stroke-width="7" stroke-linecap="round">
+    <line x1="256" y1="122" x2="256" y2="146"/>
+    <line x1="390" y1="256" x2="366" y2="256"/>
+    <line x1="122" y1="256" x2="146" y2="256"/>
+  </g>
+</svg>
