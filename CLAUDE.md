@@ -16,12 +16,20 @@ fotografiar su hidrómetro, obtener la lectura automáticamente por visión por 
 mantener un historial propio y contrastarlo contra el consumo y el monto que le factura su
 operador (AyA, municipalidad o ASADA).
 
-**Por qué existe.** En Costa Rica el agua no contabilizada ronda el 49–58 %, una muestra de la
-ARESEP encontró que cerca del 60 % de los hidrómetros del Gran Área Metropolitana no funcionaba
-apropiadamente, y el abonado no tiene forma práctica de verificar su propia lectura. Los productos
-existentes (Flume, Phyn, Moen Flo) son hardware de 150–430 dólares que asume Wi-Fi y electricidad
-en el punto de medición — supuestos que no se cumplen en la instalación típica costarricense, que
-es una caja de concreto a ras de suelo, húmeda y sin electricidad.
+**Por qué existe.** La Contraloría encontró que en 2023 **más del 50 % del agua producida por el
+AyA no se contabilizó ni facturó**, y un estudio de ARESEP sobre 419 hidrómetros del Gran Área
+Metropolitana halló que **alrededor del 60 % no funcionaba apropiadamente** — dato de 2015, que
+hay que citar con su año. El abonado, mientras tanto, no tiene forma práctica de verificar su
+propia lectura. Los productos existentes (Flume 2, Phyn Plus, Moen Flo) son hardware de **269 a
+624 dólares** que asume Wi-Fi y electricidad en el punto de medición — supuestos que no se cumplen
+en la instalación típica costarricense, que es una caja de concreto a ras de suelo, húmeda y sin
+electricidad.
+
+> **Cada una de esas cifras tiene fuente, cita textual y fecha de consulta en
+> [`docs/fuentes.md`](docs/fuentes.md).** Si alguna se usa en un entregable, se cita desde ahí. Dos
+> de las tres estaban mal enunciadas antes de T-41 y se corrigieron: el agua no contabilizada se
+> atribuía a ARESEP siendo de la Contraloría, y el precio del hardware decía 150–430 dólares
+> cuando ningún producto oficial cae en ese rango.
 
 **Diferenciador.** Ninguna alternativa existente combina lectura automática por foto + historial
 propio del abonado + contraste contra factura, sobre el parque de medidores ya instalado y sin

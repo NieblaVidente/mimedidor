@@ -180,9 +180,19 @@ No identifican a la persona. Se llenan antes de empezar.
 | E4 | ¿Cree que saber su consumo real le ayudaría a gastar menos agua? | ☐ | ☐ |
 | E5 | ¿Cree que le ayudaría a detectar un cobro equivocado? | ☐ | ☐ |
 
-> E3 es la pregunta de contraste: ese rango es lo que cuestan hoy los productos existentes
-> (Flume, Phyn, Moen Flo — entre 150 y 430 dólares). Si la mayoría dice que no a E3 y que sí a E1,
-> eso respalda la tesis del proyecto: el valor está en resolverlo **sin hardware**.
+> E3 es la pregunta de contraste: el rango pretendía representar lo que cuestan los productos
+> existentes (Flume, Phyn, Moen Flo). Si la mayoría dice que no a E3 y que sí a E1, eso respalda la
+> tesis del proyecto: el valor está en resolverlo **sin hardware**.
+>
+> ⚠️ **Corrección posterior (T-41, 2026-09-02).** El rango de ₡75.000 a ₡215.000 se derivó de una
+> cifra equivocada: se creía que esos productos costaban 150–430 dólares, y los precios oficiales
+> verificados van de **269 a 624** (ver [`fuentes.md`](fuentes.md) §3). **La pregunta se dejó tal
+> como se aplicó**, porque este documento registra el instrumento real y no el que habría
+> correspondido.
+>
+> El error **no debilita el hallazgo, lo refuerza**: se preguntó por un precio más barato que el
+> real, y aun así solo el 18,8 % dijo que compraría. Al precio verdadero la disposición sería igual
+> o menor. Queda anotado igual, porque hay que poder explicarlo si alguien lo pregunta.
 
 ---
 
