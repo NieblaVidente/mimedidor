@@ -232,7 +232,17 @@ jobs:
   desplegar:
     name: Desplegar a producción
     needs: [client, server, database, e2e]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    # `vars.URL_PRODUCCION` funciona como interruptor: mientras no exista, el job queda en
+    # `Skipped` y `main` no se pone en rojo por una infraestructura que todavía no se creó. En
+    # cuanto se defina la variable el despliegue se activa solo, sin volver a tocar este archivo
+    # — que es como estas cosas quedan apagadas para siempre.
+    #
+    # Se condiciona sobre `vars` y no sobre `secrets` porque el contexto `secrets` no está
+    # disponible en un `if` a nivel de job.
+    if: >-
+      github.event_name == 'push'
+      && github.ref == 'refs/heads/main'
+      && vars.URL_PRODUCCION != ''
     runs-on: ubuntu-latest
 
     # Dos merges seguidos no pueden pisarse a mitad de rsync. No se cancela el que ya
