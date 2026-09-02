@@ -317,7 +317,8 @@ que el profesor va a notar.
 
 Un Issue está Hecho cuando:
 
-1. El código está en una rama `feature/` o `bugfix/`.
+1. **El Issue está asignado** a quien lo trabaja, y el código está en una rama `feature/` o
+   `bugfix/`.
 2. Se abrió un Pull Request hacia `main`, con `Closes #N`, y **se pidió la revisión a los
    otros dos integrantes** desde el panel *Reviewers*.
 3. Al menos otro integrante aprobó el PR.
