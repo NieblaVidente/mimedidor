@@ -120,3 +120,98 @@ Lo que **no** existe todavía, y no es parte del alcance de T-11, es el endpoint
 sobre una foto subida y devolvería `{lectura_reconocida, confianza}` sin persistir nada. Construir
 ese endpoint es el paso natural de integración una vez que las tres tarjetas de visión (T-09,
 T-10, T-11) están cerradas — queda como siguiente tarjeta, no como parte de esta.
+
+
+---
+
+# Segunda medición — 5 fotos, 3 medidores, 3 marcas (2026-09-02)
+
+La primera medición se hizo sobre **2 fotos casi idénticas de un solo medidor**. Con el dataset
+en 3 medidores y 3 marcas se repitió, sin modificar código, para ver si el diagnóstico original
+se sostenía.
+
+**No se sostiene.** El resultado sigue siendo cero, pero por **tres causas distintas**, y la que
+describe T-32 es la última de la cadena, no la primera.
+
+## Resultado
+
+| Foto | Real | Crudo de Tesseract | Devuelto | ¿Perspectiva corregida? |
+|---|---|---|---|---|
+| `Medidor1_captura1` | `025888` | `''` | `None` | **no** |
+| `Medidor2_captura1` | `0051069` | `'005140691'` | `None` | sí |
+| `Medidor2_captura2` | `0051069` | `'00151106'` | `151106.0` ⚠️ | sí |
+| `Medidor3_captura1` | `452991` | `''` | `None` | **no** |
+| `Medidor3_captura2` | `452991` | `''` | `None` | **no** |
+
+**Exactitud: 0 de 5.** La correlación es exacta: cuando la perspectiva se corrige, Tesseract lee
+algo; cuando no, no lee nada.
+
+## La cadena de fallos, eslabón por eslabón
+
+### 1. La esfera de Medidor1 nunca llega a ser candidata
+
+`_detectar_circulo_caratula` fija `radio_min = 15 %` del lado corto de la imagen. En esa foto la
+esfera del ARAD es más chica que ese umbral, así que **Hough no la propone**. Los dos candidatos
+que sí propone son la boca de la caja, en dos posiciones distintas — se verificó recortando ambos.
+
+La regla actual elige «el más centrado», y ahí lo centrado es la caja.
+
+> **Esto es en parte un problema de captura, no de código.** El registro del dataset anota esa
+> foto como «primer plano del odómetro» y no lo es: se ve la caja completa con la esfera pequeña
+> arriba. El protocolo pide «bien de cerca, dígitos grandes y nítidos». Se corrigió la anotación.
+
+### 2. En Medidor3 el círculo es correcto, pero la corrección de perspectiva falla igual
+
+Acá el círculo elegido **sí es la esfera**: es el más centrado *y* el más claro de los candidatos.
+
+| Candidato | Radio | Brillo interior | Distancia al centro |
+|---|---|---|---|
+| **elegido** | 794 | **158,7** | 0,063 |
+| otro | 1011 | 47,2 | 0,434 |
+
+Aun así `perspectiva_corregida` es `False` y el recorte incluye bastante bisel negro alrededor de
+la esfera. Como la franja de búsqueda de la segmentación se define en **fracciones de una carátula
+ya enderezada**, sobre un recorte mal normalizado apunta al lugar equivocado: devuelve la carátula
+entera en vez de la ventana del odómetro.
+
+### 3. Recién acá aparecen las líneas divisorias, que es lo que describe T-32
+
+En las dos fotos de Medidor2 la ventana **sí** queda bien recortada, y ahí el diagnóstico original
+se confirma: `005140691` son 9 caracteres donde van 7, y `00151106` son 8. Las líneas entre
+casillas se leen como dígitos.
+
+`Medidor2_captura2` sigue siendo **la falla peligrosa**: devuelve `151106.0`, con cantidad de
+dígitos plausible y sin ninguna señal de alerta.
+
+## Un dato que sí quedó medido y sirve
+
+El brillo interior separa la esfera del resto de los círculos con margen amplio en 4 de las 5
+fotos:
+
+| Foto | Brillo del círculo correcto | Brillo del mejor competidor |
+|---|---|---|
+| Medidor2_captura1 | 206,2 | 79,1 |
+| Medidor2_captura2 | 197,6 | 61,6 |
+| Medidor3_captura1 | 126,1 | 54,0 |
+| Medidor3_captura2 | 158,7 | 47,2 |
+| Medidor1_captura1 | *(la esfera no es candidata)* | — |
+
+Es un criterio con fundamento de dominio —la esfera es una cara clara bajo vidrio, la caja y el
+bisel son oscuros— y no un ajuste a estas fotos. Queda anotado como la vía más prometedora.
+
+## Por qué no se escribió el arreglo todavía
+
+**Escribirlo ahora repetiría el error que esta misma medición acaba de destapar.**
+
+La regla que falla en Medidor3 está documentada en `segmentacion.py:82` como «confirmado con las
+2 fotos reales», y la de la carátula se eligió con el mismo criterio. Calibrar el reemplazo sobre
+**5 fotos, de las cuales 1 no cumple el protocolo de captura**, produciría otra heurística que
+funciona en la muestra y falla en el próximo medidor.
+
+Lo que hace falta antes:
+
+- **Más dataset** (T-07, hoy en 3 de 8), y sobre todo **más de una foto útil por medidor**: hoy
+  Medidor1 aporta una sola y no sirve.
+- **Repetir la toma de Medidor1** siguiendo el protocolo, con la esfera llenando el encuadre.
+- Con eso, atacar en orden: detección de la carátula → segmentación de la ventana → líneas
+  divisorias. T-32 describe el tercer eslabón; los dos primeros bloquean hoy el 60 % del dataset.

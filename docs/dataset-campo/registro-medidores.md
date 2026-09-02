@@ -36,7 +36,7 @@ confirmada" — no adivinar ni usar el nombre del operador como si fuera la marc
 
 | # | Código | Marca | Modelo | N.º serie | Lectura real | Fecha | Hora | Tomado por | Zona | Clima / condición | Tomas logradas (de 6) |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| 1 | Medidor1 | ARAD (confirmada) | — | — | Mostrada: `025888` (1 rojo) · Volumen: **2588,8 m³** | 2026-07-31 | 10:00 | José Pablo | Casa de José Pablo | Oscuro/nublado | 1 — primer plano del odómetro |
+| 1 | Medidor1 | ARAD (confirmada) | — | — | Mostrada: `025888` (1 rojo) · Volumen: **2588,8 m³** | 2026-07-31 | 10:00 | José Pablo | Casa de José Pablo | Oscuro/nublado | 1 — **anotada como «primer plano» pero no lo es**: se ve la caja completa con la esfera pequeña arriba, y por eso el detector de carátula ni siquiera la propone como candidata (ver `docs/exactitud-reconocimiento.md`, segunda medición). Hay que repetirla |
 | 2 | Medidor2 | No confirmada (carátula dice "ASADA Tronadora", que es el operador, no el fabricante; etiqueta del cuerpo dice modelo `MJ-SDC`, serie `2423279`, no se ve fabricante) | MJ-SDC | 2423279 | Mostrada: `0051069` (2 rojos) · Volumen: **510,69 m³** | 2026-08-16 | 14:50 | Yariel | Casa de Yariel | Oscuro, minutos antes de llover — condición adversa | 2 — carátula frontal/ángulo natural (capturas 1 y 2, casi idénticas) + contexto (captura 3) |
 | 3 | Medidor3 | ACTARIS (confirmada) | MULTIMAG | 255875 | Mostrada: `452991` (2 rojos) · Volumen: **4529,91 m³** | 2026-08-17 | — | Isaac | No consta | Caja a ras de suelo, tierra suelta, sombra parcial; la captura2 se tomó con flash | 3 — carátula frontal (c2), ángulo natural (c1), contexto (c3 y c4) |
 
