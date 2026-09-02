@@ -35,6 +35,22 @@ class LecturaSalida(BaseModel):
     dias_desde_anterior: int | None
 
 
+def a_volumen_m3(valor_mostrado: float, digitos_decimales: int) -> float:
+    """Convierte lo que muestra el odómetro al volumen real en metros cúbicos (T-39).
+
+    El abonado escribe los dígitos tal como los ve, incluidos los rojos y sin punto: `452991`.
+    Los rojos son la fracción de m³, así que con 2 dígitos rojos eso son `4529.91 m³`.
+
+    La cantidad de rojos es una propiedad de cada medidor y viaja en `medidor.digitos_decimales`;
+    en el dataset de campo el ARAD tiene 1 y el ACTARIS 2. Por eso el factor no puede ser una
+    constante del código.
+
+    Se redondea a `digitos_decimales` porque dividir en punto flotante deja restos
+    (`452991 / 100` no da exactamente `4529.91`), y la columna es `numeric(12, 3)`.
+    """
+    return round(valor_mostrado / (10 ** digitos_decimales), digitos_decimales)
+
+
 class ReconocimientoSalida(BaseModel):
     lectura_reconocida: float
     confianza: float | None
@@ -112,7 +128,9 @@ def listar_historial(medidor_id: UUID, conexion=Depends(obtener_conexion)) -> Hi
         if valor_anterior is None:
             consumo_desde_anterior_m3, dias_desde_anterior = None, None
         else:
-            consumo_desde_anterior_m3 = float(valor) - float(valor_anterior)
+            # Redondeado a 3, que es la escala de la columna: restar dos flotantes deja
+            # restos (0.16 puede salir 0.15999999999999992) y eso llegaria tal cual al cliente.
+            consumo_desde_anterior_m3 = round(float(valor) - float(valor_anterior), 3)
             dias_desde_anterior = (fecha - fecha_anterior).days
         lecturas.append(
             LecturaHistorial(
@@ -143,18 +161,27 @@ def crear_lectura(entrada: LecturaEntrada, conexion=Depends(obtener_conexion)) -
             "FECHA_INVALIDA", "La fecha de la lectura no puede ser en el futuro", 422
         )
 
-    if not db_lecturas.medidor_existe(conexion, entrada.medidor_id):
+    # Se consulta la escala del medidor y de paso se comprueba que exista: `None` significa que
+    # no está, y 0 que no tiene dígitos rojos. Confundirlos guardaría la lectura sin convertir en
+    # vez de devolver un 404 (T-39).
+    digitos_decimales = db_lecturas.digitos_decimales_del_medidor(conexion, entrada.medidor_id)
+    if digitos_decimales is None:
         raise ErrorAPI(
             "MEDIDOR_NO_ENCONTRADO",
             f"No existe un medidor con id {entrada.medidor_id}",
             404,
         )
 
+    # `entrada.valor` es lo que el abonado leyó en el odómetro; lo que se guarda es el volumen.
+    # La conversión va acá y no en el cliente a propósito: el cliente no tiene por qué conocer
+    # cuántos dígitos rojos tiene el aparato, y el abonado menos todavía.
+    volumen_m3 = a_volumen_m3(entrada.valor, digitos_decimales)
+
     try:
         lectura_id = db_lecturas.llamar_registrar_lectura(
             conexion,
             entrada.medidor_id,
-            entrada.valor,
+            volumen_m3,
             entrada.fecha,
             entrada.origen,
             entrada.foto_url,
@@ -175,13 +202,14 @@ def crear_lectura(entrada: LecturaEntrada, conexion=Depends(obtener_conexion)) -
         consumo_desde_anterior_m3, dias_desde_anterior = None, None
     else:
         valor_anterior, fecha_anterior = anterior
-        consumo_desde_anterior_m3 = float(entrada.valor) - float(valor_anterior)
+        # Ambos lados en m³: la lectura anterior ya está guardada como volumen.
+        consumo_desde_anterior_m3 = round(volumen_m3 - float(valor_anterior), 3)
         dias_desde_anterior = (entrada.fecha - fecha_anterior).days
 
     return LecturaSalida(
         id=lectura_id,
         medidor_id=entrada.medidor_id,
-        valor=entrada.valor,
+        valor=volumen_m3,
         fecha=entrada.fecha,
         origen=entrada.origen,
         consumo_desde_anterior_m3=consumo_desde_anterior_m3,

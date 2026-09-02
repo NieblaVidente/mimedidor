@@ -106,6 +106,7 @@ erDiagram
 | `numero_serie` | `text` | `NOT NULL UNIQUE` | Serie física grabada en el hidrómetro |
 | `marca` | `text` | `NOT NULL` | Clave para el riesgo de fragmentación del parque de medidores (`CLAUDE.md` §13): si una marca aparece en ≥60 % del dataset de campo, el MVP se acota a ella |
 | `modelo` | `text` | `NULL` | |
+| `digitos_decimales` | `smallint` | `NOT NULL DEFAULT 0`, `CHECK (0..3)` | Cuántos dígitos marca en rojo el odómetro, o sea la fracción de m³ (T-39). **Es una propiedad física de este aparato, no una constante del sistema**: en el dataset de campo el ARAD tiene 1 y el ACTARIS 2. Sin ella la lectura se guardaría inflada ×10 o ×100 según el modelo, y la comparación contra factura —que viene en m³ reales— no significaría nada |
 | `fecha_instalacion` | `date` | `NULL` | No siempre se conoce en campo |
 | `creado_en` | `timestamptz` | `NOT NULL DEFAULT now()` | |
 
@@ -208,8 +209,11 @@ totalidad de la clave por construcción. Se cumple trivialmente.
 
 - `usuario`: `nombre` y `correo` dependen únicamente de `id`.
 - `vivienda`: `direccion` y `operador` dependen únicamente de `id`, no de `usuario_id`.
-- `medidor`: `numero_serie`, `marca`, `modelo`, `fecha_instalacion` dependen únicamente de `id`,
-  no de `vivienda_id`.
+- `medidor`: `numero_serie`, `marca`, `modelo`, `digitos_decimales` y `fecha_instalacion`
+  dependen únicamente de `id`, no de `vivienda_id`. `digitos_decimales` **no** viola 3FN aunque
+  se correlacione con la marca: es una característica del aparato instalado, y un mismo
+  fabricante vende modelos con distinta cantidad de dígitos rojos. Derivarla de `marca` sería
+  suponer una dependencia que no existe.
 - `lectura`: `valor`, `fecha`, `origen`, `foto_url` dependen únicamente de `id`. Ver §3 — el
   campo derivable (`consumo_desde_anterior_m3`) se excluyó a propósito porque depende de otra
   fila, no de esta clave.

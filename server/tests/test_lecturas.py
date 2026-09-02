@@ -34,7 +34,9 @@ def test_crear_lectura_medidor_no_encontrado():
 
 def test_crear_lectura_primera_del_medidor():
     lectura_id = str(uuid4())
-    sobreescribir_conexion(respuestas=[(True,), (lectura_id,), None])
+    # Primera respuesta: los digitos rojos del medidor (T-39). `(0,)` = sin decimales, o sea
+    # que el valor mostrado y el volumen coinciden.
+    sobreescribir_conexion(respuestas=[(0,), (lectura_id,), None])
 
     respuesta = client.post("/api/lecturas", json=CUERPO_BASE)
 
@@ -48,7 +50,7 @@ def test_crear_lectura_primera_del_medidor():
 def test_crear_lectura_con_consumo_calculado():
     lectura_id = str(uuid4())
     sobreescribir_conexion(
-        respuestas=[(True,), (lectura_id,), (88.0, date(2026, 7, 18))]
+        respuestas=[(0,), (lectura_id,), (88.0, date(2026, 7, 18))]
     )
 
     respuesta = client.post("/api/lecturas", json=CUERPO_BASE)
@@ -57,6 +59,48 @@ def test_crear_lectura_con_consumo_calculado():
     cuerpo = respuesta.json()
     assert cuerpo["consumo_desde_anterior_m3"] == 12.0
     assert cuerpo["dias_desde_anterior"] == 30
+
+
+def test_crear_lectura_convierte_los_digitos_rojos_a_metros_cubicos():
+    """T-39: el abonado escribe lo que ve en el odometro; se guarda el volumen real."""
+    lectura_id = str(uuid4())
+    # Dos digitos rojos, como el MJ-SDC y el ACTARIS del dataset de campo.
+    sobreescribir_conexion(respuestas=[(2,), (lectura_id,), None])
+
+    respuesta = client.post(
+        "/api/lecturas", json={**CUERPO_BASE, "valor": 452991.0}
+    )
+
+    assert respuesta.status_code == 201
+    # 452991 mostrado con 2 rojos son 4529.91 m3, no 452991.
+    assert respuesta.json()["valor"] == 4529.91
+
+
+def test_crear_lectura_escala_distinta_por_medidor():
+    """La escala es del medidor, no una constante: el ARAD del dataset marca 1 solo rojo."""
+    lectura_id = str(uuid4())
+    sobreescribir_conexion(respuestas=[(1,), (lectura_id,), None])
+
+    respuesta = client.post("/api/lecturas", json={**CUERPO_BASE, "valor": 25888.0})
+
+    assert respuesta.status_code == 201
+    assert respuesta.json()["valor"] == 2588.8
+
+
+def test_crear_lectura_consumo_en_metros_cubicos_reales():
+    """El consumo sale en la misma unidad que la factura, que es lo que rompia antes de T-39."""
+    lectura_id = str(uuid4())
+    sobreescribir_conexion(
+        respuestas=[(2,), (lectura_id,), (510.69, date(2026, 8, 12))]
+    )
+
+    respuesta = client.post("/api/lecturas", json={**CUERPO_BASE, "valor": 51085.0})
+
+    assert respuesta.status_code == 201
+    cuerpo = respuesta.json()
+    assert cuerpo["valor"] == 510.85
+    # 0.16 m3, no 16: antes de T-39 esta resta daba 16 y se comparaba contra una factura en m3.
+    assert cuerpo["consumo_desde_anterior_m3"] == 0.16
 
 
 def test_crear_lectura_invalida():

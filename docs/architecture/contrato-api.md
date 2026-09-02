@@ -101,6 +101,19 @@ período).
 }
 ```
 
+> **Unidades de `valor` (aclarado en T-39).** En la **petición**, `valor` son los dígitos tal
+> como se leen en el odómetro, sin punto decimal: el abonado escribe lo que ve, incluidos los
+> rojos. En la **respuesta**, `valor` es el **volumen en metros cúbicos**.
+>
+> La conversión la hace el servidor con `medidor.digitos_decimales`, que dice cuántos dígitos
+> marca en rojo ese aparato — 1 en el ARAD del dataset de campo, 2 en el ACTARIS. Ni el cliente
+> ni el abonado necesitan conocer ese dato.
+>
+> Esto **no es un cambio del contrato, es la implementación alcanzando al contrato**: el campo
+> `consumo_desde_anterior_m3` siempre declaró metros cúbicos en su propio nombre, y antes de
+> T-39 se calculaba restando cadenas de odómetro sin convertir. La unidad de `valor` nunca
+> estuvo declarada; ahora sí.
+
 `origen` es `"reconocimiento"` si el usuario aceptó el valor devuelto por
 `/api/lecturas/reconocer` sin tocarlo, o `"manual"` si lo escribió o corrigió a mano. Este dato no
 es cosmético: es el que permite calcular la exactitud real en T-11 (cuántas lecturas necesitaron

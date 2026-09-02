@@ -17,10 +17,20 @@
 
 const MEDIDOR = '33333333-3333-3333-3333-333333333333'
 
-/** La lectura sembrada por `datos_de_prueba.sql`, de hace 5 días. */
-const LECTURA_SEMBRADA = 51069
-const LECTURA_NUEVA = 51085
-const CONSUMO_ESPERADO = LECTURA_NUEVA - LECTURA_SEMBRADA // 16 m³
+// El medidor sembrado tiene 2 dígitos rojos en el odómetro (T-39): lo que el abonado escribe
+// son los dígitos tal como los ve, y lo que el sistema guarda y muestra es el volumen en m³.
+// Distinguir las dos cosas es justamente lo que esta prueba tiene que ejercitar.
+
+/** Lo que se teclea, tal como se lee en la carátula. */
+const MOSTRADA_NUEVA = 52669
+
+/** Lo que el sistema guarda y muestra: los mismos dígitos con el punto en su lugar. */
+const VOLUMEN_SEMBRADO = 510.69   // sembrado por `datos_de_prueba.sql`, de hace 5 días
+const VOLUMEN_NUEVO = 526.69
+
+/** 16 m³ **de verdad**. Antes de T-39 esta resta daba 16 «unidades del odómetro», que se
+ *  comparaban contra una factura en m³ como si fueran lo mismo. */
+const CONSUMO_ESPERADO = Number((VOLUMEN_NUEVO - VOLUMEN_SEMBRADO).toFixed(2)) // 16 m³
 
 function fechaISO(diasAtras: number): string {
   // Componentes locales, no `toISOString()` (UTC) — mismo bug que se corrigió en
@@ -57,10 +67,11 @@ describe('Hilo completo: foto → lectura → historial → factura → comparac
     // Se limpia antes de escribir: si el reconocimiento llegara a devolver algo, el campo no
     // estaría vacío. La prueba es del hilo, no del acierto del OCR.
     cy.get('#valor-lectura').clear()
-    cy.get('#valor-lectura').type(String(LECTURA_NUEVA))
+    cy.get('#valor-lectura').type(String(MOSTRADA_NUEVA))
     cy.contains('button', 'Confirmar lectura').click()
 
-    cy.contains(`Lectura guardada: ${LECTURA_NUEVA} m³`).should('be.visible')
+    // Se teclearon 52669 y se confirma 526.69 m³: la conversión es lo que se verifica acá.
+    cy.contains(`Lectura guardada: ${VOLUMEN_NUEVO} m³`).should('be.visible')
 
     // --- 2. Verla en el historial, con el consumo calculado ----------------------------------
     //
@@ -71,8 +82,8 @@ describe('Hilo completo: foto → lectura → historial → factura → comparac
     cy.contains('button', 'Ver historial').click()
 
     cy.get('table').within(() => {
-      cy.contains('td', String(LECTURA_SEMBRADA)).should('exist')
-      cy.contains('td', String(LECTURA_NUEVA)).should('exist')
+      cy.contains('td', String(VOLUMEN_SEMBRADO)).should('exist')
+      cy.contains('td', String(VOLUMEN_NUEVO)).should('exist')
       cy.contains(`${CONSUMO_ESPERADO} m³ en 5 días`).should('exist')
     })
 
