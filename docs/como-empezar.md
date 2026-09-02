@@ -383,7 +383,7 @@ siguiente.
 Una tarjeta está **Hecha** cuando:
 
 1. El código está en una rama `feature/` o `bugfix/`
-2. Se abrió un Pull Request hacia `main`
+2. Se abrió un Pull Request hacia `main`, y **se pidió la revisión a los otros dos integrantes**
 3. Al menos otro integrante aprobó el PR
 4. Los checks de CI pasaron en verde
 5. El PR fue mergeado a `main`
