@@ -125,6 +125,18 @@ si el proceso muere al segundo por una dependencia rota o una credencial mal pue
 restart` igual devuelve éxito. El pipeline consulta una ruta real hasta diez veces antes de darse
 por vencido, así que un despliegue en verde significa que la aplicación **está respondiendo**.
 
+### El interruptor: `URL_PRODUCCION`
+
+El job **solo corre si `vars.URL_PRODUCCION` está definida**. Mientras no lo esté aparece como
+`Skipped`, y `main` no se pone en rojo por una infraestructura que todavía no se creó.
+
+> Un `Skipped` en «Desplegar a producción» **no es un fallo**: significa que el despliegue aún no
+> está configurado, o que la corrida viene de un Pull Request (donde nunca debe desplegar).
+
+En cuanto se defina la variable, el despliegue se activa solo, sin volver a tocar el workflow. Es
+a propósito: un job desactivado a mano dentro del archivo es un job que se queda apagado para
+siempre, porque nadie se acuerda de volver a prenderlo.
+
 ### Secretos y variables que hay que crear en GitHub
 
 Los crea una persona en `Settings → Secrets and variables → Actions`. **No viven en el
