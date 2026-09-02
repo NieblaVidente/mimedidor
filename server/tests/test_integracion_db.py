@@ -56,8 +56,11 @@ def conexion():
         con.close()
 
 
-def _crear_medidor_de_prueba(conexion) -> str:
-    """Crea la cadena mínima usuario → vivienda → medidor y devuelve el id del medidor."""
+def _crear_medidor_de_prueba(conexion, digitos_decimales: int = 0) -> str:
+    """Crea la cadena mínima usuario → vivienda → medidor y devuelve el id del medidor.
+
+    `digitos_decimales` es cuántos dígitos marca en rojo el odómetro (T-39).
+    """
     usuario_id, vivienda_id, medidor_id = str(uuid4()), str(uuid4()), str(uuid4())
     with conexion.cursor() as cur:
         cur.execute(
@@ -73,10 +76,17 @@ def _crear_medidor_de_prueba(conexion) -> str:
         )
         cur.execute(
             """
-            INSERT INTO mimedidor.medidor (id, vivienda_id, numero_serie, marca)
-            VALUES (%s, %s, %s, %s)
+            INSERT INTO mimedidor.medidor
+                (id, vivienda_id, numero_serie, marca, digitos_decimales)
+            VALUES (%s, %s, %s, %s, %s)
             """,
-            (medidor_id, vivienda_id, f"serie-{medidor_id}", "Marca de prueba"),
+            (
+                medidor_id,
+                vivienda_id,
+                f"serie-{medidor_id}",
+                "Marca de prueba",
+                digitos_decimales,
+            ),
         )
     return medidor_id
 
@@ -145,3 +155,58 @@ def test_listar_lecturas_devuelve_las_columnas_que_espera_el_endpoint(conexion):
     assert float(valor) == 51069.0
     assert fecha == date(2026, 8, 16)
     assert origen == "manual"
+
+
+# ══════════════════════════════════════════════════════════════════════════════════════════════
+# T-39 — La escala decimal es del medidor, no del código
+#
+# Estas van contra la base real y no contra un objeto falso por el mismo motivo que las de
+# arriba: lo que se está verificando es que la columna existe, que acepta el rango, y que un
+# `numeric(12, 3)` conserva el tercer decimal. Nada de eso lo detecta una conexión sustituida.
+# ══════════════════════════════════════════════════════════════════════════════════════════════
+
+
+@pytest.mark.parametrize(
+    "digitos_rojos, valor_mostrado, volumen_esperado",
+    [
+        (1, 25888.0, 2588.8),    # ARAD del dataset de campo
+        (2, 452991.0, 4529.91),  # ACTARIS y MJ-SDC del dataset de campo
+        (3, 510694.0, 510.694),  # tres rojos: el caso que numeric(10,2) habría redondeado
+        (0, 1284.0, 1284.0),     # sin rojos: el volumen es la cadena mostrada
+    ],
+)
+def test_escala_decimal_por_medidor(
+    conexion, digitos_rojos, valor_mostrado, volumen_esperado
+):
+    """Dos medidores con escalas distintas conviven, y el volumen se guarda con su precisión."""
+    from app.api.lecturas import a_volumen_m3
+
+    medidor_id = _crear_medidor_de_prueba(conexion, digitos_decimales=digitos_rojos)
+
+    leidos = db_lecturas.digitos_decimales_del_medidor(conexion, medidor_id)
+    assert leidos == digitos_rojos
+
+    volumen = a_volumen_m3(valor_mostrado, leidos)
+    assert volumen == volumen_esperado
+
+    lectura_id = db_lecturas.llamar_registrar_lectura(
+        conexion, medidor_id, volumen, date(2026, 8, 16), "manual", None
+    )
+    with conexion.cursor() as cur:
+        cur.execute("SELECT valor FROM mimedidor.lectura WHERE id = %s", (lectura_id,))
+        guardado = float(cur.fetchone()[0])
+
+    # La igualdad exacta es el punto: si la columna redondeara, este assert fallaría.
+    assert guardado == volumen_esperado
+
+
+def test_medidor_inexistente_se_distingue_de_cero_decimales(conexion):
+    """`None` (no existe) y `0` (sin dígitos rojos) no se pueden confundir.
+
+    Si se confundieran, una lectura de un medidor inexistente se guardaría sin convertir en vez
+    de devolver 404.
+    """
+    assert db_lecturas.digitos_decimales_del_medidor(conexion, str(uuid4())) is None
+    assert db_lecturas.digitos_decimales_del_medidor(
+        conexion, _crear_medidor_de_prueba(conexion, digitos_decimales=0)
+    ) == 0
