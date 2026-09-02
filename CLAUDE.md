@@ -315,19 +315,13 @@ que el profesor va a notar.
 
 ### Definition of Done
 
-Un Issue está Hecho cuando:
+**Vive en un solo lugar: [`docs/definition-of-done.md`](docs/definition-of-done.md).** Acordado
+por los tres el 2026-08-12.
 
-1. **El Issue está asignado** a quien lo trabaja, y el código está en una rama `feature/` o
-   `bugfix/`.
-2. Se abrió un Pull Request hacia `main`, con `Closes #N`, y **se pidió la revisión a los
-   otros dos integrantes** desde el panel *Reviewers*.
-3. Al menos otro integrante aprobó el PR.
-4. Los checks de CI pasaron en verde.
-5. El PR fue mergeado a `main`.
-6. La documentación asociada quedó actualizada si aplica.
-7. Los criterios de aceptación del Issue se cumplen y fueron verificados.
-
-Para Issues de tipo `doc` o `campo` que no producen código, aplican solo 6 y 7.
+Léelo antes de dar una tarjeta por terminada. No se copia acá a propósito: estaba escrito en tres
+archivos y las copias ya habían divergido —una decía que la excepción aplica a `doc` y `campo`, y
+otra agregaba `spike`— sin que nadie lo notara, que es exactamente cómo un acuerdo del equipo deja
+de ser uno solo.
 
 ### Ceremonias
 

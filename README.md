@@ -63,17 +63,8 @@ La rama `main` se mantiene siempre estable y desplegable. Todo cambio se desarro
 
 ## Definition of Done
 
-Una tarjeta se considera Hecha cuando:
-
-1. El código está en una rama `feature/` o `bugfix/`.
-2. Se abrió un Pull Request hacia `main`.
-3. Al menos otro integrante aprobó el PR.
-4. Los checks de CI pasaron en verde.
-5. El PR fue mergeado a `main`.
-6. La documentación asociada quedó actualizada si aplica.
-7. Los criterios de aceptación de la tarjeta se cumplen y fueron verificados.
-
-Detalle completo en [`docs/definition-of-done.md`](docs/definition-of-done.md).
+Cuándo se considera Hecha una tarjeta está definido en
+[`docs/definition-of-done.md`](docs/definition-of-done.md), acordado por los tres el 2026-08-12.
 
 ## Metodología
 

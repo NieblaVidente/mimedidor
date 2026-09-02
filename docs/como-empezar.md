@@ -380,20 +380,12 @@ siguiente.
 
 ## 8. Definition of Done
 
-Una tarjeta está **Hecha** cuando:
+**Vive en un solo lugar: [`definition-of-done.md`](definition-of-done.md).** Acordado por los tres
+el 2026-08-12.
 
-1. **El Issue está asignado** a quien lo trabaja, y el código está en una rama `feature/` o `bugfix/`
-2. Se abrió un Pull Request hacia `main`, y **se pidió la revisión a los otros dos integrantes**
-3. Al menos otro integrante aprobó el PR
-4. Los checks de CI pasaron en verde
-5. El PR fue mergeado a `main`
-6. La documentación asociada quedó actualizada si aplica
-7. Los criterios de aceptación de la tarjeta se cumplen y fueron verificados
-
-Tarjetas de tipo `spike`, `campo` o `doc` (que no producen código): solo aplican 6 y 7.
-
-Acordado por los tres el 2026-08-12. Detalle en
-[`docs/definition-of-done.md`](definition-of-done.md).
+Ahí está la lista completa de cuándo una tarjeta está Hecha, las excepciones para las que no
+producen código, y quién revisa cada Pull Request. No se resume acá para que no haya dos versiones
+que puedan contradecirse.
 
 ---
 
