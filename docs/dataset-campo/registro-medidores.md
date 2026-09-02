@@ -44,6 +44,19 @@ confirmada" — no adivinar ni usar el nombre del operador como si fuera la marc
 integrante, sobre los 2 ya registrados). Ninguno con las 6 tomas completas todavía. Isaac lleva
 1 de sus 2.
 
+> **Zonas: cada integrante sale en su propia provincia.** Los tres viven en provincias distintas,
+> así que no hay riesgo de pisarse ni de registrar dos veces el mismo medidor.
+>
+> No es solo un reparto cómodo. El protocolo de captura de más arriba pide repartir zonas «para no
+> sesgar la muestra hacia un solo barrio», y tres provincias distintas dan variedad real de marcas,
+> de antigüedad de instalación y de condiciones de la caja — que es justo lo que necesita la
+> decisión de alcance por marca de T-08 para no acotar el MVP sobre una muestra engañosa.
+>
+> **Fechas: sin fecha fija**, con el riesgo aceptado explícitamente. La justificación completa de
+> esta decisión y de la meta revisada está en [`docs/scrum/sprint-2.md`](../scrum/sprint-2.md),
+> sección «Salidas de campo (T-07)»; acá se anota porque es lo que hay que tener a mano al salir,
+> no dentro del acta de una ceremonia.
+
 ### ⚠️ Dos columnas de lectura, y por qué
 
 Desde Medidor3 se registran **dos valores distintos**, porque sirven a dos propósitos que no son
