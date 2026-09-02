@@ -23,9 +23,15 @@ const LECTURA_NUEVA = 51085
 const CONSUMO_ESPERADO = LECTURA_NUEVA - LECTURA_SEMBRADA // 16 m³
 
 function fechaISO(diasAtras: number): string {
+  // Componentes locales, no `toISOString()` (UTC) — mismo bug que se corrigió en
+  // PantallaCaptura.tsx (T-35): en huso horario negativo, UTC ya puede estar en el día
+  // siguiente aunque acá todavía sea "hoy".
   const fecha = new Date()
   fecha.setDate(fecha.getDate() - diasAtras)
-  return fecha.toISOString().slice(0, 10)
+  const año = fecha.getFullYear()
+  const mes = String(fecha.getMonth() + 1).padStart(2, '0')
+  const dia = String(fecha.getDate()).padStart(2, '0')
+  return `${año}-${mes}-${dia}`
 }
 
 describe('Hilo completo: foto → lectura → historial → factura → comparación', () => {

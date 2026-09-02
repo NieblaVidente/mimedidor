@@ -1,9 +1,13 @@
--- MiMedidor — Prueba del procedimiento registrar_lectura (T-14)
+-- MiMedidor — Prueba del procedimiento registrar_lectura (T-14) y de sus CHECK (T-35)
 --
 -- Criterio de aceptación de T-14: "fuerza un error a propósito y verifica que la transacción
 -- se revirtió completa". Este script lo hace de punta a punta y no deja datos de prueba: todo
 -- corre dentro de un BEGIN/ROLLBACK explícito, así se puede correr las veces que haga falta
 -- (incluido en cada corrida de CI) sin ensuciar la base.
+--
+-- El caso 3 (T-35) prueba, además, que el CHECK de fecha futura en `lectura` funciona incluso
+-- saltándose el procedimiento — la defensa en profundidad de la que habla
+-- docs/architecture/contrato-api.md.
 --
 -- Uso: psql -d mimedidor -U mimedidor_app -v ON_ERROR_STOP=1 -f verificar_registrar_lectura.sql
 -- Si algo falla, el RAISE EXCEPTION correspondiente explica cuál verificación no pasó y psql
@@ -74,7 +78,23 @@ BEGIN
         RAISE EXCEPTION 'T-14 FALLÓ (caso 2): quedaron % filas en lectura_evento, se esperaba 1 sin cambios', v_conteo;
     END IF;
 
-    RAISE NOTICE 'T-14: todas las verificaciones pasaron';
+    -- Caso 3 (T-35): el CHECK de la tabla rechaza una fecha futura aunque se salte el
+    -- procedimiento — defensa en profundidad, no solo la validación de la API.
+    v_fallo := false;
+    BEGIN
+        INSERT INTO mimedidor.lectura (medidor_id, valor, fecha, origen)
+        VALUES (v_medidor_id, 200.00, CURRENT_DATE + 1, 'manual');
+        v_fallo := true;
+    EXCEPTION
+        WHEN check_violation THEN
+            RAISE NOTICE 'Caso 3 correcto: el CHECK de la tabla rechazó la fecha futura';
+    END;
+
+    IF v_fallo THEN
+        RAISE EXCEPTION 'T-35 FALLÓ (caso 3): la tabla aceptó una lectura con fecha futura';
+    END IF;
+
+    RAISE NOTICE 'T-14/T-35: todas las verificaciones pasaron';
 END;
 $$;
 

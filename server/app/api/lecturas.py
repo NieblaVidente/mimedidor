@@ -135,6 +135,14 @@ def crear_lectura(entrada: LecturaEntrada, conexion=Depends(obtener_conexion)) -
 
     No hace reconocimiento de imagen — eso es POST /api/lecturas/reconocer (arriba).
     """
+    # Se valida acá, antes de tocar la base, por el mismo motivo que el periodo de la factura en
+    # app/api/facturas.py: da un 422 FECHA_INVALIDA claro en vez de dejar que lo rechace el
+    # CHECK de 02_tablas.sql con un mensaje interno de PostgreSQL (T-35).
+    if entrada.fecha > date.today():
+        raise ErrorAPI(
+            "FECHA_INVALIDA", "La fecha de la lectura no puede ser en el futuro", 422
+        )
+
     if not db_lecturas.medidor_existe(conexion, entrada.medidor_id):
         raise ErrorAPI(
             "MEDIDOR_NO_ENCONTRADO",

@@ -4,7 +4,7 @@ La conexión falsa (ConexionFalsa/CursorFalso) vive en conftest.py — la compar
 test_historial.py (T-17) desde ahí en vez de duplicarla.
 """
 
-from datetime import date
+from datetime import date, timedelta
 from uuid import uuid4
 
 from fastapi.testclient import TestClient
@@ -74,6 +74,29 @@ def test_crear_lectura_invalida():
 
     assert respuesta.status_code == 422
     assert respuesta.json()["error"]["codigo"] == "LECTURA_INVALIDA"
+
+
+def test_crear_lectura_fecha_futura():
+    # Se rechaza antes de tocar la base (T-35): ni siquiera se llega a llamar al procedimiento.
+    sobreescribir_conexion(respuestas=[])
+
+    manana = (date.today() + timedelta(days=1)).isoformat()
+    respuesta = client.post("/api/lecturas", json={**CUERPO_BASE, "fecha": manana})
+
+    assert respuesta.status_code == 422
+    assert respuesta.json()["error"]["codigo"] == "FECHA_INVALIDA"
+
+
+def test_crear_lectura_fecha_hoy_se_acepta():
+    # Hoy es el límite, no un caso rechazado — T-35 solo prohíbe fechas *futuras*.
+    lectura_id = str(uuid4())
+    sobreescribir_conexion(respuestas=[(True,), (lectura_id,), None])
+
+    hoy = date.today().isoformat()
+    respuesta = client.post("/api/lecturas", json={**CUERPO_BASE, "fecha": hoy})
+
+    assert respuesta.status_code == 201
+    assert respuesta.json()["fecha"] == hoy
 
 
 def test_crear_lectura_validacion_falla():
