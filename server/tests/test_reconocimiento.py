@@ -14,9 +14,19 @@ CARPETA_DATASET = Path(__file__).resolve().parents[2] / "dataset-fotos"
 
 # Lectura real registrada a mano para cada foto — ver docs/dataset-campo/registro-medidores.md.
 # Las dos fotos son de Medidor2 (carátula frontal / ángulo natural, casi idénticas).
+# Las 5 fotos del dataset que sirven para leer, de los 3 medidores recolectados. Las demás de
+# la carpeta son tomas de contexto (se ve la caja y el entorno, no la carátula) y no se miden.
+#
+# El valor es lo que MUESTRA el odómetro, no el volumen en m³. `reconocer_lectura` devuelve el
+# número mostrado a propósito (ver el docstring de `vision/reconocimiento.py`): la conversión a
+# volumen depende de los decimales registrados del medidor, y mezclarla acá haría que la
+# exactitud del reconocimiento dependiera de un dato de la base de datos.
 LECTURA_REAL_POR_FOTO = {
+    "Medidor1_captura1.png": "025888",
     "Medidor2_captura1.png": "0051069",
     "Medidor2_captura2.png": "0051069",
+    "Medidor3_captura1.jpg": "452991",
+    "Medidor3_captura2.jpg": "452991",
 }
 
 
@@ -96,11 +106,15 @@ def test_reconocer_lectura_mide_exactitud_sobre_dataset_real():
     y compara contra la lectura real registrada a mano (criterio de aceptación de T-11: medir
     exactitud sobre el dataset completo, sin excluir fotos difíciles ni maquillar el resultado).
 
-    Esta prueba fija (pin) el resultado medido en el momento de cerrar T-11: 0 de 2 lecturas
-    coinciden exactamente con la real. Si cambia el algoritmo de reconocimiento y este número
-    mejora o empeora, esta prueba va a fallar — es intencional, como recordatorio de actualizar
-    `docs/exactitud-reconocimiento.md` con el nuevo resultado en vez de dejar la documentación
-    desactualizada."""
+    Esta prueba fija (pin) el resultado medido: **0 de 5** lecturas coinciden exactamente con
+    la real, sobre 3 medidores y 3 marcas. Si cambia el algoritmo de reconocimiento y este
+    número mejora o empeora, esta prueba va a fallar — es intencional, como recordatorio de
+    actualizar `docs/exactitud-reconocimiento.md` con el nuevo resultado en vez de dejar la
+    documentación desactualizada.
+
+    Historia del número: al cerrar T-11 eran 0 de 2, las únicas fotos que había entonces. Al
+    cerrar T-32 (2026-09-06) el dataset llegó a 3 medidores y la medición pasó a 0 de 5. El
+    conteo cambió; el resultado no."""
     fotos = _fotos_reales_disponibles()
 
     aciertos = 0

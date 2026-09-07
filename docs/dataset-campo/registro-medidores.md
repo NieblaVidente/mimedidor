@@ -40,6 +40,19 @@ confirmada" — no adivinar ni usar el nombre del operador como si fuera la marc
 | 2 | Medidor2 | No confirmada (carátula dice "ASADA Tronadora", que es el operador, no el fabricante; etiqueta del cuerpo dice modelo `MJ-SDC`, serie `2423279`, no se ve fabricante) | MJ-SDC | 2423279 | Mostrada: `0051069` (2 rojos) · Volumen: **510,69 m³** | 2026-08-16 | 14:50 | Yariel | Casa de Yariel | Oscuro, minutos antes de llover — condición adversa | 2 — carátula frontal/ángulo natural (capturas 1 y 2, casi idénticas) + contexto (captura 3) |
 | 3 | Medidor3 | ACTARIS (confirmada) | MULTIMAG | 255875 | Mostrada: `452991` (2 rojos) · Volumen: **4529,91 m³** | 2026-08-17 | — | Isaac | No consta | Caja a ras de suelo, tierra suelta, sombra parcial; la captura2 se tomó con flash | 3 — carátula frontal (c2), ángulo natural (c1), contexto (c3 y c4) |
 
+> ## ⛔ Recolección cerrada el 2026-09-06
+>
+> **El equipo decidió quedarse con estos 3 medidores y no seguir recolectando.** La decisión la
+> tomaron los tres, al cierre del Sprint 2.
+>
+> **Por qué.** La meta se fijó en 12 en el Sprint 1 y se cumplieron 2; se bajó a 8 en el Sprint 2
+> y se cumplieron 3. Dos sprints con dos metas distintas y el mismo resultado: el problema no era
+> el número. Insistir una tercera vez habría repetido lo mismo con el calendario encima.
+>
+> **T-07 no se cierra como cumplida, se cierra como alcance reducido.** Sus criterios pedían 6
+> tomas por medidor, al menos 3 medidores en condiciones adversas y zonas repartidas entre los
+> tres. Nada de eso se logró. Queda el número real a la vista.
+
 **Total: 3 de 8 medidores** (meta revisada en el Planning del Sprint 2: 6 nuevos, 2 por
 integrante, sobre los 2 ya registrados). Ninguno con las 6 tomas completas todavía. Isaac lleva
 1 de sus 2.
@@ -104,6 +117,55 @@ lo dejó anotado en su propio docstring:
 
 **Esa condición ya se cumplió.** El dataset creció lo suficiente para fijar la convención, y
 además demostró que no puede ser única. Queda registrado en un Issue aparte.
+
+## Decisión de alcance por marca (T-08) — 2026-09-06
+
+Con la recolección cerrada, la decisión se toma sobre la muestra que existe.
+
+### Lo que hay
+
+| Medidor | Marca del fabricante | Modelo |
+|---|---|---|
+| Medidor1 | **ARAD** | no registrado |
+| Medidor2 | **no confirmada** — la carátula muestra el operador, no el fabricante | MJ-SDC |
+| Medidor3 | **ACTARIS** | MULTIMAG |
+
+**Dos marcas identificadas sobre tres unidades, y una sin identificar.**
+
+### La decisión: el MVP no se acota por marca
+
+Ninguno de los tres casos del criterio aplica limpiamente:
+
+- **Ninguna marca alcanza el 60 %.** Cada unidad es de una marca distinta.
+- **No hay dos marcas dominantes**: hay tres situaciones distintas en tres unidades.
+- **Tampoco son «cinco o más marcas sin predominio»**, que era el caso previsto para replantear.
+
+La muestra **no permite aplicar el criterio**, y decir lo contrario sería forzar una conclusión
+sobre tres datos. Así que el MVP **queda sin acotar a ninguna marca**, que es la opción que no
+compromete nada sobre información que no tenemos.
+
+### Lo que esta decisión cuesta, dicho sin rodeos
+
+Acotar a una marca era lo que habría permitido calibrar el reconocimiento contra un tipo de
+carátula concreto. Sin eso, T-32 tiene que resolver un problema más general con menos evidencia,
+y la medición del reconocimiento (0 de 5) queda como el número del proyecto hasta la feria.
+
+### Lo que sí quedó establecido, y no es poco
+
+**El parque está fragmentado.** Tres unidades tomadas por tres personas en tres provincias
+distintas dieron tres situaciones distintas de marca. Es una muestra chica, pero apunta en una
+dirección clara y coherente con lo que ya sabíamos del mercado costarricense.
+
+Y una de las tres **no tiene fabricante legible**: la carátula muestra el nombre del operador. Eso
+es un hallazgo por sí mismo — cualquier estrategia futura basada en la marca tiene que contemplar
+que el dato no siempre se puede leer de la foto.
+
+### Riesgo que queda abierto
+
+Se mantiene el riesgo 2 de `CLAUDE.md` §13 (fragmentación del parque), ahora con evidencia de
+campo en vez de como hipótesis. Reabrir la recolección es la única forma de cerrarlo.
+
+---
 
 ## Pendiente
 
