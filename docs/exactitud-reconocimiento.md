@@ -261,6 +261,20 @@ Cuando el dataset crezca, el orden está establecido por la medición:
 3. **Líneas divisorias.** Lo que T-32 describía. Solo se puede medir cuando los dos anteriores
    entreguen el recorte correcto.
 
+## La prueba que fija el número quedó al día
+
+`server/tests/test_reconocimiento.py` fijaba **0 de 2**: solo conocía las dos fotos de Medidor2,
+porque `LECTURA_REAL_POR_FOTO` no se había ampliado cuando llegaron Medidor1 y Medidor3. La
+medición decía 0 de 5 y la prueba seguía mirando 2 fotos.
+
+Ahora cubre las **5 fotos legibles de los 3 medidores** y sigue en 0 aciertos. **El conteo cambió;
+el resultado no.** Si alguien mejora el reconocimiento, la prueba falla y obliga a actualizar este
+documento — que es para lo que existe.
+
+Las tomas de contexto (`Medidor2_captura3`, `Medidor3_captura3`, `Medidor3_captura4`) quedan
+fuera a propósito: muestran la caja y el entorno, no la carátula, y meterlas bajaría el
+denominador de exactitud con fotos que nunca se pidió que se leyeran.
+
 ## El número que va a la feria
 
 **0 de 5.** Es el que hay, medido sobre la mejor muestra disponible, y es el que se va a decir.
