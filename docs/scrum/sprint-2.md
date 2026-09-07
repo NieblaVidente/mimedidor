@@ -300,3 +300,43 @@ Quedan **7 días** (cierra el 7 de setiembre) y estas tarjetas vivas:
 **El bloqueo real del sprint es T-07.** Va en 2 medidores de los 8 de la meta revisada, y detrás de
 él están parados T-08 (#30) y T-32 (#42). Es lo único de esta lista que no se resuelve programando,
 y la mitigación que se había acordado para vigilarlo era justamente el daily que no ocurrió.
+
+
+---
+
+## Decisión de alcance — 2026-09-06
+
+**Acordada por los tres**, un día antes del cierre del sprint.
+
+### Se cierra la recolección de fotografías de campo en 3 medidores
+
+La meta fue 12 en el Sprint 1, con 2 cumplidos. Se revisó a 8 en el Sprint 2, con 3 cumplidos.
+**Dos metas distintas y el mismo resultado**, así que el problema no era el número.
+
+En vez de arrastrar T-07 a un tercer sprint con la feria encima, el equipo decide quedarse con
+las 3 unidades y seguir adelante.
+
+### Qué se cierra y cómo
+
+| Tarjeta | Cómo se cierra |
+|---|---|
+| **T-07** (#29) | **Alcance reducido**, no cumplida. 3 de 8, con el número real a la vista |
+| **T-08** (#30) | **Decidida sobre la muestra que existe**: el MVP no se acota por marca |
+| **T-32** (#42) | **Diagnóstico entregado**, arreglo diferido con su justificación |
+
+Ninguna se marca como cumplida si no lo está. T-07 tenía criterios —6 tomas por medidor, 3 en
+condiciones adversas, zonas repartidas— que no se lograron, y eso queda escrito.
+
+### Lo que el equipo asume al decidir esto
+
+- **El reconocimiento se queda en 0 de 5** hasta la feria. La demostración va a mostrar el flujo
+  con corrección manual, y hay que decirlo en vez de esquivarlo.
+- **El MVP no queda acotado a ninguna marca**, porque la muestra no permite aplicar el criterio.
+- **El riesgo de fragmentación del parque** (`CLAUDE.md` §13.2) pasa de hipótesis a observación:
+  tres unidades, tres situaciones de marca distintas.
+
+### Por qué se registra así
+
+Cerrar T-07 como «Hecho» habría dado un tablero más limpio y un registro falso. El número real
+—3 de 8, con dos metas fallidas— es el dato que la retrospectiva necesita para entender por qué
+esta tarea no avanzó en dos sprints, y esa conversación vale más que la tarjeta.
