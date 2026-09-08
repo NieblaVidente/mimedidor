@@ -103,20 +103,39 @@ No identifican a la persona. Se llenan antes de empezar.
 
 ---
 
-### Sección A — Su situación hoy
+### 🚦 Pregunta filtro — antes de todo lo demás
 
-*No mencionar MiMedidor todavía.*
+**Esta pregunta va sola, en su propia pantalla o página, antes del resto del cuestionario.**
 
 | # | Pregunta | Sí | No |
 |---|---|---|---|
 | A1 | ¿Es usted quien paga o revisa el recibo del agua de su casa? | ☐ | ☐ |
+
+> ### ⛔ Si la respuesta es «no», el cuestionario TERMINA acá
+>
+> Agradecer y cerrar. **No mostrar ninguna otra pregunta.** La persona no es usuaria del
+> producto, y sus respuestas al resto no se pueden usar para nada.
+>
+> **Si el formulario es digital**, esto tiene que estar implementado como salto de sección —
+> en Google Forms: *«Ir a una sección según la respuesta»* → «No» → *«Enviar formulario»*. Una
+> nota de texto pidiéndole a la persona que se detenga **no funciona**: ya se probó y no
+> funcionó (ver §9).
+>
+> Estas respuestas no se anotan como una fila de «no» en el registro: se cuentan aparte, como
+> descartadas por filtro.
+
+---
+
+### Sección A — Su situación hoy
+
+*Solo para quien contestó «sí» en A1. No mencionar MiMedidor todavía.*
+
+| # | Pregunta | Sí | No |
+|---|---|---|---|
 | A2 | ¿Sabe dónde está el medidor de agua (hidrómetro) de su vivienda? | ☐ | ☐ |
 | A3 | ¿Alguna vez le ha visto los números al medidor? | ☐ | ☐ |
 | A4 | ¿Tiene un teléfono con cámara? | ☐ | ☐ |
 | A5 | ¿Tiene internet en su casa, sea wifi o datos del teléfono? | ☐ | ☐ |
-
-> Si A1 es "no", agradecer y terminar acá: la persona no es usuaria del producto. Anotar la
-> respuesta como descartada, no como un "no" del resto de las preguntas.
 
 ---
 
@@ -125,10 +144,19 @@ No identifican a la persona. Se llenan antes de empezar.
 | # | Pregunta | Sí | No |
 |---|---|---|---|
 | B1 | ¿Alguna vez le ha parecido que el recibo del agua le llegó más alto de lo normal? | ☐ | ☐ |
-| B2 | Cuando eso pasó, ¿pudo comprobar por su cuenta si la lectura era correcta? | ☐ | ☐ |
+| B2 | **Solo si B1 fue «sí»:** cuando eso pasó, ¿pudo comprobar por su cuenta si la lectura era correcta? | ☐ | ☐ ·  ☐ no aplica |
 | B3 | ¿Ha reclamado alguna vez por el monto del recibo del agua? | ☐ | ☐ |
 | B4 | ¿Sabe interpretar los números del medidor para saber cuánta agua gastó? | ☐ | ☐ |
 | B5 | ¿Ha tenido alguna vez una fuga que se dio cuenta solo cuando le llegó el recibo? | ☐ | ☐ |
+
+> **B2 es condicional, no un filtro.** Su redacción («cuando eso pasó») presupone que B1 fue
+> «sí». A quien nunca le llegó un recibo alto, B2 no le aplica — y contestarla «no» ensucia el
+> dato, porque un «no» ahí significa «no pude comprobarlo», que es justo la evidencia del
+> problema que el producto resuelve.
+>
+> A diferencia de A1, **B2 no corta el cuestionario**: el resto de las preguntas siguen siendo
+> válidas. Solo hay que poder distinguir «no pude» de «no me aplica», y por eso lleva una
+> tercera casilla. En un formulario digital va como pregunta condicional, o con tres opciones.
 
 ---
 
@@ -229,10 +257,11 @@ dimensiones declaradas (requisito de trazabilidad de ISO/IEC/IEEE 29148).
 
 | Preguntas | Dimensión TELOS | Qué decide |
 |---|---|---|
-| A1 | — (filtro) | Si la persona pertenece a la población objetivo |
+| A1 | — (filtro que corta) | Si la persona pertenece a la población objetivo. Un «no» acá termina el cuestionario y la respuesta se cuenta como descartada, no como una fila del registro |
 | A2, A3, B4 | Operativa | Si el abonado tiene alguna relación con su medidor hoy |
 | A4, A5, D1, D2 | Técnica | Si existen las condiciones materiales que el sistema asume (§1 de `CLAUDE.md`: cámara, conectividad, PWA sin tienda) |
-| B1, B2, B3, B5 | Operativa (conducta real) | Si el problema que el proyecto dice resolver le ocurre de verdad a la gente |
+| B1, B3, B5 | Operativa (conducta real) | Si el problema que el proyecto dice resolver le ocurre de verdad a la gente |
+| B2 | Operativa (conducta real, **condicional a B1**) | Si quien tuvo el problema pudo verificarlo por su cuenta. Solo aplica a quien contestó «sí» en B1 |
 | C1, C2 | Operativa | Si la caja de concreto a ras de suelo permite la captura en la práctica |
 | C3, C4, C5 | Operativa | Si el flujo con corrección manual — el camino real hoy — es aceptable |
 | D3, D4 | Técnica / confianza | Fricción de adopción y percepción sobre las fotos |
@@ -250,8 +279,19 @@ Una fila por respuesta. Los comentarios van completos en la sección de abajo, n
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | |
 
-**Total de respuestas: 0 de 15 mínimas.** *(Actualizar este número al agregar cada respuesta,
-igual que se hace con el dataset de campo en `docs/dataset-campo/registro-medidores.md`.)*
+En la columna `B2`, anotar `n/a` cuando B1 fue «no» — no dejarla en blanco ni marcarla «no»
+(§9 explica por qué esa distinción importa).
+
+**Se llevan dos conteos separados, no uno:**
+
+| | |
+|---|---|
+| Respuestas **válidas** (contestaron «sí» en A1) | 0 |
+| Descartadas por el filtro A1 | 0 |
+
+Solo el primero cuenta contra el mínimo de 15. El segundo se reporta igual, porque cuántas
+personas quedaron fuera del filtro también dice algo — y porque ocultarlo sería maquillar la
+tasa de respuesta.
 
 ### Comentarios recogidos
 
@@ -268,7 +308,7 @@ salga — mismo criterio que se usó para la decisión de marca en T-08.
 
 | Señal | Umbral | Qué significa |
 |---|---|---|
-| **El problema existe** | B1 ≥ 50 % sí **y** B2 ≥ 50 % no | Hay gente a la que le llegó un recibo dudoso y no pudo verificarlo. Es la premisa del proyecto: si esto no se cumple, el producto resuelve un problema que la gente no tiene |
+| **El problema existe** | B1 ≥ 50 % sí **y** B2 ≥ 50 % no *(sobre quienes contestaron «sí» en B1, no sobre el total)* | Hay gente a la que le llegó un recibo dudoso y no pudo verificarlo. Es la premisa del proyecto: si esto no se cumple, el producto resuelve un problema que la gente no tiene |
 | **Se puede usar en la práctica** | C1 y C2 ≥ 70 % sí | Las condiciones físicas reales de las cajas de medidor permiten la captura |
 | **El flujo real es aceptable** | C4 ≥ 60 % sí | La gente tolera corregir a mano, que es el camino normal hoy (0 % de acierto del OCR, ver `docs/exactitud-reconocimiento.md`) |
 | **La tesis del "sin hardware" se sostiene** | E1 alto **y** E3 bajo | Quieren la solución, pero no pagando por un aparato — que es exactamente el hueco que el proyecto dice llenar |
@@ -281,7 +321,70 @@ después de ver los datos, no se descartan respuestas incómodas, y no se redond
 
 ## 8. Estado
 
-- [ ] Formulario revisado por los tres integrantes antes de aplicarlo
-- [ ] 15 respuestas mínimas recogidas
-- [ ] Resultados tabulados en §6
+- [x] Formulario revisado por los tres integrantes antes de aplicarlo
+- [x] Primera recolección: 33 respuestas, 16 válidas
+- [x] Corrección del filtro tras esa primera vuelta (T-51, §9)
+- [ ] Segunda recolección con el formulario corregido, si alcanza el tiempo
 - [ ] Interpretación escrita contra los criterios de §7
+
+---
+
+## 9. Corrección del filtro tras la primera recolección (T-51)
+
+### Qué pasó
+
+La primera vuelta recogió **33 respuestas** y solo **16 quedaron válidas**: hubo que descartar el
+**51,5 %** *después* de recolectar.
+
+La causa no fue de quien respondió, fue del formulario: **la pregunta filtro no cortaba el
+cuestionario.** A1 preguntaba si la persona paga o revisa el recibo del agua, y quien contestaba
+que no seguía viendo y contestando las 25 preguntas restantes. Esas respuestas no se pueden usar
+—alguien que no ve el recibo no puede decir si el monto le pareció alto— así que se descartaron
+enteras.
+
+La instrucción existía, pero como **nota de texto debajo de la tabla**: «si A1 es no, agradecer y
+terminar acá». Una nota no corta nada. Es la diferencia entre pedirle a la gente que se detenga y
+que el formulario no la deje seguir.
+
+### Qué se corrigió
+
+1. **A1 salió de la sección A** y quedó sola, antes del resto, con la instrucción de cierre en
+   grande y las indicaciones concretas para implementarla como salto de sección en un formulario
+   digital. Ya no es una nota al pie: es una compuerta.
+2. **B2 tenía el mismo problema en menor grado**, y no se había detectado. Su redacción
+   («*cuando eso pasó*») presupone que B1 fue «sí». A quien nunca le llegó un recibo alto, B2 no
+   le aplica, pero el formulario la obligaba a contestar sí o no igual. Un «no» ahí es ambiguo:
+   puede significar «no pude comprobarlo» —que es la evidencia del problema— o «no me pasó
+   nunca», que no dice nada. Ahora lleva una tercera casilla de «no aplica» y está marcada como
+   condicional.
+3. **El registro lleva dos conteos separados** (§6): respuestas válidas y descartadas por filtro.
+   Antes había un solo número, y eso hacía invisible el 51,5 % hasta que alguien lo contara a
+   mano.
+4. **El umbral de §7 aclara el denominador de B2**: se calcula sobre quienes contestaron «sí» en
+   B1, no sobre el total. Con la casilla de «no aplica» esa distinción ya no es teórica.
+
+### Qué NO se corrigió, y por qué
+
+Se revisaron las demás preguntas buscando el mismo patrón. Hay pares donde una respuesta hace
+menos probable la siguiente —si no sabe dónde está el medidor (A2), es raro que le haya visto los
+números (A3); si no puede llegar hasta él (C1), difícilmente pueda fotografiarlo (C2)— pero en
+esos casos la segunda pregunta **sigue siendo contestable y su respuesta significa algo**. No son
+condicionales, son correlacionadas. Convertirlas en saltos escondería información real.
+
+### Qué pasa con las 16 respuestas ya recogidas
+
+**Siguen siendo válidas y no se mezclan con las nuevas.** Se recogieron con un instrumento
+distinto —sin filtro que cortara y sin la casilla de «no aplica» en B2— así que juntarlas sería
+sumar cosas que no se midieron igual.
+
+Si hay una segunda vuelta, se analiza aparte y se reporta el n de cada una. El resultado
+principal de la primera vuelta —87,5 % usaría una aplicación gratuita contra 18,8 % que compraría
+un medidor comercial— **se sostiene con n = 16**, porque los intervalos no se traslapan. Duplicar
+la muestra lo haría más firme; no lo cambia.
+
+### Por qué esto se cuenta en vez de taparse
+
+Es un error metodológico del equipo, detectado por el equipo, corregido por el equipo y con el
+costo escrito: se perdió la mitad de una recolección. Contarlo antes de que alguien lo pregunte
+vale más que un n = 16 sin explicación — y es la misma regla que se aplica al 0 % de exactitud
+del reconocimiento (`CLAUDE.md` §8).
