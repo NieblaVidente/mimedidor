@@ -32,20 +32,57 @@ const VOLUMEN_NUEVO = 526.69
  *  comparaban contra una factura en m³ como si fueran lo mismo. */
 const CONSUMO_ESPERADO = Number((VOLUMEN_NUEVO - VOLUMEN_SEMBRADO).toFixed(2)) // 16 m³
 
-function fechaISO(diasAtras: number): string {
+/** Hoy según el navegador — el mismo reloj con el que `PantallaCaptura` fecha la lectura. */
+function hoyISO(): string {
   // Componentes locales, no `toISOString()` (UTC) — mismo bug que se corrigió en
   // PantallaCaptura.tsx (T-35): en huso horario negativo, UTC ya puede estar en el día
   // siguiente aunque acá todavía sea "hoy".
-  const fecha = new Date()
-  fecha.setDate(fecha.getDate() - diasAtras)
-  const año = fecha.getFullYear()
-  const mes = String(fecha.getMonth() + 1).padStart(2, '0')
-  const dia = String(fecha.getDate()).padStart(2, '0')
+  const hoy = new Date()
+  const año = hoy.getFullYear()
+  const mes = String(hoy.getMonth() + 1).padStart(2, '0')
+  const dia = String(hoy.getDate()).padStart(2, '0')
   return `${año}-${mes}-${dia}`
+}
+
+/** Días entre dos fechas `AAAA-MM-DD`, contadas como fechas y no como instantes. */
+function diasEntre(desdeISO: string, hastaISO: string): number {
+  const [a1, m1, d1] = desdeISO.split('-').map(Number)
+  const [a2, m2, d2] = hastaISO.split('-').map(Number)
+  return Math.round((Date.UTC(a2, m2 - 1, d2) - Date.UTC(a1, m1 - 1, d1)) / 86_400_000)
+}
+
+/**
+ * La fecha de la lectura que sembró `datos_de_prueba.sql`, **leída del sistema** en vez de
+ * recalculada acá (T-43).
+ *
+ * Por qué no se calcula: la siembra usa `CURRENT_DATE - 5`, que es la fecha en la zona horaria
+ * del **servidor de PostgreSQL**, mientras que la lectura nueva la fecha el **navegador** con su
+ * hora local. Cuando esas dos zonas no coinciden —el caso reportado tenía la base en GMT y la
+ * máquina en Costa Rica— la diferencia entre ambas lecturas no es de 5 días, y la prueba fallaba
+ * de noche con el código intacto.
+ *
+ * Leerla del historial hace que la prueba verifique la aritmética del sistema sin depender de que
+ * los dos relojes coincidan. El consumo en m³ se sigue afirmando exacto: eso no depende de la
+ * zona horaria de nadie.
+ */
+function fechaSembrada(): Cypress.Chainable<string> {
+  return cy
+    .request(`/api/lecturas?medidor_id=${MEDIDOR}`)
+    .then(({ body }) => {
+      expect(body.lecturas, 'datos_de_prueba.sql tiene que haber sembrado una lectura').to.have.length
+        .of.at.least(1)
+      return body.lecturas[0].fecha as string
+    })
 }
 
 describe('Hilo completo: foto → lectura → historial → factura → comparación', () => {
   it('registra una lectura, la ve en el historial y la contrasta contra una factura', () => {
+    // Se lee del sistema antes de empezar, en vez de asumir "hace 5 días" (T-43).
+    let sembradaISO = ''
+    fechaSembrada().then((fecha) => {
+      sembradaISO = fecha
+    })
+
     cy.visit('/')
 
     // --- 1. Capturar y registrar una lectura -------------------------------------------------
@@ -76,7 +113,7 @@ describe('Hilo completo: foto → lectura → historial → factura → comparac
     // --- 2. Verla en el historial, con el consumo calculado ----------------------------------
     //
     // Que aparezca el consumo prueba que la lectura llegó de verdad a la base: el número sale de
-    // compararla contra la lectura sembrada hace 5 días, no de nada que viva en el navegador.
+    // compararla contra la lectura sembrada, no de nada que viva en el navegador.
 
     cy.get('#medidor-historial').type(MEDIDOR)
     cy.contains('button', 'Ver historial').click()
@@ -84,7 +121,11 @@ describe('Hilo completo: foto → lectura → historial → factura → comparac
     cy.get('table').within(() => {
       cy.contains('td', String(VOLUMEN_SEMBRADO)).should('exist')
       cy.contains('td', String(VOLUMEN_NUEVO)).should('exist')
-      cy.contains(`${CONSUMO_ESPERADO} m³ en 5 días`).should('exist')
+      // El consumo en m³ se afirma exacto — no depende de ninguna zona horaria. Los días salen
+      // de la fecha realmente sembrada, que sí depende del reloj de la base (T-43).
+      cy.contains(`${CONSUMO_ESPERADO} m³ en ${diasEntre(sembradaISO, hoyISO())} días`).should(
+        'exist',
+      )
     })
 
     // --- 3. Registrar una factura y contrastarla --------------------------------------------
@@ -96,9 +137,18 @@ describe('Hilo completo: foto → lectura → historial → factura → comparac
     const CONSUMO_FACTURADO = 20
     const DIFERENCIA_PORCENTUAL = ((CONSUMO_FACTURADO - CONSUMO_ESPERADO) / CONSUMO_FACTURADO) * 100
 
+    // El período arranca exactamente en la fecha sembrada, no en "hoy menos 5" (T-43): la
+    // comparación necesita una lectura con `fecha <= periodo_inicio`, y si ese extremo cae antes
+    // de lo sembrado no hay con qué comparar y la comparación devuelve nulo. Ese fallo parecía
+    // un error de la lógica de comparación sin serlo.
     cy.get('#factura-medidor').type(MEDIDOR)
-    cy.get('#factura-inicio').type(fechaISO(5))
-    cy.get('#factura-fin').type(fechaISO(0))
+    // Dentro de `cy.then()` a propósito: los argumentos de un comando de Cypress se evalúan
+    // cuando el comando se **encola**, no cuando se ejecuta. Fuera del `then`, `sembradaISO`
+    // todavía vale "" y `cy.type()` falla con "cannot accept an empty string".
+    cy.then(() => {
+      cy.get('#factura-inicio').type(sembradaISO)
+      cy.get('#factura-fin').type(hoyISO())
+    })
     cy.get('#factura-consumo').type(String(CONSUMO_FACTURADO))
     cy.get('#factura-monto').type('9500')
     cy.contains('button', 'Registrar y comparar').click()
