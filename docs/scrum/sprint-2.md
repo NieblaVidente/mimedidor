@@ -340,3 +340,170 @@ condiciones adversas, zonas repartidas— que no se lograron, y eso queda escrit
 Cerrar T-07 como «Hecho» habría dado un tablero más limpio y un registro falso. El número real
 —3 de 8, con dos metas fallidas— es el dato que la retrospectiva necesita para entender por qué
 esta tarea no avanzó en dos sprints, y esa conversación vale más que la tarjeta.
+
+
+---
+
+# Sprint Review — 2026-09-08
+
+**Modalidad:** videollamada.
+**Asistentes:** José Pablo Ramírez Sánchez, Yariel Andrey Elizondo Jiménez, Isaac Felipe Morún
+Moreira. Los tres presentes.
+
+Se hizo **antes** de la Retrospectiva, en el orden que fija `CLAUDE.md` §10.
+
+> **Nota sobre la fecha.** El sprint cerraba el 7 de setiembre y las ceremonias se hicieron el 8,
+> un día después. Queda anotado en vez de corregido hacia atrás.
+
+## El incremento que se revisó
+
+Lo que estaba en `main` al cierre del sprint:
+
+| Qué | Estado |
+|---|---|
+| Hilo completo foto → lectura → historial → factura → comparación | Funcionando, con los cuatro verificadores del CI en verde |
+| Conversión de la lectura a volumen real (T-39) | Corregida. Antes se guardaba la cadena del odómetro como si fuera m³ |
+| Fecha de la lectura editable y validada (T-35) | Hecha |
+| PWA instalable en un teléfono real | Comprobada, con evidencia en `docs/evidencia/pwa-instalable-t31.md` |
+| Manual de usuario | `docs/manual-usuario.md`, con capturas de las tres pantallas |
+| Manual técnico, casos de uso, evidencia de pruebas | Entregados |
+| Respaldo y recuperación | `database/scripts/respaldar.sh` y `restaurar.sh`, documentados |
+
+## Lo que se dijo que NO está
+
+Queda registrado acá porque es lo que el equipo va a tener que decir en la feria:
+
+- **El reconocimiento automático acierta 0 de 5** sobre el dataset de campo. No cambió durante el
+  sprint y no va a cambiar antes de la feria.
+- **No hay entrega continua.** El pipeline valida pero no despliega, porque no hay servidor
+  contratado (#38 quedó abierta).
+- **El dataset de campo se cerró en 3 medidores** de los 8 de la meta revisada.
+
+---
+
+# Sprint Retrospective — 2026-09-08
+
+**Modalidad:** videollamada, a continuación del Review.
+**Asistentes:** los tres.
+
+El material se preparó de antemano en
+[`propuesta-cierre-sprint-2-y-sprint-3.md`](propuesta-cierre-sprint-2-y-sprint-3.md) y se revisó
+en el Pull Request #87, que **los tres aprobaron**.
+
+## Los números del sprint
+
+| | Puntos |
+|---|---|
+| Comprometido y cumplido | **26 de 26** |
+| Cerrado fuera del compromiso | 23 |
+| — descontando T-07, cerrada como alcance reducido y no cumplida | −5 |
+| **Trabajo estimado y realmente completado** | **44** |
+| Tarjetas cerradas **sin ninguna estimación** | **6 tarjetas, 0 puntos registrados** |
+| Abierto al cierre | 5 (#38, T-28) |
+
+**El compromiso se cumplió entero**, cosa que no pasó en el Sprint 1 (52 de 60).
+
+Dos matices que el equipo acordó dejar escritos:
+
+1. **T-21 (3 pts) ya estaba terminado el día del Planning.** El trabajo nuevo del compromiso fueron
+   23 puntos.
+2. **T-07 no se cuenta como completada.** Cerró en 3 de 8 medidores porque el equipo decidió seguir
+   adelante, no porque estuviera hecha. Sumar sus 5 puntos a la velocity la inflaría.
+
+## Seguimiento de las cinco acciones del Sprint 1
+
+| # | Acción | Resultado |
+|---|---|---|
+| 1 | Los Issues de frontend nombran los endpoints que consumen | **Sin evidencia concluyente.** Solo hubo dos Issues de cliente: #52 sí los nombra, #43 no los necesitaba |
+| 2 | Prueba contra la cosa real en todo lo que toque base de datos o HTTP | ✅ **Cumplida** |
+| 3 | Nunca tres ramas en vuelo | ❌ **Incumplida** |
+| 4 | Daily asíncrono con registro semanal | ❌ **Incumplida las dos semanas** |
+| 5 | Rotación de revisión de Pull Requests por área | ❌ **Incumplida** |
+
+### Por qué la acción 2 sobrevivió y las otras no
+
+Es la conclusión central de esta retrospectiva. La acción 2 **quedó dentro del pipeline**: el job
+`e2e` es obligatorio para mergear, así que no depende de que nadie se acuerde. Las otras cuatro
+dependían de memoria y disciplina, y se cayeron.
+
+### Acción 3 — el detalle, porque señala al Scrum Master
+
+Hubo **11 momentos distintos con 3 o más Pull Requests abiertos a la vez**, con un pico de **cinco**
+el 2026-09-02: #76, #77, #78, #79 y #80.
+
+**Los cinco eran de José Pablo**, que es quien escribió la acción y quien facilita las ceremonias.
+Queda escrito así.
+
+### Acción 4 — el criterio de fracaso escrito por adelantado se activó
+
+En el registro de la semana del 25 al 31 de agosto el equipo dejó por escrito, *antes* de que
+ocurriera:
+
+> Si al cerrar la semana del 1 al 7 de setiembre tampoco hay registro, el problema no es el formato
+> sino que el equipo no está haciendo dailies, y eso entra a la retrospectiva del Sprint 2 como
+> **hallazgo** — no como una acción más que se vuelve a escribir igual.
+
+**No hubo registro de esa semana.** El equipo predijo su propio fallo y acertó.
+
+Se probaron dos explicaciones y ninguna alcanzó: en el Sprint 1 se concluyó que «nadie era dueño» y
+se nombró dueño; en el Sprint 2 se concluyó que «el formato no encaja» y se cambió el formato. Falló
+las dos veces.
+
+### Acción 5 — la que más pesa
+
+| Integrante | Pull Requests que escribió | Pull Requests que aprobó |
+|---|---|---|
+| José Pablo | **24** | 9 |
+| Isaac | 7 | **23** |
+| Yariel | **2** | **0** |
+
+**Ninguno de los tres cubrió las tres áreas.** Yariel no aprobó ningún Pull Request en todo el
+sprint.
+
+Pesa más que las otras cuatro porque hay una **Defensa Técnica Individual** en Sistemas Operativos
+(8 %): a cualquiera le pueden preguntar por cualquier parte del sistema. Revisar el código de otro
+es la forma más barata de conocerlo, y con 0 y 2 revisiones esa preparación no está pasando.
+
+## Hallazgos
+
+1. **El reparto de trabajo empeoró.** Sprint 1: 22 / 13 / 10 puntos. Sprint 2 en Pull Requests:
+   **24 / 7 / 2**. El acta del Planning decía «queda anotado para vigilarlo en la próxima
+   retrospectiva» — esta es esa retrospectiva, y la brecha creció.
+2. **Estimar sigue siendo el punto flojo.** Seis tarjetas cerradas sin puntos, entre ellas T-39, que
+   fue el hallazgo más importante del sprint y en el registro de velocity **vale cero**. El equipo
+   hoy no puede planificar por velocity porque no tiene una serie confiable.
+3. **Tres defectos aparecieron solo al mirar el producto con ojos de usuario**, al escribir el
+   manual (#84, #85, #86). Los tres estaban en `main` con los cuatro verificadores en verde. El más
+   incómodo es #84: la guía de encuadre que la pantalla dice que uses **nunca funcionó**, y el
+   reconocimiento se midió sobre fotos tomadas sin la ayuda que se suponía que existía.
+4. **Lo que funcionó y no hay que perder:** el compromiso se cumplió entero, y **ninguna tarjeta se
+   marcó como hecha sin estarlo** — T-07 cerró como alcance reducido, T-32 entregó diagnóstico sin
+   arreglo, y el reconocimiento se reporta como 0 de 5.
+
+## Acciones acordadas para el Sprint 3
+
+**Tres, no cinco.** De las cinco anteriores, tres se incumplieron; escribir más no mejora nada.
+
+El criterio que el equipo adoptó: **una acción solo entra si se puede verificar sin depender de que
+alguien se acuerde** — que es la lección de por qué la acción 2 sobrevivió.
+
+**Las tres se aprobaron tal cual, sin cambios.**
+
+| # | Acción | Cómo se verifica | Responsable |
+|---|---|---|---|
+| **A** | Ningún Issue se cierra sin etiqueta `puntos:`. Si aparece a mitad del sprint, se estima entre los tres antes de empezarla | `gh issue list --state closed` y contar los que quedaron sin etiqueta | Los tres |
+| **B** | Cada integrante aprueba al menos 3 Pull Requests, y al menos uno tiene que ser de código, no de documentación | `gh pr list --json reviews` | Los tres |
+| **C** | **Se elimina el Daily Scrum como ceremonia con registro escrito.** Se reemplaza por un repaso del tablero de 10 minutos al inicio de cada clase presencial en que coincidan los tres, anotado en una línea en el acta del sprint | Que el acta del Sprint 3 tenga esas líneas con fecha | José Pablo |
+
+### Sobre la acción C
+
+Es un cambio a una ceremonia de Scrum y por eso se decidió entre los tres, no por el Scrum Master
+solo.
+
+La razón: se intentó dos veces con dos formatos distintos y se cayó las dos. **Insistir por tercera
+vez sería no aprender de la retrospectiva.** Lo que el profesor de ISW2 evalúa es el registro fechado
+de las ceremonias, no que se llamen «Daily Scrum» ni que sean diarias. Un repaso corto anclado a algo
+que ya ocurre —la clase presencial— tiene posibilidad real de sostenerse.
+
+**`CLAUDE.md` §10 queda desactualizado por esta decisión** y se corrige en el mismo Pull Request que
+este registro.
