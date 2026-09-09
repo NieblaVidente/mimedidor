@@ -68,7 +68,12 @@ jobs:
       run:
         working-directory: database/scripts
     steps:
+      # fetch-depth: 0 porque verificar_migraciones.sh lee del historial el esquema base desde
+      # el que arranca la cadena de migraciones. Con el clon superficial por defecto ese commit
+      # no existe en el runner y el paso falla.
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Instalar PostgreSQL 16 (motor nativo, sin contenedor)
         run: |
@@ -99,6 +104,14 @@ jobs:
 
       - name: Fijar contraseña del superusuario (solo para que los scripts de T-29 se conecten por TCP)
         run: sudo -u postgres psql -c "ALTER USER postgres PASSWORD 'clave-superusuario-ci';"
+
+      # Desde T-28 producción se actualiza aplicando migraciones, mientras que el CI y cualquier
+      # instalación nueva construyen la base desde cero. Si esos dos caminos se separan, el CI
+      # queda en verde sobre un esquema que no es el que corre en producción.
+      - name: "Verificar que migraciones y scripts den el mismo esquema"
+        run: |
+          chmod +x verificar_migraciones.sh
+          PGPASSWORD='clave-superusuario-ci' ./verificar_migraciones.sh localhost 5432 postgres
 
       - name: "Verificar respaldo y restauración (T-29: respalda, restaura y compara los datos)"
         run: |

@@ -18,6 +18,30 @@ La rúbrica describe los mecanismos de control transaccional con vocabulario de 
 - `scripts/` — creación de base de datos, tablas, esquemas, roles y permisos.
 - `migrations/` — cambios incrementales al esquema, en orden.
 
+**Los dos caminos tienen que llegar al mismo esquema.** Una instalación nueva (y el CI) se
+construyen desde cero con `scripts/`; producción ya existe y se actualiza aplicando
+`migrations/`. Si se agrega una columna a `02_tablas.sql` y se olvida la migración —o al
+revés— el CI queda en verde sobre un esquema que no es el que corre en producción.
+
+`scripts/verificar_migraciones.sh` comprueba justamente eso: arma las dos bases, aplica las
+migraciones dos veces para confirmar que son idempotentes, y compara los esquemas de forma
+canónica (columnas, restricciones e índices, ordenados por nombre). Corre en cada PR dentro del
+job `database`.
+
+```bash
+PGPASSWORD='...' database/scripts/verificar_migraciones.sh localhost 5432 postgres
+```
+
+No compara el **orden** de las columnas a propósito: `ALTER TABLE ADD COLUMN` siempre agrega al
+final, así que una base migrada nunca va a coincidir en ese punto con una creada desde cero.
+Esa diferencia no afecta a este proyecto —ninguna consulta usa `SELECT *` ni `INSERT` sin
+nombrar columnas— y exigir que coincida obligaría a reescribir tablas sin ganar nada.
+
+**Al agregar una migración nueva** no hay que tocar nada del script: el `SHA_BASE` que tiene
+adentro es el punto de partida de toda la cadena (el `02_tablas.sql` anterior a que existiera
+la primera migración) y solo cambiaría si algún día se aplasta el historial en una línea base
+nueva.
+
 ## Modelo
 
 Diagrama entidad-relación, diccionario de datos y justificación de 3FN en
