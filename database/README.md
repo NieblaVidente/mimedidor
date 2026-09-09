@@ -97,6 +97,47 @@ haga falta, y el job `database` de CI lo corre en cada PR.
 psql -d mimedidor -U mimedidor_app -v ON_ERROR_STOP=1 -f database/scripts/verificar_registrar_lectura.sql
 ```
 
+## De qué reloj depende cada fecha (T-43)
+
+En este sistema hay **tres relojes distintos**, y no siempre coinciden. Saber cuál decide cada
+fecha evita perder una tarde buscando un fallo que no está en el código:
+
+| Fecha | La decide | Zona horaria |
+|---|---|---|
+| `lectura.fecha` que registra el abonado | `PantallaCaptura.tsx`, con los componentes de fecha locales | La del **navegador** del usuario |
+| La validación de fecha futura de la API | `date.today()` en `crear_lectura` | La del **proceso del servidor** |
+| El `CHECK (fecha <= CURRENT_DATE)` de la tabla | PostgreSQL | La del **servidor de PostgreSQL** |
+| La lectura que siembra `datos_de_prueba.sql` | `CURRENT_DATE - 5` | La del **servidor de PostgreSQL** |
+
+**Esto ya causó un fallo real.** La prueba end-to-end afirmaba "5 días" entre la lectura sembrada
+y la nueva, lo cual solo es cierto si el reloj de PostgreSQL y el del navegador están en la misma
+zona. Con la base en `GMT` y la máquina en Costa Rica, después de las 18:00 la base ya está en el
+día siguiente y la diferencia da 4 días, no 5. La prueba fallaba con el código intacto. Se
+corrigió en T-43 haciendo que la prueba **lea del sistema** la fecha sembrada en vez de
+recalcularla con otro reloj.
+
+### Sobre el `CHECK` y la validación en Python
+
+Las dos comprueban lo mismo —que la fecha no sea futura— pero **con relojes distintos**, así que
+pueden discrepar. Medido en una máquina en Costa Rica el 2026-09-07 a las 22:47:
+
+```
+Python date.today()                    → 2026-09-07
+PostgreSQL CURRENT_DATE en GMT         → 2026-09-08
+PostgreSQL CURRENT_DATE en Asia/Tokyo  → 2026-09-08
+PostgreSQL CURRENT_DATE en Guatemala   → 2026-09-07
+```
+
+Con la base **adelantada** respecto a la aplicación —el caso normal, porque los servidores suelen
+estar en UTC y Costa Rica es UTC-6— el `CHECK` queda **más permisivo** que Python. No rechaza
+nada válido: Python filtra primero y devuelve el `FECHA_INVALIDA` limpio del contrato. La defensa
+en profundidad sigue funcionando.
+
+El caso incómodo sería el inverso: una base **atrasada** respecto a la aplicación rechazaría con
+un error crudo de restricción una lectura de hoy que Python ya aceptó. Hoy no ocurre en ningún
+despliegue del proyecto, pero **es la razón por la que conviene fijar explícitamente la zona
+horaria del servidor de PostgreSQL** en vez de dejarla al azar de la instalación.
+
 ## Respaldo y recuperación (T-29)
 
 | | |
