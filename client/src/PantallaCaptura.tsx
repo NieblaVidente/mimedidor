@@ -1,11 +1,20 @@
 import { useEffect, useRef, useState } from 'react'
 import { abrirCamara, capturarFotograma, detenerCamara } from './camara'
-import { ErrorApiLecturas, guardarLectura, reconocerFoto, type LecturaGuardada } from './api/lecturas'
+import { guardarLectura, reconocerFoto, type LecturaGuardada } from './api/lecturas'
+import { ErrorApi } from './api/errores'
 
 type Estado = 'inicio' | 'camara' | 'reconociendo' | 'revisando' | 'guardando' | 'guardado'
 
 function fechaHoyISO(): string {
-  return new Date().toISOString().slice(0, 10)
+  // OJO: `new Date().toISOString()` da la fecha en UTC, no la fecha local — en Costa Rica
+  // (UTC-6), entre las 18:00 y la medianoche, UTC ya está en el día siguiente. Con esa fecha
+  // "de mañana" el servidor la rechazaba con FECHA_INVALIDA (T-35) siendo todavía hoy acá.
+  // Se arma a mano con los componentes locales para evitar la conversión a UTC.
+  const hoy = new Date()
+  const año = hoy.getFullYear()
+  const mes = String(hoy.getMonth() + 1).padStart(2, '0')
+  const dia = String(hoy.getDate()).padStart(2, '0')
+  return `${año}-${mes}-${dia}`
 }
 
 function PantallaCaptura() {
@@ -15,6 +24,9 @@ function PantallaCaptura() {
   const [medidorId, setMedidorId] = useState('')
   const [estado, setEstado] = useState<Estado>('inicio')
   const [valorTexto, setValorTexto] = useState('')
+  // Hoy por defecto, pero editable (T-35): antes se guardaba siempre con la fecha de hoy, sin
+  // contemplar que el abonado normalmente toma la foto en el patio y registra la lectura después.
+  const [fecha, setFecha] = useState(fechaHoyISO())
   const [origen, setOrigen] = useState<'reconocimiento' | 'manual'>('manual')
   const [mensajeError, setMensajeError] = useState<string | null>(null)
   const [lecturaGuardada, setLecturaGuardada] = useState<LecturaGuardada | null>(null)
@@ -73,7 +85,7 @@ function PantallaCaptura() {
       setValorTexto('')
       setOrigen('manual')
       setMensajeError(
-        error instanceof ErrorApiLecturas
+        error instanceof ErrorApi
           ? 'No se pudo leer la lectura automáticamente. Escribila a mano.'
           : 'Ocurrió un error inesperado al reconocer la foto. Podés escribir la lectura a mano.',
       )
@@ -99,14 +111,14 @@ function PantallaCaptura() {
       const lectura = await guardarLectura({
         medidor_id: medidorId,
         valor: valorNumerico,
-        fecha: fechaHoyISO(),
+        fecha,
         origen,
       })
       setLecturaGuardada(lectura)
       setEstado('guardado')
     } catch (error) {
       setMensajeError(
-        error instanceof ErrorApiLecturas ? error.message : 'No se pudo guardar la lectura.',
+        error instanceof ErrorApi ? error.message : 'No se pudo guardar la lectura.',
       )
       setEstado('revisando')
     }
@@ -115,6 +127,7 @@ function PantallaCaptura() {
   function manejarRegistrarOtra() {
     setEstado('inicio')
     setValorTexto('')
+    setFecha(fechaHoyISO())
     setMensajeError(null)
     setLecturaGuardada(null)
   }
@@ -153,18 +166,31 @@ function PantallaCaptura() {
 
       {(estado === 'revisando' || estado === 'guardando') && (
         <section>
-          <label htmlFor="valor-lectura">Lectura (m³)</label>
+          <label htmlFor="valor-lectura">Lectura que muestra el medidor</label>
           <input
             id="valor-lectura"
             value={valorTexto}
             onChange={(evento) => manejarCambioValor(evento.target.value)}
             inputMode="decimal"
+            aria-describedby="ayuda-valor-lectura"
           />
+          <p id="ayuda-valor-lectura">
+            Escribí los dígitos tal como se ven en el odómetro, seguidos y sin punto ni coma
+            (incluidos los rojos).
+          </p>
           <p>
             {origen === 'reconocimiento'
               ? 'Lectura reconocida automáticamente — revisala antes de confirmar.'
               : 'Ingresada manualmente.'}
           </p>
+          <label htmlFor="fecha-lectura">Fecha de la lectura</label>
+          <input
+            id="fecha-lectura"
+            type="date"
+            value={fecha}
+            max={fechaHoyISO()}
+            onChange={(evento) => setFecha(evento.target.value)}
+          />
           <button type="button" onClick={manejarConfirmar} disabled={estado === 'guardando'}>
             {estado === 'guardando' ? 'Guardando…' : 'Confirmar lectura'}
           </button>
