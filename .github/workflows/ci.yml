@@ -293,6 +293,24 @@ jobs:
           printf '%s\n' "${{ secrets.SSH_HOST_KEY }}" > ~/.ssh/known_hosts
           chmod 600 ~/.ssh/known_hosts
 
+      - name: Guardar la versión que está corriendo
+        run: |
+          # Sin esto no hay nada a qué volver: los `rsync --delete` de abajo pisan la versión
+          # viva y la anterior deja de existir. La copia se hace en el servidor, antes de
+          # tocar nada, y es lo que usa `infra/revertir.sh`.
+          #
+          # Vive en /opt/mimedidor/versiones, que es del usuario de despliegue: renombrar o
+          # crear directorios dentro de /var/www exigiría permisos sobre /var/www mismo.
+          ssh "${{ secrets.SSH_USUARIO }}@${{ secrets.SSH_HOST }}" 'bash -euo pipefail -s' <<'REMOTO'
+          mkdir -p /opt/mimedidor/versiones
+          if [ -d /var/www/mimedidor ]; then
+            rsync -a --delete /var/www/mimedidor/ /opt/mimedidor/versiones/cliente-anterior/
+          fi
+          if [ -d /opt/mimedidor/servidor ]; then
+            rsync -a --delete /opt/mimedidor/servidor/ /opt/mimedidor/versiones/servidor-anterior/
+          fi
+          REMOTO
+
       - name: Publicar el cliente
         run: |
           rsync -az --delete client/dist/ \
@@ -304,6 +322,17 @@ jobs:
             --exclude '__pycache__' --exclude '.pytest_cache' --exclude 'tests' \
             server/ "${{ secrets.SSH_USUARIO }}@${{ secrets.SSH_HOST }}:/opt/mimedidor/servidor/"
 
+      - name: Publicar el script de reversión
+        run: |
+          # Va al home del usuario de despliegue, NO a /opt/mimedidor/servidor/, que se
+          # sincroniza con `--delete`: si el despliegue que hay que revertir llegara sin el
+          # script, la emergencia empezaría sin la herramienta para resolverla.
+          #
+          # Se publica en cada despliegue para que el script del servidor sea siempre el de la
+          # versión que está corriendo, y no uno copiado a mano hace tres semanas.
+          rsync -az infra/revertir.sh \
+            "${{ secrets.SSH_USUARIO }}@${{ secrets.SSH_HOST }}:revertir.sh"
+
       - name: Instalar dependencias y reiniciar el servicio
         run: |
           ssh "${{ secrets.SSH_USUARIO }}@${{ secrets.SSH_HOST }}" 'bash -euo pipefail -s' <<'REMOTO'
@@ -314,14 +343,40 @@ jobs:
       - name: Verificar que quedó en pie
         run: |
           # Un despliegue que no se verifica no es un despliegue: reiniciar el servicio no
-          # prueba que arrancó. Se consulta una ruta real hasta que responda o se agote.
+          # prueba que arrancó.
+          #
+          # Se comprueban DOS cosas, porque una sola no alcanza:
+          #
+          #   1. /api/salud → 200. Prueba que uvicorn está sirviendo detrás de nginx.
+          #      No toca la base de datos, así que por sí solo daría verde con las
+          #      credenciales de PostgreSQL mal puestas — que es la falla más probable en un
+          #      servidor recién armado.
+          #
+          #   2. /api/lecturas con un medidor inexistente → 404. Ese 404 lo produce
+          #      `medidor_existe`, o sea que la aplicación CONSULTÓ la base y contestó. Si
+          #      PostgreSQL no responde, sale 500 y esto falla, que es lo que se quiere.
+          #
+          # No se usa `curl -f` acá: haría fallar el 404, que es justamente la respuesta
+          # correcta. Se compara el código explícitamente.
+          #
+          # OJO: la versión anterior de este paso consultaba /api/lecturas SIN parámetros con
+          # `curl -fsS`. `medidor_id` es obligatorio, así que devolvía 400 y `-f` lo trataba
+          # como error (salida 22): todo despliegue habría terminado en rojo aunque
+          # funcionara. Comprobado contra el servidor corriendo, no deducido.
+          MEDIDOR_INEXISTENTE=00000000-0000-0000-0000-000000000000
           for intento in $(seq 1 10); do
-            if curl -fsS --max-time 10 "${{ vars.URL_PRODUCCION }}/api/lecturas" > /dev/null; then
-              echo "Producción responde en el intento $intento."
+            salud=$(curl -s -o /dev/null -w '%{http_code}' --max-time 10 \
+              "${{ vars.URL_PRODUCCION }}/api/salud" || echo 000)
+            base=$(curl -s -o /dev/null -w '%{http_code}' --max-time 10 \
+              "${{ vars.URL_PRODUCCION }}/api/lecturas?medidor_id=$MEDIDOR_INEXISTENTE" || echo 000)
+
+            if [ "$salud" = "200" ] && [ "$base" = "404" ]; then
+              echo "Producción responde y llega a la base de datos (intento $intento)."
               exit 0
             fi
-            echo "Intento $intento sin respuesta; reintentando en 3 s."
+
+            echo "Intento $intento — /api/salud: $salud (se espera 200), base: $base (se espera 404). Reintentando en 3 s."
             sleep 3
           done
-          echo "::error::El despliegue terminó pero /api/lecturas no responde."
+          echo "::error::El despliegue terminó pero producción no verifica. salud=$salud base=$base"
           exit 1
