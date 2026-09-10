@@ -133,7 +133,8 @@ function PantallaCaptura() {
   }
 
   return (
-    <div>
+    <div className="pantalla">
+      <h2>Registrar lectura</h2>
       {estado === 'inicio' && (
         <section>
           <label htmlFor="medidor-id">Medidor</label>

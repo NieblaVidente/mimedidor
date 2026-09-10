@@ -1,18 +1,25 @@
+/* Paleta propia del proyecto (T-52): los mismos colores del ícono de la PWA
+   (client/public/icono.svg, theme_color en vite.config.ts) — así la app instalada y la
+   app abierta en el navegador se ven como una sola cosa, en vez del morado de la plantilla
+   de Vite que traía antes de T-42. */
 :root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
-  --accent: #aa3bff;
+  --azul-oscuro: #1b4e80;
+  --azul: #2f6fb5;
+  --azul-claro: #8fb4d9;
+  --rojo: #c0392b;
 
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
+  --texto: #3c4551;
+  --texto-fuerte: #12263f;
+  --fondo: #fff;
+  --fondo-tarjeta: #f4f7fb;
+  --borde: #dbe4ee;
 
-  font: 18px/145% var(--sans);
-  letter-spacing: 0.18px;
+  --sans: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+
+  font: 17px/145% var(--sans);
   color-scheme: light dark;
-  color: var(--text);
-  background: var(--bg);
+  color: var(--texto);
+  background: var(--fondo);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -25,65 +32,78 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --accent: #c084fc;
+    --azul: #5b93cf;
+    --azul-claro: #8fb4d9;
+    --texto: #b9c4d1;
+    --texto-fuerte: #eef3f8;
+    --fondo: #0f1b28;
+    --fondo-tarjeta: #16263a;
+    --borde: #23384f;
   }
 }
 
-#root {
-  width: 1126px;
-  max-width: 100%;
-  margin: 0 auto;
-  text-align: center;
-  border-inline: 1px solid var(--border);
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
+* {
   box-sizing: border-box;
-  padding: 0 20px 32px;
 }
 
 body {
   margin: 0;
 }
 
+#root {
+  max-width: 640px;
+  margin: 0 auto;
+  min-height: 100svh;
+  padding: 0 20px 40px;
+}
+
+header {
+  text-align: center;
+  padding: 32px 0 8px;
+}
+
 h1,
 h2 {
-  font-family: var(--heading);
-  font-weight: 500;
-  color: var(--text-h);
+  font-family: var(--sans);
+  font-weight: 600;
+  color: var(--texto-fuerte);
 }
 
 h1 {
-  font-size: 56px;
-  letter-spacing: -1.68px;
-  margin: 32px 0;
+  font-size: 34px;
+  letter-spacing: -0.5px;
+  margin: 0 0 6px;
+  color: var(--azul-oscuro);
   @media (max-width: 1024px) {
-    font-size: 36px;
-    margin: 20px 0;
+    font-size: 28px;
   }
 }
+
 h2 {
-  font-size: 24px;
-  line-height: 118%;
-  letter-spacing: -0.24px;
-  margin: 0 0 8px;
-  @media (max-width: 1024px) {
-    font-size: 20px;
-  }
+  font-size: 20px;
+  letter-spacing: -0.2px;
+  margin: 0 0 14px;
 }
+
 p {
   margin: 0;
 }
 
-/* Layout de formularios (T-42): sin esto, cada rótulo quedaba pegado a su campo, y cada campo
-   pegado al siguiente, en las tres pantallas. */
+/* Cada una de las tres pantallas —captura, historial, factura— es una "tarjeta" del mismo
+   tamaño y con el mismo trato visual, para que se lean como secciones de una sola aplicación
+   y no como tres formularios pegados uno debajo del otro (T-52). */
+.pantalla {
+  display: block;
+  background: var(--fondo-tarjeta);
+  border: 1px solid var(--borde);
+  border-radius: 12px;
+  padding: 20px;
+  margin: 0 0 20px;
+  text-align: left;
+}
+
 section {
-  max-width: 480px;
-  margin: 0 auto 32px;
+  max-width: 100%;
   text-align: left;
 }
 
@@ -92,7 +112,12 @@ label {
   margin-top: 16px;
   margin-bottom: 4px;
   font-weight: 600;
-  color: var(--text-h);
+  font-size: 15px;
+  color: var(--texto-fuerte);
+}
+
+label:first-child {
+  margin-top: 0;
 }
 
 input,
@@ -100,25 +125,40 @@ select {
   display: block;
   width: 100%;
   box-sizing: border-box;
-  padding: 8px 10px;
+  padding: 9px 11px;
   margin-bottom: 4px;
   font: inherit;
-  color: var(--text-h);
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: 4px;
+  color: var(--texto-fuerte);
+  background: var(--fondo);
+  border: 1px solid var(--borde);
+  border-radius: 6px;
+}
+
+input:focus,
+select:focus {
+  outline: 2px solid var(--azul);
+  outline-offset: 1px;
 }
 
 button {
   margin-top: 16px;
-  padding: 8px 16px;
+  padding: 9px 18px;
   font: inherit;
   font-weight: 600;
   color: #fff;
-  background: var(--accent);
+  background: var(--azul);
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
+}
+
+button:hover:not(:disabled) {
+  background: var(--azul-oscuro);
+}
+
+button:focus-visible {
+  outline: 2px solid var(--azul-oscuro);
+  outline-offset: 2px;
 }
 
 button:disabled {
@@ -135,27 +175,34 @@ th,
 td {
   text-align: left;
   padding: 8px;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--borde);
 }
 
-/* Visor de cámara y guía de encuadre (T-16). Vivían en App.css, que ningún archivo importaba
-   (T-42) — la guía nunca se veía y el video no tenía el max-width que lo contiene en pantallas
-   angostas. */
+th {
+  color: var(--texto-fuerte);
+}
+
+p[role='alert'] {
+  color: var(--rojo);
+  font-weight: 600;
+  margin-top: 8px;
+}
+
+/* Visor de cámara y guía de encuadre (T-16, arreglado en T-42). */
 .visor-camara {
   position: relative;
   width: 100%;
   max-width: 480px;
+  margin: 0 auto 12px;
 }
 
 .visor-camara video {
   width: 100%;
   border-radius: 8px;
   background: #000;
+  display: block;
 }
 
-/* Guía de encuadre (T-16): un anillo centrado sobre el video para ayudar a alinear la
-   carátula circular del hidrómetro antes de disparar — mejora la foto de entrada y reduce
-   el trabajo de T-09 (detección de círculo). */
 .guia-encuadre {
   position: absolute;
   inset: 12% 25%;

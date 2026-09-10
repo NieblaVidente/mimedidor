@@ -70,7 +70,7 @@ function PantallaFactura() {
 
   if (estado === 'listo' && comparacion) {
     return (
-      <section>
+      <section className="pantalla">
         <h2>Comparación de tu factura</h2>
         <p>Consumo facturado: {comparacion.consumo_facturado_m3} m³</p>
         <p>
@@ -89,7 +89,7 @@ function PantallaFactura() {
   }
 
   return (
-    <section>
+    <section className="pantalla">
       <h2>Registrar factura</h2>
       <form onSubmit={manejarEnviar}>
         <label htmlFor="factura-medidor">Medidor</label>

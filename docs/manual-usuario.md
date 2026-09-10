@@ -245,9 +245,6 @@ Escrito a propósito, para que nadie espere algo que no está:
   ver el historial necesita internet.
 - **No avisa nada por su cuenta.** No manda notificaciones ni correos.
 - **No guarda la foto.** Se usa para intentar leer el número y se descarta.
-- **La pantalla todavía no tiene diseño propio.** T-42 arregló que la aplicación se viera rota
-  (la guía de encuadre no se veía, el video se salía de la pantalla, los campos quedaban
-  pegados); falta la pasada visual —tipografía y paleta propias— que le toca a T-52.
 
 ---
 
