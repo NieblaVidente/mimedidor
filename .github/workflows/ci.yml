@@ -68,7 +68,12 @@ jobs:
       run:
         working-directory: database/scripts
     steps:
+      # fetch-depth: 0 porque verificar_migraciones.sh lee del historial el esquema base desde
+      # el que arranca la cadena de migraciones. Con el clon superficial por defecto ese commit
+      # no existe en el runner y el paso falla.
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Instalar PostgreSQL 16 (motor nativo, sin contenedor)
         run: |
@@ -99,6 +104,14 @@ jobs:
 
       - name: Fijar contraseña del superusuario (solo para que los scripts de T-29 se conecten por TCP)
         run: sudo -u postgres psql -c "ALTER USER postgres PASSWORD 'clave-superusuario-ci';"
+
+      # Desde T-28 producción se actualiza aplicando migraciones, mientras que el CI y cualquier
+      # instalación nueva construyen la base desde cero. Si esos dos caminos se separan, el CI
+      # queda en verde sobre un esquema que no es el que corre en producción.
+      - name: "Verificar que migraciones y scripts den el mismo esquema"
+        run: |
+          chmod +x verificar_migraciones.sh
+          PGPASSWORD='clave-superusuario-ci' ./verificar_migraciones.sh localhost 5432 postgres
 
       - name: "Verificar respaldo y restauración (T-29: respalda, restaura y compara los datos)"
         run: |
@@ -223,3 +236,92 @@ jobs:
         run: |
           echo "===== API ====="; cat /tmp/api.log || true
           echo "===== CLIENTE ====="; cat /tmp/cliente.log || true
+
+  # ══════════════════════════════════════════════════════════════════════════════════════
+  # Entrega continua (T-28). Solo corre al mergear a `main`, y `needs` la encadena a los
+  # cuatro verificadores: si alguno falla, el despliegue no ocurre. Esa dependencia es la
+  # garantía real de que no se publica algo en rojo, y no un acuerdo verbal.
+  # ══════════════════════════════════════════════════════════════════════════════════════
+  desplegar:
+    name: Desplegar a producción
+    needs: [client, server, database, e2e]
+    # `vars.URL_PRODUCCION` funciona como interruptor: mientras no exista, el job queda en
+    # `Skipped` y `main` no se pone en rojo por una infraestructura que todavía no se creó. En
+    # cuanto se defina la variable el despliegue se activa solo, sin volver a tocar este archivo
+    # — que es como estas cosas quedan apagadas para siempre.
+    #
+    # Se condiciona sobre `vars` y no sobre `secrets` porque el contexto `secrets` no está
+    # disponible en un `if` a nivel de job.
+    if: >-
+      github.event_name == 'push'
+      && github.ref == 'refs/heads/main'
+      && vars.URL_PRODUCCION != ''
+    runs-on: ubuntu-latest
+
+    # Dos merges seguidos no pueden pisarse a mitad de rsync. No se cancela el que ya
+    # empezó: dejar el servidor con medio despliegue encima es peor que esperar.
+    concurrency:
+      group: despliegue-produccion
+      cancel-in-progress: false
+
+    environment:
+      name: produccion
+      url: ${{ vars.URL_PRODUCCION }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: client/.nvmrc
+          cache: npm
+          cache-dependency-path: client/package-lock.json
+
+      - name: Construir el cliente
+        working-directory: client
+        run: |
+          npm ci
+          npm run build
+
+      - name: Preparar el acceso por SSH
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "${{ secrets.SSH_LLAVE_PRIVADA }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          # Se fija la llave pública del servidor en vez de desactivar la verificación:
+          # `StrictHostKeyChecking=no` aceptaría cualquier host que responda en esa IP.
+          printf '%s\n' "${{ secrets.SSH_HOST_KEY }}" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
+
+      - name: Publicar el cliente
+        run: |
+          rsync -az --delete client/dist/ \
+            "${{ secrets.SSH_USUARIO }}@${{ secrets.SSH_HOST }}:/var/www/mimedidor/"
+
+      - name: Publicar el servidor
+        run: |
+          rsync -az --delete \
+            --exclude '__pycache__' --exclude '.pytest_cache' --exclude 'tests' \
+            server/ "${{ secrets.SSH_USUARIO }}@${{ secrets.SSH_HOST }}:/opt/mimedidor/servidor/"
+
+      - name: Instalar dependencias y reiniciar el servicio
+        run: |
+          ssh "${{ secrets.SSH_USUARIO }}@${{ secrets.SSH_HOST }}" 'bash -euo pipefail -s' <<'REMOTO'
+          /opt/mimedidor/venv/bin/pip install --quiet --upgrade -r /opt/mimedidor/servidor/requirements.txt
+          sudo /usr/bin/systemctl restart mimedidor
+          REMOTO
+
+      - name: Verificar que quedó en pie
+        run: |
+          # Un despliegue que no se verifica no es un despliegue: reiniciar el servicio no
+          # prueba que arrancó. Se consulta una ruta real hasta que responda o se agote.
+          for intento in $(seq 1 10); do
+            if curl -fsS --max-time 10 "${{ vars.URL_PRODUCCION }}/api/lecturas" > /dev/null; then
+              echo "Producción responde en el intento $intento."
+              exit 0
+            fi
+            echo "Intento $intento sin respuesta; reintentando en 3 s."
+            sleep 3
+          done
+          echo "::error::El despliegue terminó pero /api/lecturas no responde."
+          exit 1

@@ -97,13 +97,16 @@ def comparar_factura(
         valor_inicio, fecha_inicio = lectura_inicio
         valor_fin, fecha_fin = lectura_fin
         if fecha_fin > fecha_inicio:
-            consumo_medido_m3 = float(valor_fin) - float(valor_inicio)
+            # Redondeado a 3, que es la escala de `lectura.valor`. Restar dos flotantes deja
+            # restos: 526.69 - 510.69 da 16.000000000000057, y ese numero llegaba tal cual a la
+            # pantalla del abonado. Antes de T-39 no se notaba porque las lecturas eran enteras.
+            consumo_medido_m3 = round(float(valor_fin) - float(valor_inicio), 3)
 
     diferencia_m3: float | None = None
     diferencia_porcentual: float | None = None
     supera_umbral = False
     if consumo_medido_m3 is not None and consumo_facturado_m3:
-        diferencia_m3 = float(consumo_facturado_m3) - consumo_medido_m3
+        diferencia_m3 = round(float(consumo_facturado_m3) - consumo_medido_m3, 3)
         diferencia_porcentual = round(diferencia_m3 / float(consumo_facturado_m3) * 100, 1)
         supera_umbral = abs(diferencia_porcentual) > UMBRAL_DIFERENCIA_PORCENTUAL
 

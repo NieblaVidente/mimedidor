@@ -16,12 +16,20 @@ fotografiar su hidrómetro, obtener la lectura automáticamente por visión por 
 mantener un historial propio y contrastarlo contra el consumo y el monto que le factura su
 operador (AyA, municipalidad o ASADA).
 
-**Por qué existe.** En Costa Rica el agua no contabilizada ronda el 49–58 %, una muestra de la
-ARESEP encontró que cerca del 60 % de los hidrómetros del Gran Área Metropolitana no funcionaba
-apropiadamente, y el abonado no tiene forma práctica de verificar su propia lectura. Los productos
-existentes (Flume, Phyn, Moen Flo) son hardware de 150–430 dólares que asume Wi-Fi y electricidad
-en el punto de medición — supuestos que no se cumplen en la instalación típica costarricense, que
-es una caja de concreto a ras de suelo, húmeda y sin electricidad.
+**Por qué existe.** La Contraloría encontró que en 2023 **más del 50 % del agua producida por el
+AyA no se contabilizó ni facturó**, y un estudio de ARESEP sobre 419 hidrómetros del Gran Área
+Metropolitana halló que **alrededor del 60 % no funcionaba apropiadamente** — dato de 2015, que
+hay que citar con su año. El abonado, mientras tanto, no tiene forma práctica de verificar su
+propia lectura. Los productos existentes (Flume 2, Phyn Plus, Moen Flo) son hardware de **269 a
+624 dólares** que asume Wi-Fi y electricidad en el punto de medición — supuestos que no se cumplen
+en la instalación típica costarricense, que es una caja de concreto a ras de suelo, húmeda y sin
+electricidad.
+
+> **Cada una de esas cifras tiene fuente, cita textual y fecha de consulta en
+> [`docs/fuentes.md`](docs/fuentes.md).** Si alguna se usa en un entregable, se cita desde ahí. Dos
+> de las tres estaban mal enunciadas antes de T-41 y se corrigieron: el agua no contabilizada se
+> atribuía a ARESEP siendo de la Contraloría, y el precio del hardware decía 150–430 dólares
+> cuando ningún producto oficial cae en ese rango.
 
 **Diferenciador.** Ninguna alternativa existente combina lectura automática por foto + historial
 propio del abonado + contraste contra factura, sobre el parque de medidores ya instalado y sin
@@ -57,7 +65,7 @@ profesores evalúan este mismo proyecto desde la perspectiva de su materia (ver 
 
 | Capa | Tecnología | Notas |
 |---|---|---|
-| Cliente | **Vite + React + TypeScript** | Cámara vía `getUserMedia`. ⚠️ **La PWA todavía no está armada** — ver §13.5 |
+| Cliente | **Vite + React + TypeScript** | Cámara vía `getUserMedia`. PWA armada en T-31: `vite-plugin-pwa` genera manifest y trabajador de servicio en el build |
 | Backend | **Python + FastAPI + Uvicorn** | El procesamiento de imagen vive en el mismo proceso |
 | Visión por computadora | **OpenCV** (`opencv-python-headless`) para preprocesamiento (T-09/T-10) | La variante `headless` no trae dependencias de interfaz gráfica: el servidor y el runner de CI procesan arreglos, no muestran ventanas |
 | Reconocimiento de dígitos (OCR) | **Tesseract**, vía `pytesseract` | Decidido en T-02b — ver justificación abajo |
@@ -315,17 +323,13 @@ que el profesor va a notar.
 
 ### Definition of Done
 
-Un Issue está Hecho cuando:
+**Vive en un solo lugar: [`docs/definition-of-done.md`](docs/definition-of-done.md).** Acordado
+por los tres el 2026-08-12.
 
-1. El código está en una rama `feature/` o `bugfix/`.
-2. Se abrió un Pull Request hacia `main`, con `Closes #N`.
-3. Al menos otro integrante aprobó el PR.
-4. Los checks de CI pasaron en verde.
-5. El PR fue mergeado a `main`.
-6. La documentación asociada quedó actualizada si aplica.
-7. Los criterios de aceptación del Issue se cumplen y fueron verificados.
-
-Para Issues de tipo `doc` o `campo` que no producen código, aplican solo 6 y 7.
+Léelo antes de dar una tarjeta por terminada. No se copia acá a propósito: estaba escrito en tres
+archivos y las copias ya habían divergido —una decía que la excepción aplica a `doc` y `campo`, y
+otra agregaba `spike`— sin que nadie lo notara, que es exactamente cómo un acuerdo del equipo deja
+de ser uno solo.
 
 ### Ceremonias
 
@@ -401,21 +405,27 @@ Si estás asistiendo a un integrante de este equipo:
    ≥ 60 % de la muestra, el MVP se acota a ella.
 3. **Carga simultánea de infraestructura y funcionalidad** en un sprint de 10 días, con tres
    personas que además llevan 4 proyectos de C++ de Sistemas Operativos.
-4. **Cypress con PWA no está confirmado por escrito** con el profesor de ISW2. Sigue abierto, pero
-   cambió de forma: desde T-22 Cypress funciona y corre en CI, así que la parte de «¿sirve
-   Cypress?» está respondida. Lo que no está probado es la combinación, porque el cliente todavía
-   no es una PWA (§13.5): cuando se agreguen manifest y service worker hay que volver a correr la
-   prueba end-to-end y confirmar que el service worker no interfiere. Conviene tenerlo por escrito
-   antes de la semana 10, no después.
+4. **La prueba end-to-end no cubre el camino con trabajador de servicio.** Cypress corre contra
+   `npm run dev` (ver `client/cypress.config.ts`, que apunta al 5173), y T-31 dejó el trabajador
+   de servicio **desactivado en desarrollo** a propósito: uno cacheando durante `vite dev` esconde
+   los cambios que uno acaba de hacer. La consecuencia es que la combinación Cypress + PWA no está
+   probada — **no se rompió, simplemente no se ejercita**. En producción el trabajador de servicio
+   sí está activo, así que ese camino hoy no tiene cobertura automatizada. Cerrarlo implica correr
+   Cypress contra `vite preview` en un job aparte, y eso no entró en el alcance de T-31.
 
 Los tres siguientes salieron de dibujar el diagrama de arquitectura (T-19): son diferencias reales
 entre lo que este archivo declaraba y lo que hay en el repositorio.
 
-5. **La PWA todavía no está armada.** `vite-plugin-pwa` no está instalado y el build no genera
-   manifest ni service worker. Hoy el cliente es una aplicación de una sola página normal. Ser una
-   PWA sigue siendo el objetivo del producto (§1) y la decisión sobre nativo (T-01) sigue en pie —
-   el trabajo pendiente es acotado. Lo que no se vale mientras tanto es **describirla como si ya
-   lo fuera** en un documento de entrega.
+5. ✅ **CERRADO — La PWA todavía no está armada.** Cerrado en T-31 (#41). El build genera
+   `manifest.webmanifest`, `sw.js` y los iconos PNG de 192 y 512 px; `registerSW.js` queda
+   inyectado en el `index.html`. Con eso la justificación de la decisión T-01 —web sobre nativo,
+   porque «se instala desde el navegador sin pasar por una tienda»— deja de estar a medias.
+
+   **Lo que el trabajador de servicio hace y lo que no:** guarda los archivos del build para que
+   la aplicación abra rápido y sobreviva a una conexión intermitente. **No cachea `/api`**, a
+   propósito: una lectura o un historial servidos desde caché serían datos viejos presentados como
+   actuales, que es exactamente lo que este producto no puede hacer. El funcionamiento sin
+   conexión —guardar una lectura tomada sin señal y sincronizarla después— sigue sin existir.
 6. ✅ **CERRADO — Cliente y servidor nunca se han ejecutado juntos.** Cerrado en T-21 (#31, PR #28,
    commit `575680a`, 2026-08-25). El proxy vive en `client/vite.config.ts:17` y reenvía `/api` a
    `http://localhost:8000`; desde T-22 (#32, PR #50) la prueba end-to-end corre el hilo completo

@@ -88,7 +88,8 @@ resolver el problema de las líneas divisorias, que es la causa raíz que queda 
 
 - **Más dataset.** Con 2 fotos casi idénticas de un solo medidor no se puede saber si el problema
   de las líneas divisorias se repite igual en otros modelos, ni calibrar nada con confianza.
-  Bloqueado por T-07/T-08 (meta: 12 medidores).
+  Bloqueado por T-07/T-08 (meta vigente: 8 medidores, revisada en el Sprint Planning del
+  Sprint 2 desde los 12 originales).
 - **Manejar las líneas divisorias explícitamente** — por ejemplo, detectarlas y borrarlas antes
   de pasarle la imagen a Tesseract, o segmentar cada casilla de dígito por separado y reconocerla
   individualmente en vez de pedirle a Tesseract que lea la fila completa de una sola vez.
@@ -119,3 +120,164 @@ Lo que **no** existe todavía, y no es parte del alcance de T-11, es el endpoint
 sobre una foto subida y devolvería `{lectura_reconocida, confianza}` sin persistir nada. Construir
 ese endpoint es el paso natural de integración una vez que las tres tarjetas de visión (T-09,
 T-10, T-11) están cerradas — queda como siguiente tarjeta, no como parte de esta.
+
+
+---
+
+# Segunda medición — 5 fotos, 3 medidores, 3 marcas (2026-09-02)
+
+La primera medición se hizo sobre **2 fotos casi idénticas de un solo medidor**. Con el dataset
+en 3 medidores y 3 marcas se repitió, sin modificar código, para ver si el diagnóstico original
+se sostenía.
+
+**No se sostiene.** El resultado sigue siendo cero, pero por **tres causas distintas**, y la que
+describe T-32 es la última de la cadena, no la primera.
+
+## Resultado
+
+| Foto | Real | Crudo de Tesseract | Devuelto | ¿Perspectiva corregida? |
+|---|---|---|---|---|
+| `Medidor1_captura1` | `025888` | `''` | `None` | **no** |
+| `Medidor2_captura1` | `0051069` | `'005140691'` | `None` | sí |
+| `Medidor2_captura2` | `0051069` | `'00151106'` | `151106.0` ⚠️ | sí |
+| `Medidor3_captura1` | `452991` | `''` | `None` | **no** |
+| `Medidor3_captura2` | `452991` | `''` | `None` | **no** |
+
+**Exactitud: 0 de 5.** La correlación es exacta: cuando la perspectiva se corrige, Tesseract lee
+algo; cuando no, no lee nada.
+
+## La cadena de fallos, eslabón por eslabón
+
+### 1. La esfera de Medidor1 nunca llega a ser candidata
+
+`_detectar_circulo_caratula` fija `radio_min = 15 %` del lado corto de la imagen. En esa foto la
+esfera del ARAD es más chica que ese umbral, así que **Hough no la propone**. Los dos candidatos
+que sí propone son la boca de la caja, en dos posiciones distintas — se verificó recortando ambos.
+
+La regla actual elige «el más centrado», y ahí lo centrado es la caja.
+
+> **Esto es en parte un problema de captura, no de código.** El registro del dataset anota esa
+> foto como «primer plano del odómetro» y no lo es: se ve la caja completa con la esfera pequeña
+> arriba. El protocolo pide «bien de cerca, dígitos grandes y nítidos». Se corrigió la anotación.
+
+### 2. En Medidor3 el círculo es correcto, pero la corrección de perspectiva falla igual
+
+Acá el círculo elegido **sí es la esfera**: es el más centrado *y* el más claro de los candidatos.
+
+| Candidato | Radio | Brillo interior | Distancia al centro |
+|---|---|---|---|
+| **elegido** | 794 | **158,7** | 0,063 |
+| otro | 1011 | 47,2 | 0,434 |
+
+Aun así `perspectiva_corregida` es `False` y el recorte incluye bastante bisel negro alrededor de
+la esfera. Como la franja de búsqueda de la segmentación se define en **fracciones de una carátula
+ya enderezada**, sobre un recorte mal normalizado apunta al lugar equivocado: devuelve la carátula
+entera en vez de la ventana del odómetro.
+
+### 3. Recién acá aparecen las líneas divisorias, que es lo que describe T-32
+
+En las dos fotos de Medidor2 la ventana **sí** queda bien recortada, y ahí el diagnóstico original
+se confirma: `005140691` son 9 caracteres donde van 7, y `00151106` son 8. Las líneas entre
+casillas se leen como dígitos.
+
+`Medidor2_captura2` sigue siendo **la falla peligrosa**: devuelve `151106.0`, con cantidad de
+dígitos plausible y sin ninguna señal de alerta.
+
+## Un dato que sí quedó medido y sirve
+
+El brillo interior separa la esfera del resto de los círculos con margen amplio en 4 de las 5
+fotos:
+
+| Foto | Brillo del círculo correcto | Brillo del mejor competidor |
+|---|---|---|
+| Medidor2_captura1 | 206,2 | 79,1 |
+| Medidor2_captura2 | 197,6 | 61,6 |
+| Medidor3_captura1 | 126,1 | 54,0 |
+| Medidor3_captura2 | 158,7 | 47,2 |
+| Medidor1_captura1 | *(la esfera no es candidata)* | — |
+
+Es un criterio con fundamento de dominio —la esfera es una cara clara bajo vidrio, la caja y el
+bisel son oscuros— y no un ajuste a estas fotos. Queda anotado como la vía más prometedora.
+
+## Por qué no se escribió el arreglo todavía
+
+**Escribirlo ahora repetiría el error que esta misma medición acaba de destapar.**
+
+La regla que falla en Medidor3 está documentada en `segmentacion.py:82` como «confirmado con las
+2 fotos reales», y la de la carátula se eligió con el mismo criterio. Calibrar el reemplazo sobre
+**5 fotos, de las cuales 1 no cumple el protocolo de captura**, produciría otra heurística que
+funciona en la muestra y falla en el próximo medidor.
+
+Lo que hace falta antes:
+
+- **Más dataset** (T-07, hoy en 3 de 8), y sobre todo **más de una foto útil por medidor**: hoy
+  Medidor1 aporta una sola y no sirve.
+- **Repetir la toma de Medidor1** siguiendo el protocolo, con la esfera llenando el encuadre.
+- Con eso, atacar en orden: detección de la carátula → segmentación de la ventana → líneas
+  divisorias. T-32 describe el tercer eslabón; los dos primeros bloquean hoy el 60 % del dataset.
+
+
+---
+
+# Cierre de T-32 — 2026-09-06
+
+**Se entrega el diagnóstico. El arreglo queda diferido, y esa es la decisión.**
+
+El 6 de setiembre el equipo cerró la recolección de fotografías en 3 medidores (ver
+`docs/dataset-campo/registro-medidores.md`). Con eso, la condición que T-32 se había puesto a sí
+misma —«solo tiene sentido si el dataset avanza»— ya no se va a cumplir en este sprint.
+
+## Qué se entrega
+
+La medición de la segunda ronda, arriba: **0 de 5 sobre 3 medidores y 3 marcas**, con la cadena
+de tres fallos identificada y verificada uno por uno.
+
+Ese diagnóstico corrigió la premisa de la tarjeta. T-32 se abrió para atacar las líneas
+divisorias del odómetro, y la medición mostró que **eso es el tercer eslabón de tres**: en 3 de
+las 5 fotos el reconocimiento nunca llega a ver el odómetro, porque falla antes la detección de
+la carátula o la segmentación de la ventana.
+
+## Qué NO se entrega, y por qué
+
+**El arreglo.** No se escribió a propósito.
+
+La heurística que hoy falla está documentada en `server/app/vision/segmentacion.py` como
+«confirmado con las 2 fotos reales». Se calibró sobre dos fotos de un solo medidor y no
+generalizó al tercero. **Calibrar su reemplazo sobre cinco fotos —de las cuales una no cumple el
+protocolo de captura— produciría exactamente el mismo tipo de heurística**, que funciona en la
+muestra y falla en el próximo medidor.
+
+Escribir ese arreglo habría dado una tarjeta cerrada y un problema intacto.
+
+## Lo que queda para el próximo intento
+
+Cuando el dataset crezca, el orden está establecido por la medición:
+
+1. **Detección de la carátula.** En Medidor1 la esfera es más chica que el radio mínimo del
+   detector y ni siquiera llega a ser candidata. El criterio de brillo interior, medido arriba,
+   separa la esfera del resto de los círculos con margen amplio en 4 de las 5 fotos.
+2. **Segmentación de la ventana.** Su franja de búsqueda se define en fracciones de una carátula
+   ya enderezada; sobre un recorte mal normalizado apunta al lugar equivocado.
+3. **Líneas divisorias.** Lo que T-32 describía. Solo se puede medir cuando los dos anteriores
+   entreguen el recorte correcto.
+
+## La prueba que fija el número quedó al día
+
+`server/tests/test_reconocimiento.py` fijaba **0 de 2**: solo conocía las dos fotos de Medidor2,
+porque `LECTURA_REAL_POR_FOTO` no se había ampliado cuando llegaron Medidor1 y Medidor3. La
+medición decía 0 de 5 y la prueba seguía mirando 2 fotos.
+
+Ahora cubre las **5 fotos legibles de los 3 medidores** y sigue en 0 aciertos. **El conteo cambió;
+el resultado no.** Si alguien mejora el reconocimiento, la prueba falla y obliga a actualizar este
+documento — que es para lo que existe.
+
+Las tomas de contexto (`Medidor2_captura3`, `Medidor3_captura3`, `Medidor3_captura4`) quedan
+fuera a propósito: muestran la caja y el entorno, no la carátula, y meterlas bajaría el
+denominador de exactitud con fotos que nunca se pidió que se leyeran.
+
+## El número que va a la feria
+
+**0 de 5.** Es el que hay, medido sobre la mejor muestra disponible, y es el que se va a decir.
+
+El producto entrega valor igual porque el abonado corrige la lectura a mano, y el 81,2 % de los
+encuestados dijo que la usaría así. Lo que no se vale es presentarlo como resuelto.

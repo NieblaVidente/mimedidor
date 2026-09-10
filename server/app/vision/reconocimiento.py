@@ -163,12 +163,19 @@ def reconocer_lectura(ventana_bgr: np.ndarray) -> float | None:
     `_LARGO_MINIMO_LECTURA` y `_LARGO_MAXIMO_LECTURA`) — por ejemplo si Tesseract no detectó nada,
     o si detectó tan pocos o tantos caracteres que claramente no es una lectura válida.
 
-    Nota de alcance: esta función interpreta la cadena de dígitos como un entero tal cual se ve
-    en el odómetro (p. ej. "0051069" -> 51069.0), igual que se registra en
-    `docs/dataset-campo/registro-medidores.md`. Algunos odómetros marcan en rojo los últimos
-    dígitos para indicar una fracción de m³; decidir esa convención de punto decimal no es parte
-    del alcance de T-11 (no hay todavía evidencia suficiente de campo para fijarla) y queda para
-    una tarjeta futura una vez que el dataset de T-07/T-08 crezca."""
+    Devuelve **la cadena tal como se ve en el odómetro**, sin interpretar el punto decimal
+    (p. ej. "0051069" -> 51069.0). Eso es deliberado y no cambió con T-39.
+
+    Los últimos dígitos que el odómetro marca en rojo son fracción de m³, y cuántos son depende
+    del aparato: es una propiedad del medidor y vive en `medidor.digitos_decimales`. La
+    conversión a volumen ocurre al guardar la lectura (`app/api/lecturas.py::a_volumen_m3`), no
+    acá.
+
+    La separación importa para medir el reconocimiento: la verdad de referencia de T-11/T-32 es
+    la **cadena mostrada**, porque lo que se evalúa es si el OCR reproduce esos caracteres. Si
+    esta función devolviera el volumen, la exactitud del reconocimiento pasaría a depender de que
+    el medidor tenga bien registrada su escala, que es un dato ajeno a la visión por computadora.
+    """
     texto = leer_lectura(ventana_bgr)
     if not texto.isdigit():
         return None

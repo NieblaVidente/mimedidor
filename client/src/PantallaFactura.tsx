@@ -1,10 +1,6 @@
 import { useState, type FormEvent } from 'react'
-import {
-  ErrorApiFacturas,
-  guardarFactura,
-  obtenerComparacion,
-  type Comparacion,
-} from './api/facturas'
+import { guardarFactura, obtenerComparacion, type Comparacion } from './api/facturas'
+import { ErrorApi } from './api/errores'
 
 type Estado = 'formulario' | 'procesando' | 'listo'
 
@@ -60,7 +56,7 @@ function PantallaFactura() {
       setEstado('listo')
     } catch (error) {
       setMensajeError(
-        error instanceof ErrorApiFacturas ? error.message : 'No se pudo registrar la factura.',
+        error instanceof ErrorApi ? error.message : 'No se pudo registrar la factura.',
       )
       setEstado('formulario')
     }

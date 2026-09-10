@@ -36,6 +36,7 @@ ni un mensaje de la base de datos:
 | `MEDIDOR_NO_ENCONTRADO` | 404 | El `medidor_id` referenciado no existe |
 | `FACTURA_NO_ENCONTRADA` | 404 | El `id` de factura en la URL no existe |
 | `LECTURA_INVALIDA` | 422 | La lectura a guardar es menor que la última lectura registrada para ese medidor (un hidrómetro no retrocede) |
+| `FECHA_INVALIDA` | 422 | La fecha de la lectura es posterior a hoy (T-35) |
 | `ERROR_INTERNO` | 500 | Cualquier fallo no anticipado. Se loguea completo en el servidor; al cliente solo llega este código genérico |
 
 ---
@@ -100,6 +101,19 @@ período).
 }
 ```
 
+> **Unidades de `valor` (aclarado en T-39).** En la **petición**, `valor` son los dígitos tal
+> como se leen en el odómetro, sin punto decimal: el abonado escribe lo que ve, incluidos los
+> rojos. En la **respuesta**, `valor` es el **volumen en metros cúbicos**.
+>
+> La conversión la hace el servidor con `medidor.digitos_decimales`, que dice cuántos dígitos
+> marca en rojo ese aparato — 1 en el ARAD del dataset de campo, 2 en el ACTARIS. Ni el cliente
+> ni el abonado necesitan conocer ese dato.
+>
+> Esto **no es un cambio del contrato, es la implementación alcanzando al contrato**: el campo
+> `consumo_desde_anterior_m3` siempre declaró metros cúbicos en su propio nombre, y antes de
+> T-39 se calculaba restando cadenas de odómetro sin convertir. La unidad de `valor` nunca
+> estuvo declarada; ahora sí.
+
 `origen` es `"reconocimiento"` si el usuario aceptó el valor devuelto por
 `/api/lecturas/reconocer` sin tocarlo, o `"manual"` si lo escribió o corrigió a mano. Este dato no
 es cosmético: es el que permite calcular la exactitud real en T-11 (cuántas lecturas necesitaron
@@ -132,6 +146,23 @@ ese medidor (T-17 debe manejar ese caso explícitamente).
   }
 }
 ```
+
+**Response 422 — fecha en el futuro (T-35):**
+
+```json
+{
+  "error": {
+    "codigo": "FECHA_INVALIDA",
+    "mensaje": "La fecha de la lectura no puede ser en el futuro"
+  }
+}
+```
+
+La pantalla (T-16) deja elegir la fecha de la lectura, con hoy como valor por defecto — antes de
+T-35 se guardaba siempre con la fecha de hoy, sin poder elegirla. Rechazar esto solo en el
+cliente no alcanza: cualquier herramienta HTTP puede saltarse la pantalla, así que la validación
+vive en el servidor (arriba) y, como defensa en profundidad, también como `CHECK` en
+`mimedidor.lectura` (`database/scripts/02_tablas.sql`).
 
 ---
 

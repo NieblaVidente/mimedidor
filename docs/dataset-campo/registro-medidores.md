@@ -36,13 +36,141 @@ confirmada" — no adivinar ni usar el nombre del operador como si fuera la marc
 
 | # | Código | Marca | Modelo | N.º serie | Lectura real | Fecha | Hora | Tomado por | Zona | Clima / condición | Tomas logradas (de 6) |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| 1 | Medidor1 | ARAD (confirmada) | — | — | 025888 m³ | 2026-07-31 | 10:00 | José Pablo | Casa de José Pablo | Oscuro/nublado | 1 — primer plano del odómetro |
-| 2 | Medidor2 | No confirmada (carátula dice "ASADA Tronadora", que es el operador, no el fabricante; etiqueta del cuerpo dice modelo `MJ-SDC`, serie `2423279`, no se ve fabricante) | MJ-SDC | 2423279 | 0051069 m³ | 2026-08-16 | 14:50 | Yariel | Casa de Yariel | Oscuro, minutos antes de llover — condición adversa | 2 — carátula frontal/ángulo natural (capturas 1 y 2, casi idénticas) + contexto (captura 3) |
+| 1 | Medidor1 | ARAD (confirmada) | — | — | Mostrada: `025888` (1 rojo) · Volumen: **2588,8 m³** | 2026-07-31 | 10:00 | José Pablo | Casa de José Pablo | Oscuro/nublado | 1 — **anotada como «primer plano» pero no lo es**: se ve la caja completa con la esfera pequeña arriba, y por eso el detector de carátula ni siquiera la propone como candidata (ver `docs/exactitud-reconocimiento.md`, segunda medición). Hay que repetirla |
+| 2 | Medidor2 | No confirmada (carátula dice "ASADA Tronadora", que es el operador, no el fabricante; etiqueta del cuerpo dice modelo `MJ-SDC`, serie `2423279`, no se ve fabricante) | MJ-SDC | 2423279 | Mostrada: `0051069` (2 rojos) · Volumen: **510,69 m³** | 2026-08-16 | 14:50 | Yariel | Casa de Yariel | Oscuro, minutos antes de llover — condición adversa | 2 — carátula frontal/ángulo natural (capturas 1 y 2, casi idénticas) + contexto (captura 3) |
+| 3 | Medidor3 | ACTARIS (confirmada) | MULTIMAG | 255875 | Mostrada: `452991` (2 rojos) · Volumen: **4529,91 m³** | 2026-08-17 | — | Isaac | No consta | Caja a ras de suelo, tierra suelta, sombra parcial; la captura2 se tomó con flash | 3 — carátula frontal (c2), ángulo natural (c1), contexto (c3 y c4) |
 
-**Total: 2 de 12 medidores mínimos.** Ninguno con las 6 tomas completas todavía.
+> ## ⛔ Recolección cerrada el 2026-09-06
+>
+> **El equipo decidió quedarse con estos 3 medidores y no seguir recolectando.** La decisión la
+> tomaron los tres, al cierre del Sprint 2.
+>
+> **Por qué.** La meta se fijó en 12 en el Sprint 1 y se cumplieron 2; se bajó a 8 en el Sprint 2
+> y se cumplieron 3. Dos sprints con dos metas distintas y el mismo resultado: el problema no era
+> el número. Insistir una tercera vez habría repetido lo mismo con el calendario encima.
+>
+> **T-07 no se cierra como cumplida, se cierra como alcance reducido.** Sus criterios pedían 6
+> tomas por medidor, al menos 3 medidores en condiciones adversas y zonas repartidas entre los
+> tres. Nada de eso se logró. Queda el número real a la vista.
+
+**Total: 3 de 8 medidores** (meta revisada en el Planning del Sprint 2: 6 nuevos, 2 por
+integrante, sobre los 2 ya registrados). Ninguno con las 6 tomas completas todavía. Isaac lleva
+1 de sus 2.
+
+> **Zonas: cada integrante sale en su propia provincia.** Los tres viven en provincias distintas,
+> así que no hay riesgo de pisarse ni de registrar dos veces el mismo medidor.
+>
+> No es solo un reparto cómodo. El protocolo de captura de más arriba pide repartir zonas «para no
+> sesgar la muestra hacia un solo barrio», y tres provincias distintas dan variedad real de marcas,
+> de antigüedad de instalación y de condiciones de la caja — que es justo lo que necesita la
+> decisión de alcance por marca de T-08 para no acotar el MVP sobre una muestra engañosa.
+>
+> **Fechas: sin fecha fija**, con el riesgo aceptado explícitamente. La justificación completa de
+> esta decisión y de la meta revisada está en [`docs/scrum/sprint-2.md`](../scrum/sprint-2.md),
+> sección «Salidas de campo (T-07)»; acá se anota porque es lo que hay que tener a mano al salir,
+> no dentro del acta de una ceremonia.
+
+### ⚠️ Dos columnas de lectura, y por qué
+
+Desde Medidor3 se registran **dos valores distintos**, porque sirven a dos propósitos que no son
+el mismo:
+
+- **Mostrada** — la cadena de dígitos tal como aparece en el odómetro, sin punto decimal. Es la
+  verdad de referencia contra la que se mide el reconocimiento (T-32): el OCR tiene que reproducir
+  esos caracteres, no interpretarlos.
+- **Volumen** — el valor físico en m³, con los dígitos rojos tratados como decimales. Es el que
+  usa el producto para calcular consumo y contrastarlo contra la factura.
+
+En Medidor3 los dos últimos dígitos son **rojos**, y en un hidrómetro los rojos son la parte
+decimal. `452991` mostrado equivale a `4529,91 m³`.
+
+La verificación de sentido común lo respalda: 452 991 m³ acumulados serían del orden de 3 000 m³
+por mes, imposible en una casa; 4 529,91 m³ dan unos 30 m³ mensuales durante doce años, que sí es
+un perfil doméstico.
+
+**Esto importa más allá del registro.** El producto compara consumo medido contra consumo
+facturado, y la factura del operador viene en m³. Si se guarda la cadena mostrada como si fuera
+m³, la comparación —que es la función central de MiMedidor— queda desviada por un factor de 100.
+
+### El hallazgo: la cantidad de dígitos rojos cambia según el medidor
+
+Confirmado con quienes tomaron cada lectura:
+
+| Medidor | Marca | Dígitos rojos | Mostrada | Volumen real | Factor |
+|---|---|---|---|---|---|
+| Medidor1 | ARAD | **1** | `025888` | 2588,8 m³ | ×10 |
+| Medidor2 | MJ-SDC | **2** | `0051069` | 510,69 m³ | ×100 |
+| Medidor3 | ACTARIS | **2** | `452991` | 4529,91 m³ | ×100 |
+
+**No es una constante del sistema: es una propiedad de cada medidor.** Con un solo modelo en el
+dataset se podía confundir con un desfase global y corregirlo con una división fija. Con tres
+modelos y dos escalas distintas queda claro que la posición del punto decimal tiene que viajar con
+el medidor, no con el código.
+
+Esto era una decisión aplazada a propósito, no un descuido. `server/app/vision/reconocimiento.py`
+lo dejó anotado en su propio docstring:
+
+> «Algunos odómetros marcan en rojo los últimos dígitos para indicar una fracción de m³; decidir
+> esa convención de punto decimal no es parte del alcance de T-11 (no hay todavía evidencia
+> suficiente de campo para fijarla) y queda para una tarjeta futura una vez que el dataset de
+> T-07/T-08 crezca.»
+
+**Esa condición ya se cumplió.** El dataset creció lo suficiente para fijar la convención, y
+además demostró que no puede ser única. Queda registrado en un Issue aparte.
+
+## Decisión de alcance por marca (T-08) — 2026-09-06
+
+Con la recolección cerrada, la decisión se toma sobre la muestra que existe.
+
+### Lo que hay
+
+| Medidor | Marca del fabricante | Modelo |
+|---|---|---|
+| Medidor1 | **ARAD** | no registrado |
+| Medidor2 | **no confirmada** — la carátula muestra el operador, no el fabricante | MJ-SDC |
+| Medidor3 | **ACTARIS** | MULTIMAG |
+
+**Dos marcas identificadas sobre tres unidades, y una sin identificar.**
+
+### La decisión: el MVP no se acota por marca
+
+Ninguno de los tres casos del criterio aplica limpiamente:
+
+- **Ninguna marca alcanza el 60 %.** Cada unidad es de una marca distinta.
+- **No hay dos marcas dominantes**: hay tres situaciones distintas en tres unidades.
+- **Tampoco son «cinco o más marcas sin predominio»**, que era el caso previsto para replantear.
+
+La muestra **no permite aplicar el criterio**, y decir lo contrario sería forzar una conclusión
+sobre tres datos. Así que el MVP **queda sin acotar a ninguna marca**, que es la opción que no
+compromete nada sobre información que no tenemos.
+
+### Lo que esta decisión cuesta, dicho sin rodeos
+
+Acotar a una marca era lo que habría permitido calibrar el reconocimiento contra un tipo de
+carátula concreto. Sin eso, T-32 tiene que resolver un problema más general con menos evidencia,
+y la medición del reconocimiento (0 de 5) queda como el número del proyecto hasta la feria.
+
+### Lo que sí quedó establecido, y no es poco
+
+**El parque está fragmentado.** Tres unidades tomadas por tres personas en tres provincias
+distintas dieron tres situaciones distintas de marca. Es una muestra chica, pero apunta en una
+dirección clara y coherente con lo que ya sabíamos del mercado costarricense.
+
+Y una de las tres **no tiene fabricante legible**: la carátula muestra el nombre del operador. Eso
+es un hallazgo por sí mismo — cualquier estrategia futura basada en la marca tiene que contemplar
+que el dato no siempre se puede leer de la foto.
+
+### Riesgo que queda abierto
+
+Se mantiene el riesgo 2 de `CLAUDE.md` §13 (fragmentación del parque), ahora con evidencia de
+campo en vez de como hipótesis. Reabrir la recolección es la única forma de cerrarlo.
+
+---
 
 ## Pendiente
 
+- Completar las tomas que faltan de Medidor3 (ángulo inclinado, primer plano del odómetro,
+  etiqueta del cuerpo) y anotar su zona, que no consta
 - Completar las tomas que faltan de Medidor1 (contexto, ángulo inclinado, etiqueta del cuerpo —
   esta última podría revelar la marca real de Medidor2 también, si se repite el modelo)
 - Seguir sumando medidores en cuanto el clima lo permita, repartiendo zonas entre los tres para no

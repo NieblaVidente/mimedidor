@@ -28,13 +28,16 @@ ON CONFLICT (id) DO NOTHING;
 
 -- Modelo y serie copiados de Medidor2 del dataset de campo, para que los datos de prueba se
 -- parezcan a los reales (ver docs/dataset-campo/registro-medidores.md).
-INSERT INTO mimedidor.medidor (id, vivienda_id, numero_serie, marca, modelo)
+-- `digitos_decimales = 2` sale del medidor real: su odometro marca dos digitos en rojo, que son
+-- fraccion de m3 (T-39, ver docs/dataset-campo/registro-medidores.md).
+INSERT INTO mimedidor.medidor (id, vivienda_id, numero_serie, marca, modelo, digitos_decimales)
 VALUES (
     '33333333-3333-3333-3333-333333333333',
     '22222222-2222-2222-2222-222222222222',
     '2423279',
     'No confirmada',
-    'MJ-SDC'
+    'MJ-SDC',
+    2
 )
 ON CONFLICT (id) DO NOTHING;
 
@@ -45,8 +48,13 @@ ON CONFLICT (id) DO NOTHING;
 -- las lecturas serían del mismo día, el consumo entre lecturas daría "0 días" y la comparación
 -- contra factura devolvería nulo por falta de un período real que medir.
 --
--- La fecha es relativa a hoy, no fija, para que la prueba end-to-end pueda afirmar "5 días"
+-- La fecha es relativa a hoy, no fija, para que la lectura sembrada siempre quede en el pasado
 -- cualquier día que corra.
+--
+-- ⚠️ `CURRENT_DATE` es la fecha en la zona horaria del **servidor de PostgreSQL**, que no tiene
+-- por qué ser la del navegador que registra la otra lectura. Por eso la prueba end-to-end no
+-- asume "hace 5 días": lee esta fecha del sistema y calcula la diferencia (T-43). Ver la sección
+-- «De qué reloj depende cada fecha» en database/README.md.
 --
 -- Se registra llamando al procedimiento de T-14, no con un INSERT directo, para que también
 -- quede su evento de auditoría y los datos de prueba se parezcan a los reales.
@@ -62,7 +70,10 @@ BEGIN
     ) THEN
         CALL mimedidor.registrar_lectura(
             '33333333-3333-3333-3333-333333333333'::uuid,
-            51069::numeric,
+            -- 510.69 m3, no 51069: el odometro muestra `0051069` y sus dos ultimos digitos
+            -- son rojos. Lo que se guarda es el volumen real, que es lo que la comparacion
+            -- contra la factura necesita (T-39).
+            510.69::numeric,
             CURRENT_DATE - 5,
             'manual',
             NULL,

@@ -106,6 +106,7 @@ erDiagram
 | `numero_serie` | `text` | `NOT NULL UNIQUE` | Serie física grabada en el hidrómetro |
 | `marca` | `text` | `NOT NULL` | Clave para el riesgo de fragmentación del parque de medidores (`CLAUDE.md` §13): si una marca aparece en ≥60 % del dataset de campo, el MVP se acota a ella |
 | `modelo` | `text` | `NULL` | |
+| `digitos_decimales` | `smallint` | `NOT NULL DEFAULT 0`, `CHECK (0..3)` | Cuántos dígitos marca en rojo el odómetro, o sea la fracción de m³ (T-39). **Es una propiedad física de este aparato, no una constante del sistema**: en el dataset de campo el ARAD tiene 1 y el ACTARIS 2. Sin ella la lectura se guardaría inflada ×10 o ×100 según el modelo, y la comparación contra factura —que viene en m³ reales— no significaría nada |
 | `fecha_instalacion` | `date` | `NULL` | No siempre se conoce en campo |
 | `creado_en` | `timestamptz` | `NOT NULL DEFAULT now()` | |
 
@@ -162,12 +163,36 @@ columna: son valores que dependen de **otras filas** de la misma tabla (la lectu
 mismo medidor, o las lecturas dentro del período de una factura), y guardarlos sería redundancia
 calculada — se desincroniza en cuanto alguien corrige una lectura a mano.
 
-Se resuelven como vistas/funciones en T-13, no como tablas:
+> **Corrección (T-34, 2026-08-27):** esta sección decía que ambos se resolvían con una vista y
+> una función de PL/pgSQL escritas en T-13. Eso nunca se implementó — quedó como deuda técnica
+> registrada en `docs/deuda-tecnica.md` hasta que se cerró acá. Lo que sigue es lo que
+> **realmente existe** en el código.
 
-- `vista_historial_lecturas` — usa `LAG()` sobre `lectura` ordenada por `fecha` dentro de cada
-  `medidor_id` para calcular `consumo_desde_anterior_m3` y `dias_desde_anterior` al vuelo.
-- `fn_comparacion_factura(factura_id)` — cruza `factura` con las `lectura` del mismo
-  `medidor_id` dentro de `[periodo_inicio, periodo_fin]` para devolver la comparación completa.
+Los dos se calculan en **Python**, dentro de los routers, sobre las filas ya ordenadas que trae
+una consulta simple:
+
+- `consumo_desde_anterior_m3` / `dias_desde_anterior` — `server/app/api/lecturas.py::listar_historial`,
+  recorriendo secuencialmente lo que devuelve `app/db/lecturas.py::listar_lecturas` (equivalente
+  a lo que haría `LAG()` en SQL, pero en un `for` de Python).
+- `consumo_medido_m3` / `diferencia_m3` / `diferencia_porcentual` / `supera_umbral` —
+  `server/app/api/facturas.py::comparar_factura`, a partir de dos llamadas a
+  `app/db/facturas.py::lectura_mas_reciente_hasta` (la lectura vigente al inicio y al fin del
+  período de la factura).
+
+**Por qué se decidió dejarlo así y no escribir la vista/función que describía este documento**
+(Issue [#44](https://github.com/NieblaVidente/mimedidor/issues/44), T-34): para cuando se
+detectó la contradicción, ambos cálculos ya estaban implementados en Python, con cobertura de
+prueba completa (`server/tests/test_historial.py`, `test_facturas.py`) y verificados de punta a
+punta por la prueba end-to-end de Cypress (T-22). Reescribirlos como objetos de PostgreSQL y
+migrar los routers para que los consulten es un cambio real de arquitectura, no solo mover
+código — y hacerlo esta semana, a días de la entrega y sin beneficio funcional para quien usa la
+aplicación (el resultado es idéntico), es más riesgo de romper algo que ya funciona y está
+probado que beneficio. La razón original de §3 (evitar repetir la misma lógica en dos lugares)
+sigue siendo válida en principio — queda anotada como mejora deseable para un sprint futuro, no
+como algo urgente.
+
+Lo que **no** se aceptó fue dejar la contradicción sin resolver: este documento tiene que
+describir lo que el código hace de verdad, y ahora lo hace.
 
 ---
 
@@ -184,8 +209,11 @@ totalidad de la clave por construcción. Se cumple trivialmente.
 
 - `usuario`: `nombre` y `correo` dependen únicamente de `id`.
 - `vivienda`: `direccion` y `operador` dependen únicamente de `id`, no de `usuario_id`.
-- `medidor`: `numero_serie`, `marca`, `modelo`, `fecha_instalacion` dependen únicamente de `id`,
-  no de `vivienda_id`.
+- `medidor`: `numero_serie`, `marca`, `modelo`, `digitos_decimales` y `fecha_instalacion`
+  dependen únicamente de `id`, no de `vivienda_id`. `digitos_decimales` **no** viola 3FN aunque
+  se correlacione con la marca: es una característica del aparato instalado, y un mismo
+  fabricante vende modelos con distinta cantidad de dígitos rojos. Derivarla de `marca` sería
+  suponer una dependencia que no existe.
 - `lectura`: `valor`, `fecha`, `origen`, `foto_url` dependen únicamente de `id`. Ver §3 — el
   campo derivable (`consumo_desde_anterior_m3`) se excluyó a propósito porque depende de otra
   fila, no de esta clave.

@@ -12,6 +12,22 @@ def medidor_existe(conexion, medidor_id: UUID) -> bool:
         return cur.fetchone() is not None
 
 
+def digitos_decimales_del_medidor(conexion, medidor_id: UUID) -> int | None:
+    """Cuántos dígitos marca en rojo el odómetro de este medidor, o sea la fracción de m³ (T-39).
+
+    Devuelve `None` si el medidor no existe, para que el llamador distinga «no está» de «tiene
+    cero decimales» — que son cosas distintas y confundirlas guardaría la lectura sin convertir
+    en vez de devolver un 404.
+    """
+    with conexion.cursor() as cur:
+        cur.execute(
+            "SELECT digitos_decimales FROM mimedidor.medidor WHERE id = %s",
+            (str(medidor_id),),
+        )
+        fila = cur.fetchone()
+        return None if fila is None else int(fila[0])
+
+
 def llamar_registrar_lectura(
     conexion,
     medidor_id: UUID,

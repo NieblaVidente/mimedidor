@@ -2,27 +2,12 @@
  * Cliente de las rutas de lecturas del contrato de la API (docs/architecture/contrato-api.md
  * §2, §3 y §4). Rutas relativas: el cliente y el servidor se sirven desde el mismo origen en
  * este sprint, no hay configuración de host aparte.
+ *
+ * El manejo de errores vive en `./errores` (T-33) — antes este módulo declaraba su propia clase
+ * duplicada, ver `docs/deuda-tecnica.md`.
  */
 
-export class ErrorApiLecturas extends Error {
-  codigo: string
-
-  constructor(codigo: string, mensaje: string) {
-    super(mensaje)
-    this.name = 'ErrorApiLecturas'
-    this.codigo = codigo
-  }
-}
-
-interface CuerpoError {
-  error: { codigo: string; mensaje: string }
-}
-
-async function lanzarError(respuesta: Response): Promise<never> {
-  const cuerpo = (await respuesta.json().catch(() => null)) as CuerpoError | null
-  const error = cuerpo?.error ?? { codigo: 'ERROR_INTERNO', mensaje: 'Ocurrió un error inesperado' }
-  throw new ErrorApiLecturas(error.codigo, error.mensaje)
-}
+import { lanzarError } from './errores'
 
 export interface ResultadoReconocimiento {
   lectura_reconocida: number

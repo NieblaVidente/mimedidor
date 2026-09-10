@@ -32,6 +32,14 @@ CREATE TABLE mimedidor.medidor (
     -- Clave para el riesgo de fragmentación del parque de medidores (CLAUDE.md §13).
     marca               text NOT NULL,
     modelo              text,
+    -- Cuantos de los digitos del odometro estan en rojo, o sea son fraccion de m3 (T-39).
+    -- Es una propiedad fisica de ESTE aparato, no una constante del sistema: en el dataset de
+    -- campo, el ARAD tiene 1 y el ACTARIS y el MJ-SDC tienen 2. Sin esta columna la lectura se
+    -- guardaria inflada por 10 o por 100 segun el modelo, y la comparacion contra la factura
+    -- --que viene en m3 reales-- no significaria nada.
+    digitos_decimales   smallint NOT NULL DEFAULT 0
+                        CONSTRAINT medidor_digitos_decimales_rango
+                        CHECK (digitos_decimales BETWEEN 0 AND 3),
     fecha_instalacion   date,
     creado_en           timestamptz NOT NULL DEFAULT now()
 );
@@ -41,8 +49,14 @@ CREATE INDEX idx_medidor_vivienda_id ON mimedidor.medidor(vivienda_id);
 CREATE TABLE mimedidor.lectura (
     id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     medidor_id  uuid NOT NULL REFERENCES mimedidor.medidor(id),
-    valor       numeric(10, 2) NOT NULL CHECK (valor >= 0),
-    fecha       date NOT NULL,
+    -- 3 decimales, no 2: `medidor.digitos_decimales` admite hasta 3 digitos rojos (litros), y
+    -- con numeric(10,2) el tercero se redondearia en silencio al guardar (T-39).
+    valor       numeric(12, 3) NOT NULL CHECK (valor >= 0),
+    -- Defensa en profundidad de T-35: la API ya rechaza una fecha futura antes de llegar acá
+    -- (server/app/api/lecturas.py), pero este CHECK protege también a quien escriba en la
+    -- tabla sin pasar por la API (ej. un script de datos futuro).
+    fecha       date NOT NULL
+                CONSTRAINT lectura_fecha_no_futura CHECK (fecha <= CURRENT_DATE),
     -- Permite calcular la exactitud real del reconocimiento en T-11.
     origen      text NOT NULL CHECK (origen IN ('reconocimiento', 'manual')),
     foto_url    text,
@@ -75,7 +89,7 @@ CREATE TABLE mimedidor.lectura_evento (
     id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     lectura_id  uuid NOT NULL REFERENCES mimedidor.lectura(id),
     medidor_id  uuid NOT NULL REFERENCES mimedidor.medidor(id),
-    valor       numeric(10, 2) NOT NULL,
+    valor       numeric(12, 3) NOT NULL,
     origen      text NOT NULL,
     creado_en   timestamptz NOT NULL DEFAULT now()
 );
