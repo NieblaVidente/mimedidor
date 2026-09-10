@@ -37,7 +37,7 @@ function PantallaHistorial() {
   }
 
   return (
-    <section>
+    <section className="pantalla">
       <h2>Historial de lecturas</h2>
 
       <label htmlFor="medidor-historial">Medidor</label>
