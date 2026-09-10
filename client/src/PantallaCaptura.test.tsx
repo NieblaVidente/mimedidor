@@ -59,7 +59,7 @@ describe('PantallaCaptura', () => {
     await avanzarHastaCamara(usuario)
     await usuario.click(screen.getByRole('button', { name: 'Tomar foto' }))
 
-    const campoValor = await screen.findByLabelText('Lectura (m³)')
+    const campoValor = await screen.findByLabelText('Lectura que muestra el medidor')
     expect(campoValor).toHaveValue('1284')
 
     await usuario.click(screen.getByRole('button', { name: 'Confirmar lectura' }))
@@ -87,7 +87,7 @@ describe('PantallaCaptura', () => {
     await avanzarHastaCamara(usuario)
     await usuario.click(screen.getByRole('button', { name: 'Tomar foto' }))
 
-    const campoValor = await screen.findByLabelText('Lectura (m³)')
+    const campoValor = await screen.findByLabelText('Lectura que muestra el medidor')
     expect(campoValor).toHaveValue('')
     await screen.findByText(/No se pudo leer la lectura automáticamente/)
 
@@ -114,7 +114,7 @@ describe('PantallaCaptura', () => {
     await avanzarHastaCamara(usuario)
     await usuario.click(screen.getByRole('button', { name: 'Tomar foto' }))
 
-    const campoValor = await screen.findByLabelText('Lectura (m³)')
+    const campoValor = await screen.findByLabelText('Lectura que muestra el medidor')
     await usuario.clear(campoValor)
     await usuario.type(campoValor, '1050')
     await usuario.click(screen.getByRole('button', { name: 'Confirmar lectura' }))
@@ -134,7 +134,7 @@ describe('PantallaCaptura', () => {
 
     await avanzarHastaCamara(usuario)
     await usuario.click(screen.getByRole('button', { name: 'Tomar foto' }))
-    const campoValor = await screen.findByLabelText('Lectura (m³)')
+    const campoValor = await screen.findByLabelText('Lectura que muestra el medidor')
 
     await usuario.click(screen.getByRole('button', { name: 'Confirmar lectura' }))
 
@@ -156,7 +156,7 @@ describe('PantallaCaptura', () => {
 
     await avanzarHastaCamara(usuario)
     await usuario.click(screen.getByRole('button', { name: 'Tomar foto' }))
-    await screen.findByLabelText('Lectura (m³)')
+    await screen.findByLabelText('Lectura que muestra el medidor')
 
     const campoFecha = screen.getByLabelText('Fecha de la lectura')
     await usuario.clear(campoFecha)
@@ -176,7 +176,7 @@ describe('PantallaCaptura', () => {
 
     await avanzarHastaCamara(usuario)
     await usuario.click(screen.getByRole('button', { name: 'Tomar foto' }))
-    await screen.findByLabelText('Lectura (m³)')
+    await screen.findByLabelText('Lectura que muestra el medidor')
 
     const campoFecha = screen.getByLabelText('Fecha de la lectura') as HTMLInputElement
     // Fecha local, no `toISOString()` (UTC) — el mismo bug de huso horario que arregló T-35.
@@ -193,5 +193,20 @@ describe('PantallaCaptura', () => {
     render(<PantallaCaptura />)
 
     expect(screen.getByRole('button', { name: 'Abrir cámara' })).toBeDisabled()
+  })
+
+  it('el rótulo del valor no dice m³ y explica qué escribir (T-44)', async () => {
+    const usuario = userEvent.setup()
+    vi.mocked(reconocerFoto).mockResolvedValue({ lectura_reconocida: 1284, confianza: null })
+
+    await avanzarHastaCamara(usuario)
+    await usuario.click(screen.getByRole('button', { name: 'Tomar foto' }))
+
+    const campoValor = await screen.findByLabelText('Lectura que muestra el medidor')
+    expect(campoValor).toBeInTheDocument()
+    expect(screen.queryByLabelText('Lectura (m³)')).not.toBeInTheDocument()
+    expect(
+      screen.getByText(/Escribí los dígitos tal como se ven en el odómetro/),
+    ).toBeInTheDocument()
   })
 })

@@ -166,13 +166,18 @@ function PantallaCaptura() {
 
       {(estado === 'revisando' || estado === 'guardando') && (
         <section>
-          <label htmlFor="valor-lectura">Lectura (m³)</label>
+          <label htmlFor="valor-lectura">Lectura que muestra el medidor</label>
           <input
             id="valor-lectura"
             value={valorTexto}
             onChange={(evento) => manejarCambioValor(evento.target.value)}
             inputMode="decimal"
+            aria-describedby="ayuda-valor-lectura"
           />
+          <p id="ayuda-valor-lectura">
+            Escribí los dígitos tal como se ven en el odómetro, seguidos y sin punto ni coma
+            (incluidos los rojos).
+          </p>
           <p>
             {origen === 'reconocimiento'
               ? 'Lectura reconocida automáticamente — revisala antes de confirmar.'

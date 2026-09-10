@@ -67,10 +67,6 @@ en una caja de concreto a ras del suelo:
 - **Cuidado con el flash y con el reflejo del sol.** El vidrio rebota la luz justo sobre los
   números.
 
-> **Sobre la frase «dentro de la guía» que aparece en pantalla.** La aplicación dice
-> «Encuadrá la carátula del hidrómetro dentro de la guía», pero **en esta versión esa guía no se
-> dibuja**. Ignore la frase y encuadre a ojo. Está reportado como error.
-
 Cuando esté listo, toque **Tomar foto**.
 
 ### Paso 3 — Revise el número. Este es el paso importante
@@ -101,9 +97,6 @@ tiene que hacer ninguna cuenta: escríbalos igual que los demás.
 
 En el ejemplo de este manual el medidor tiene **dos dígitos rojos**, así que al escribir `52669`
 la aplicación va a guardar **526,69 m³**.
-
-> **Ojo con el rótulo del campo.** Dice **«Lectura (m³)»**, y eso confunde: lo que usted escribe
-> **no** son metros cúbicos, son los dígitos de la carátula. Está reportado para corregirlo.
 
 #### Si el número que salió está mal
 
@@ -238,7 +231,6 @@ darle.
 | **«La lectura es menor que la última lectura registrada»** | Un medidor de agua nunca retrocede, así que la aplicación no lo acepta. Casi siempre es un dígito mal copiado. Si de verdad le cambiaron el medidor, avísele a quien administra el sistema |
 | **«La fecha de la lectura no puede ser en el futuro»** | Corrija la fecha |
 | **«No hay suficientes lecturas propias en este período»** | Le falta una lectura del inicio del período o de antes. Se resuelve solo con el tiempo |
-| **La cámara se sale de la pantalla y no ve bien lo que enfoca** | Es un defecto conocido de esta versión, ya reportado. Encuadre lo mejor que pueda y revise el número después |
 
 ---
 
@@ -253,8 +245,9 @@ Escrito a propósito, para que nadie espere algo que no está:
   ver el historial necesita internet.
 - **No avisa nada por su cuenta.** No manda notificaciones ni correos.
 - **No guarda la foto.** Se usa para intentar leer el número y se descarta.
-- **La pantalla no está terminada.** Los rótulos y los campos se ven pegados, y en el celular
-  algunas partes se salen de la pantalla. Funciona, pero se ve a medio hacer.
+- **La pantalla todavía no tiene diseño propio.** T-42 arregló que la aplicación se viera rota
+  (la guía de encuadre no se veía, el video se salía de la pantalla, los campos quedaban
+  pegados); falta la pasada visual —tipografía y paleta propias— que le toca a T-52.
 
 ---
 
