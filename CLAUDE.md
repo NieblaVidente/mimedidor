@@ -335,10 +335,20 @@ de ser uno solo.
 
 | Ceremonia | Cuándo |
 |---|---|
-| Sprint Planning | Lunes semana 6, al inicio |
-| Daily Scrum | Todos los días, 15 min |
-| Sprint Review | Jueves semana 7, antes de entregar |
-| Sprint Retrospective | Jueves semana 7, después del review |
+| Sprint Planning | Al inicio de cada sprint |
+| **Repaso del tablero** | 10 min al inicio de cada clase presencial en que coincidan los tres |
+| Sprint Review | El día de cierre del sprint, antes de entregar |
+| Sprint Retrospective | Después del Review, el mismo día |
+
+> **El Daily Scrum se eliminó como ceremonia diaria con registro escrito**, por acuerdo de los tres
+> en la retrospectiva del Sprint 2 (acción C, ver [`docs/scrum/sprint-2.md`](docs/scrum/sprint-2.md)).
+> Lo reemplaza el repaso del tablero.
+>
+> La razón: se intentó dos veces, con dos formatos distintos —asíncrono por chat y presencial— y se
+> cayó las dos. Lo que la rúbrica de ISW2 evalúa es el **registro fechado** de las ceremonias, no
+> que se llamen «Daily Scrum» ni que sean diarias. Un repaso corto anclado a algo que ya ocurre
+> tiene posibilidad real de sostenerse; un daily diario para tres personas que se ven en clase ya
+> se demostró dos veces que no.
 
 **Registrá cada ceremonia en `docs/scrum/`** con fecha, asistentes y acuerdos. El profesor de ISW2
 va a pedir evidencia de que ocurrieron. Una foto de la reunión no prueba nada; un registro fechado
