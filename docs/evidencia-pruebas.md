@@ -42,25 +42,41 @@ a pasar inadvertido.
 
 | Nivel | Dónde vive | Cuántas | Qué sustituye / qué no |
 |---|---|---|---|
-| Unitarias del servidor | `server/tests/*.py` (excepto `test_integracion_db.py`) | **31** (28 corren en cada PR, 3 solo con el dataset de campo local — ver nota abajo) | La conexión a PostgreSQL está sustituida por un objeto falso — prueban lógica de negocio y de visión aisladas, rápido y sin infraestructura |
-| Unitarias del cliente | `client/src/*.test.tsx` | **15** | El módulo de API (`fetch`) está sustituido — prueban la lógica de cada pantalla en aislamiento |
-| Integración contra base real | `server/tests/test_integracion_db.py` | **4** | Nada sustituido: corre contra PostgreSQL 16 real. Se saltan solas en el job `server` (no tiene Postgres) y corren de verdad en el job `database`. Existen por el bug del cast de T-21 — ver arriba |
+| Unitarias del servidor | `server/tests/*.py` (excepto `test_integracion_db.py`) | **36** (33 corren en cada PR, 3 solo con el dataset de campo local — ver nota abajo) | La conexión a PostgreSQL está sustituida por un objeto falso — prueban lógica de negocio y de visión aisladas, rápido y sin infraestructura |
+| Unitarias del cliente | `client/src/*.test.tsx` | **19** | El módulo de API (`fetch`) está sustituido — prueban la lógica de cada pantalla en aislamiento |
+| Integración contra base real | `server/tests/test_integracion_db.py` | **9** | Nada sustituido: corre contra PostgreSQL 16 real. Se saltan solas en el job `server` (no tiene Postgres) y corren de verdad en el job `database`. Existen por el bug del cast de T-21 — ver arriba |
 | Transaccional en SQL | `database/scripts/verificar_registrar_lectura.sql` | 1 escenario, 2 casos | Registra una lectura válida y fuerza una inválida a propósito; confirma que la transacción de dos escrituras (`lectura` + `lectura_evento`) no dejó nada a medias (T-14) |
 | Respaldo y restauración | `database/scripts/verificar_restauracion.sh` | 1 escenario de punta a punta | Inserta un dato, respalda, restaura en una base aparte y confirma que el dato sobrevivió con el mismo valor — no solo que los comandos no fallaron (T-29) |
-| End-to-end | `client/cypress/e2e/hilo-completo.cy.ts` | **2** | Nada sustituido: navegador real → cliente → proxy de Vite → FastAPI → PostgreSQL. Cubre el hilo feliz completo (foto → lectura → historial → factura → comparación con alerta de umbral) y el rechazo de una lectura inválida sin fuga de detalles internos (T-22) |
+| End-to-end | `client/cypress/e2e/hilo-completo.cy.ts` | **2** | Nada sustituido: navegador real → cliente → proxy de Vite → FastAPI → PostgreSQL. Cubre el hilo feliz completo (foto → lectura → historial → factura → comparación con alerta de umbral) y el rechazo de una lectura inválida sin fuga de detalles internos (T-22). **Corre dos veces en cada PR**: contra el servidor de desarrollo y contra el build con el trabajador de servicio activo (T-50) |
+| End-to-end sobre el build (PWA) | `client/cypress/e2e-pwa/trabajador-de-servicio.cy.ts` | **2** | Nada sustituido, y además con el trabajador de servicio sirviendo la página. Comprueba que controla la pestaña sin cachear `/api`, y que **una versión nueva reemplaza a la que quedó en caché** — reconstruyendo el cliente a mitad de la prueba (T-50). Ver [`pruebas-end-to-end.md`](pruebas-end-to-end.md) |
 | Exactitud del reconocimiento | `docs/exactitud-reconocimiento.md` | 2 fotos medidas | **0 de 2 (0%)** coinciden exactamente con la lectura real — medido, no maquillado (T-11). **No corre en CI**: el dataset de fotos no se versiona (`CLAUDE.md`, política de no subir fotos crudas), así que es una medición manual puntual, fijada como número de referencia — ver nota abajo |
 
-**Total de pruebas automatizadas que corren de verdad en cada Pull Request: 28 + 15 + 4 + 2 = 49.**
+**Total de pruebas automatizadas que corren de verdad en cada Pull Request: 33 + 19 + 9 + 2 + 2 = 65.**
+Las 2 del hilo end-to-end se ejecutan dos veces —una por cada camino, con y sin trabajador de
+servicio— pero se cuentan una sola vez: son las mismas pruebas.
+
+> **Los conteos se volvieron a medir el 2026-09-11**, corriendo las suites en este entorno. Los
+> anteriores (31 / 15 / 4, total 49) venían del Sprint 2 y se habían quedado atrás: entre T-35,
+> T-39, T-42/T-44, T-52 y T-50 se agregaron pruebas que nadie volvió a contar acá. Vale la pena
+> repetir la medición antes de entregar el documento, no confiar en este número.
 Las 3 pruebas restantes del servidor (sobre `dataset-fotos/`, no versionado) están escritas y
 pasan cuando alguien las corre con el dataset local, pero **se saltan en CI** — ver la nota sobre
 la exactitud del reconocimiento más abajo. Aparte quedan las verificaciones de base de datos
 (T-14/T-29), que también corren en CI pero se cuentan aparte por no ser aserciones de
 `pytest`/Vitest/Cypress en el sentido estricto.
 
-Los cuatro jobs de `.github/workflows/ci.yml` (`client`, `server`, `database`, `e2e`) corren en
-paralelo en cada Pull Request y bloquean el merge si alguno falla. Confirmado corriendo la suite
-completa en este entorno: `server` da **32 passed, 3 skipped** en total (35 con integración
-incluida), idéntico a lo que muestra la corrida real de CI de abajo.
+Los cinco jobs de `.github/workflows/ci.yml` (`client`, `server`, `database`, `e2e`, `e2e-pwa`) corren
+en paralelo en cada Pull Request y bloquean el merge si alguno falla.
+
+Confirmado corriendo las suites en este entorno el 2026-09-11: `pytest` recolecta **45** pruebas
+en `server/` — 33 unitarias que corren siempre, 3 que necesitan el dataset de campo local y 9 de
+integración que se saltan solas cuando no hay PostgreSQL configurado (en CI corren en el job
+`database`). Vitest da **19 passed**. Cypress, **2 + 2**.
+
+> En una máquina sin Tesseract instalado, 3 de las unitarias del servidor fallan con
+> `TesseractNotFoundError`. Es el entorno, no el código: el job `server` de CI instala el motor
+> nativo (`apt-get install tesseract-ocr`) antes de correrlas. Si te pasa en local, instalalo
+> — ver [`como-empezar.md`](como-empezar.md).
 
 ---
 

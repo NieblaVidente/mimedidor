@@ -1,28 +1,26 @@
 import { defineConfig } from 'cypress'
+import { usarCamaraFalsa } from './cypress/camara-falsa'
 
+/**
+ * Prueba end-to-end contra el **servidor de desarrollo** (T-22).
+ *
+ * Es la que corre en cada PR sobre el código fuente. La otra configuración,
+ * `cypress.preview.config.ts`, corre el mismo hilo contra el build con el trabajador de servicio
+ * activo (T-50); el porqué de tener dos está en `docs/pruebas-end-to-end.md`.
+ */
 export default defineConfig({
   e2e: {
     // El servidor de desarrollo de Vite, que es el que tiene el proxy a la API (T-21).
     // Apuntar directo al 8000 no serviría: probaríamos la API sin el cliente.
     baseUrl: 'http://localhost:5173',
 
-    // El hilo arranca en la cámara y no hay forma de registrar una lectura sin pasar por ella,
-    // así que la prueba necesita una. Los navegadores basados en Chromium pueden simular una:
-    // `use-fake-device-for-media-stream` entrega un video sintético, y
-    // `use-fake-ui-for-media-stream` acepta el permiso de cámara sin mostrar el diálogo, que en
-    // modo automatizado nadie podría aceptar.
-    //
-    // ⚠️ **Hay que correrla en un navegador Chromium** — Electron (el que trae Cypress y el que
-    // se usa por defecto), Chrome o Edge. En Firefox estos flags no existen: no habría cámara,
-    // no se podría tomar la foto, y la prueba fallaría por el navegador y no por el código.
+    // Solo el hilo funcional. Las pruebas de `cypress/e2e-pwa/` necesitan el trabajador de
+    // servicio, que en desarrollo está desactivado a propósito (`devOptions.enabled: false` en
+    // vite.config.ts): acá fallarían por el entorno, no por el código.
+    specPattern: 'cypress/e2e/**/*.cy.ts',
+
     setupNodeEvents(on) {
-      on('before:browser:launch', (navegador, opciones) => {
-        if (navegador.family === 'chromium') {
-          opciones.args.push('--use-fake-device-for-media-stream')
-          opciones.args.push('--use-fake-ui-for-media-stream')
-        }
-        return opciones
-      })
+      usarCamaraFalsa(on)
     },
 
     supportFile: false,

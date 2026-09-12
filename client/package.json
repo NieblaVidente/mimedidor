@@ -10,6 +10,7 @@
     "test": "vitest run",
     "preview": "vite preview",
     "e2e": "cypress run",
+    "e2e:pwa": "cypress run --config-file cypress.preview.config.ts",
     "e2e:abrir": "cypress open"
   },
   "dependencies": {

@@ -237,14 +237,119 @@ jobs:
           echo "===== API ====="; cat /tmp/api.log || true
           echo "===== CLIENTE ====="; cat /tmp/cliente.log || true
 
+
+  # Mismo hilo, otro camino: el build servido por `vite preview`, donde el trabajador de servicio
+  # **sí** está activo (T-50). No reemplaza al job `e2e`, lo complementa — el porqué de tener dos y
+  # no uno está en `docs/pruebas-end-to-end.md`.
+  e2e-pwa:
+    name: End-to-end sobre el build (trabajador de servicio)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # --- Base de datos ---------------------------------------------------------------------
+      - name: Instalar y arrancar PostgreSQL 16
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-16 postgresql-client-16
+          sudo systemctl enable --now postgresql
+          until pg_isready -q -h localhost; do sleep 1; done
+
+      - name: Crear la base, aplicar el esquema y sembrar los datos de prueba
+        working-directory: database/scripts
+        run: |
+          sudo -u postgres createdb mimedidor
+          sudo -u postgres psql -d mimedidor \
+            -v ON_ERROR_STOP=1 \
+            -v password_app='clave-de-prueba-ci' \
+            -v password_lectura='clave-de-prueba-ci' \
+            -f ejecutar_todo.sql
+          sudo -u postgres psql -d mimedidor -v ON_ERROR_STOP=1 -f datos_de_prueba.sql
+
+      # --- Servidor --------------------------------------------------------------------------
+      - uses: actions/setup-python@v5
+        with:
+          python-version-file: server/.python-version
+          cache: pip
+          cache-dependency-path: server/requirements-dev.txt
+
+      - name: Instalar Tesseract y las dependencias del servidor
+        working-directory: server
+        run: |
+          sudo apt-get install -y tesseract-ocr
+          pip install -r requirements-dev.txt
+
+      - name: Levantar la API
+        working-directory: server
+        env:
+          PGHOST: localhost
+          PGDATABASE: mimedidor
+          PGUSER: mimedidor_app
+          PGPASSWORD: clave-de-prueba-ci
+        run: nohup uvicorn app.main:app --port 8000 > /tmp/api.log 2>&1 &
+
+      # --- Cliente: el build, no el código fuente ----------------------------------------------
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: client/.nvmrc
+          cache: npm
+          cache-dependency-path: client/package-lock.json
+
+      - name: Instalar las dependencias del cliente
+        working-directory: client
+        run: npm ci
+
+      - name: Asegurar el binario de Cypress
+        working-directory: client
+        run: npx cypress install
+
+      # El identificador de versión que la aplicación muestra en el pie. La segunda prueba
+      # reconstruye con otro valor para comprobar que el trabajador de servicio no se queda pegado
+      # en éste.
+      - name: Construir el cliente
+        working-directory: client
+        env:
+          VITE_VERSION_BUILD: ${{ github.sha }}
+        run: npm run build
+
+      # `vite preview` sirve `dist/`, con el trabajador de servicio registrado. Su proxy a `/api`
+      # está en la sección `preview` de vite.config.ts: `server.proxy` no aplica acá.
+      - name: Levantar vite preview
+        working-directory: client
+        run: nohup npm run preview -- --port 4173 > /tmp/preview.log 2>&1 &
+
+      - name: Esperar a que los dos respondan
+        run: |
+          until curl -sf http://localhost:8000/api/salud > /dev/null; do sleep 1; done
+          until curl -sf http://localhost:4173/ > /dev/null; do sleep 1; done
+          # Que el proxy de preview llegue a la API es la premisa de toda la prueba.
+          curl -sf http://localhost:4173/api/salud | grep -q '"estado":"ok"'
+
+      # --- Las pruebas -------------------------------------------------------------------------
+      # Dos invocaciones y no una para que el orden sea explícito: la segunda reconstruye el
+      # cliente a mitad de camino, así que tiene que ir después del hilo completo.
+      - name: El hilo completo, esta vez con el trabajador de servicio activo
+        working-directory: client
+        run: npx cypress run --config-file cypress.preview.config.ts --spec 'cypress/e2e/**/*.cy.ts' --browser chrome
+
+      - name: Que una versión nueva reemplace a la cacheada
+        working-directory: client
+        run: npx cypress run --config-file cypress.preview.config.ts --spec 'cypress/e2e-pwa/**/*.cy.ts' --browser chrome
+
+      - name: Logs si algo falló
+        if: failure()
+        run: |
+          echo "===== API ====="; cat /tmp/api.log || true
+          echo "===== PREVIEW ====="; cat /tmp/preview.log || true
+
   # ══════════════════════════════════════════════════════════════════════════════════════
   # Entrega continua (T-28). Solo corre al mergear a `main`, y `needs` la encadena a los
-  # cuatro verificadores: si alguno falla, el despliegue no ocurre. Esa dependencia es la
+  # cinco verificadores: si alguno falla, el despliegue no ocurre. Esa dependencia es la
   # garantía real de que no se publica algo en rojo, y no un acuerdo verbal.
   # ══════════════════════════════════════════════════════════════════════════════════════
   desplegar:
     name: Desplegar a producción
-    needs: [client, server, database, e2e]
+    needs: [client, server, database, e2e, e2e-pwa]
     # `vars.URL_PRODUCCION` funciona como interruptor: mientras no exista, el job queda en
     # `Skipped` y `main` no se pone en rojo por una infraestructura que todavía no se creó. En
     # cuanto se defina la variable el despliegue se activa solo, sin volver a tocar este archivo
@@ -279,6 +384,11 @@ jobs:
 
       - name: Construir el cliente
         working-directory: client
+        env:
+          # Lo que la aplicación muestra en el pie. Con un trabajador de servicio de por medio,
+          # "recargá la página" no garantiza que alguien esté viendo la versión última: esto dice
+          # contra qué commit se reporta un problema (T-50).
+          VITE_VERSION_BUILD: ${{ github.sha }}
         run: |
           npm ci
           npm run build
