@@ -245,7 +245,7 @@ El pipeline corre solo y despliega la versión revertida.
 de esto se arregla el servidor a mano, el repositorio pasa a mentir sobre lo que está corriendo, y
 el próximo despliegue vuelve a poner la versión rota.
 
-**Lo que cuesta:** entre 3 y 5 minutos, porque tienen que pasar de nuevo los cuatro verificadores
+**Lo que cuesta:** entre 3 y 5 minutos, porque tienen que pasar de nuevo los cinco verificadores
 antes de que el job de despliegue arranque. **La aplicación sigue caída todo ese rato.** Y si
 GitHub Actions está con problemas, este camino no existe.
 

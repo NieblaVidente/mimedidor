@@ -69,6 +69,22 @@ export default defineConfig({
     },
   },
 
+  // `server.proxy` **no aplica a `vite preview`**: son dos servidores distintos y cada uno lee su
+  // propia sección. Sin esto, la prueba end-to-end contra el build (T-50) recibiría el index.html
+  // en cada `fetch('/api/…')`, igual que pasaba en desarrollo antes de T-21.
+  //
+  // Preview no es producción: allá el build y la API se sirven desde el mismo origen y no hay
+  // ningún proxy. Este existe solo para poder ejercitar el build —y con él el trabajador de
+  // servicio— sin montar esa infraestructura.
+  preview: {
+    proxy: {
+      '/api': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+      },
+    },
+  },
+
   test: {
     environment: 'jsdom',
     setupFiles: ['./src/setupTests.ts'],

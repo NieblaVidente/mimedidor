@@ -238,6 +238,23 @@ La prueba deja datos en la base (las lecturas y facturas que registra). No moles
 correrla, pero si querés partir de cero: borrá la base, volvé a correr `ejecutar_todo.sql` y
 después `datos_de_prueba.sql`.
 
+### La misma prueba, pero sobre el build (T-50)
+
+`npm run e2e` corre contra el servidor de desarrollo, donde el **trabajador de servicio está
+desactivado** a propósito. En producción sí está activo, así que hay una segunda forma de correrla
+—contra el build servido por `vite preview`— que además comprueba que una versión nueva reemplaza
+a la que quedó en caché:
+
+```bash
+cd client
+VITE_VERSION_BUILD=local npm run build
+npm run preview -- --port 4173 &
+npm run e2e:pwa
+```
+
+El porqué de tener dos caminos y dos jobs de CI está en
+[`pruebas-end-to-end.md`](pruebas-end-to-end.md).
+
 ---
 
 ## 5. Lo primero que tenés que leer

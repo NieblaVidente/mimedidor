@@ -210,3 +210,19 @@ p[role='alert'] {
   border-radius: 50%;
   pointer-events: none;
 }
+
+/* Pie con la versión del build (T-50). Discreto a propósito: sirve para diagnosticar, no es
+   información que el abonado necesite mientras usa la aplicación. */
+footer {
+  margin-top: 32px;
+  padding-top: 16px;
+  border-top: 1px solid var(--borde);
+  text-align: center;
+  font-size: 13px;
+  color: var(--texto);
+  opacity: 0.75;
+}
+
+footer p {
+  margin: 0;
+}

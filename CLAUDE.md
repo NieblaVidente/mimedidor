@@ -73,7 +73,7 @@ profesores evalúan este mismo proyecto desde la perspectiva de su materia (ver 
 | Pruebas unitarias | `pytest` (server) · Vitest (client) | |
 | Pruebas end-to-end | Cypress | Implementadas en T-22. Corren el hilo completo contra el backend real en cada PR |
 | Análisis estático | `ruff` (server) · ESLint (client) | |
-| CI/CD | GitHub Actions | Cuatro jobs paralelos: `client`, `server`, `database` y `e2e`. Los cuatro son obligatorios para mergear. ⚠️ **Todavía no hay entrega continua** — ver §13.7 |
+| CI/CD | GitHub Actions | Cinco jobs paralelos: `client`, `server`, `database`, `e2e` y `e2e-pwa` (T-50, el hilo sobre el build con el trabajador de servicio activo). Los cinco son obligatorios para mergear. ⚠️ **Todavía no hay entrega continua** — ver §13.7 |
 
 ### Por qué estas decisiones
 
@@ -415,13 +415,23 @@ Si estás asistiendo a un integrante de este equipo:
    ≥ 60 % de la muestra, el MVP se acota a ella.
 3. **Carga simultánea de infraestructura y funcionalidad** en un sprint de 10 días, con tres
    personas que además llevan 4 proyectos de C++ de Sistemas Operativos.
-4. **La prueba end-to-end no cubre el camino con trabajador de servicio.** Cypress corre contra
-   `npm run dev` (ver `client/cypress.config.ts`, que apunta al 5173), y T-31 dejó el trabajador
-   de servicio **desactivado en desarrollo** a propósito: uno cacheando durante `vite dev` esconde
-   los cambios que uno acaba de hacer. La consecuencia es que la combinación Cypress + PWA no está
-   probada — **no se rompió, simplemente no se ejercita**. En producción el trabajador de servicio
-   sí está activo, así que ese camino hoy no tiene cobertura automatizada. Cerrarlo implica correr
-   Cypress contra `vite preview` en un job aparte, y eso no entró en el alcance de T-31.
+4. ✅ **CERRADO — La prueba end-to-end no cubre el camino con trabajador de servicio.** Cerrado en
+   T-50 (#93). El job `e2e-pwa` corre el hilo completo contra `vite preview`, donde el trabajador
+   de servicio **sí** está activo, y además comprueba que una versión nueva reemplaza a la
+   cacheada. Son dos jobs y no uno porque en desarrollo el trabajador de servicio sigue
+   desactivado a propósito (T-31): uno cacheando durante `vite dev` esconde los cambios que uno
+   acaba de hacer. El detalle está en [`docs/pruebas-end-to-end.md`](docs/pruebas-end-to-end.md).
+
+   **Lo que hizo falta para cerrarlo:** un proxy propio para `vite preview` —`server.proxy` no
+   aplica ahí, son dos servidores distintos—, limpiar trabajadores de servicio y cachés antes de
+   cada corrida, y un identificador de versión visible en el pie de la aplicación
+   (`VITE_VERSION_BUILD`, que el pipeline fija en el SHA del commit): sin algo que distinga un
+   build de otro, «se quedó pegado en el anterior» no se puede afirmar. Ese identificador sirve
+   igual para diagnosticar en producción, donde «recargá la página» no garantiza que alguien esté
+   viendo la versión última.
+
+   **Lo que sigue sin cubrirse:** el funcionamiento sin conexión, que no existe todavía (§13.5), y
+   el diálogo de instalación como aplicación, cuya evidencia es manual.
 
 Los tres siguientes salieron de dibujar el diagrama de arquitectura (T-19): son diferencias reales
 entre lo que este archivo declaraba y lo que hay en el repositorio.
