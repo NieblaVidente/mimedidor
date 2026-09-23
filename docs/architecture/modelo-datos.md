@@ -43,6 +43,7 @@ erDiagram
         text numero_serie UK
         text marca
         text modelo
+        smallint digitos_decimales
         date fecha_instalacion
         timestamptz creado_en
     }
@@ -116,8 +117,8 @@ erDiagram
 |---|---|---|---|
 | `id` | `uuid` | PK | |
 | `medidor_id` | `uuid` | `NOT NULL`, `FK → medidor(id)` | |
-| `valor` | `numeric(10,2)` | `NOT NULL`, `CHECK (valor >= 0)` | Un hidrómetro no retrocede; la validación contra la lectura anterior es de negocio, no un `CHECK` de una sola fila — vive en el procedimiento de T-14 |
-| `fecha` | `date` | `NOT NULL` | |
+| `valor` | `numeric(12,3)` | `NOT NULL`, `CHECK (valor >= 0)` | Un hidrómetro no retrocede; la validación contra la lectura anterior es de negocio, no un `CHECK` de una sola fila — vive en el procedimiento de T-14. **Tres decimales desde T-39**: el `CHECK` de `digitos_decimales` admite hasta 3 dígitos rojos (litros), y `numeric(10,2)` habría redondeado el tercero al guardar, sin error y sin aviso |
+| `fecha` | `date` | `NOT NULL`, `CONSTRAINT lectura_fecha_no_futura CHECK (fecha <= CURRENT_DATE)` | La API ya rechaza fechas futuras, pero el `CHECK` protege también a quien escriba por `psql` (T-35, migración 001) |
 | `origen` | `text` | `NOT NULL`, `CHECK (origen IN ('reconocimiento','manual'))` | Es el dato que permite calcular la exactitud real en T-11 |
 | `foto_url` | `text` | `NULL` | |
 | `creado_en` | `timestamptz` | `NOT NULL DEFAULT now()` | |
@@ -144,7 +145,7 @@ Nace de la decisión de §5.2 (Opción C) — ver esa sección para la justifica
 | `id` | `uuid` | PK | |
 | `lectura_id` | `uuid` | `NOT NULL`, `FK → lectura(id)` | |
 | `medidor_id` | `uuid` | `NOT NULL`, `FK → medidor(id)` | Se podría derivar vía `lectura_id → lectura.medidor_id`, pero se guarda explícito a propósito: es una tabla de auditoría y tiene que poder consultarse por medidor aunque `lectura` cambie de forma en el futuro (ver justificación en §5.2) |
-| `valor` | `numeric(10,2)` | `NOT NULL` | Valor tal como quedó registrado en el momento del evento |
+| `valor` | `numeric(12,3)` | `NOT NULL` | Valor tal como quedó registrado en el momento del evento. Ampliado junto con `lectura.valor` en T-39, para que la bitácora no redondee lo que la tabla sí guarda |
 | `origen` | `text` | `NOT NULL` | Copia del `origen` de la lectura en el momento del evento |
 | `creado_en` | `timestamptz` | `NOT NULL DEFAULT now()` | |
 

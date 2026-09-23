@@ -144,7 +144,7 @@ horaria del servidor de PostgreSQL** en vez de dejarla al azar de la instalació
 |---|---|
 | Tipo | Lógico completo, `pg_dump -Fc` (formato *custom*: comprimido y con restauración selectiva vía `pg_restore`, a diferencia de un volcado plano en texto) |
 | Alcance | La base completa, más los roles del clúster aparte con `pg_dumpall --roles-only` — los roles no son objetos de la base de datos sino del clúster (ver la nota de §"Cómo correr los scripts" arriba) |
-| Frecuencia | Diaria en desarrollo activo, y **obligatoria antes de cada entrega** |
+| Frecuencia | **Ejecución manual**, obligatoria antes de cada entrega y antes de cada cambio de esquema. No hay tarea programada (`cron`) todavía: automatizar la *ejecución* queda pendiente para cuando exista el servidor de producción. Lo que sí está automatizado es la **verificación**: `verificar_restauracion.sh` corre en cada Pull Request |
 | Retención | Los últimos 7 respaldos de cada tipo, en rotación — `respaldar.sh` borra los más viejos automáticamente |
 | Restauración | Siempre contra una base de datos **nueva** (`createdb` + `pg_restore`), nunca sobre la activa |
 
