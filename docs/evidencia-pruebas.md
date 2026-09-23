@@ -59,6 +59,10 @@ servicio— pero se cuentan una sola vez: son las mismas pruebas.
 > anteriores (31 / 15 / 4, total 49) venían del Sprint 2 y se habían quedado atrás: entre T-35,
 > T-39, T-42/T-44, T-52 y T-50 se agregaron pruebas que nadie volvió a contar acá. Vale la pena
 > repetir la medición antes de entregar el documento, no confiar en este número.
+>
+> **Repetida el 2026-09-22**, el día antes de la feria, con Tesseract en el PATH y la base local
+> ya migrada: `pytest` **45 passed** (las 36 unitarias más las 9 de integración, ninguna saltada)
+> y Vitest **19 passed**. Los números de la tabla siguen vigentes.
 Las 3 pruebas restantes del servidor (sobre `dataset-fotos/`, no versionado) están escritas y
 pasan cuando alguien las corre con el dataset local, pero **se saltan en CI** — ver la nota sobre
 la exactitud del reconocimiento más abajo. Aparte quedan las verificaciones de base de datos
@@ -73,10 +77,21 @@ en `server/` — 33 unitarias que corren siempre, 3 que necesitan el dataset de 
 integración que se saltan solas cuando no hay PostgreSQL configurado (en CI corren en el job
 `database`). Vitest da **19 passed**. Cypress, **2 + 2**.
 
-> En una máquina sin Tesseract instalado, 3 de las unitarias del servidor fallan con
+> En una máquina sin Tesseract **accesible**, 4 de las unitarias del servidor fallan con
 > `TesseractNotFoundError`. Es el entorno, no el código: el job `server` de CI instala el motor
 > nativo (`apt-get install tesseract-ocr`) antes de correrlas. Si te pasa en local, instalalo
 > — ver [`como-empezar.md`](como-empezar.md).
+>
+> **Accesible, no solo instalado.** El 2026-09-22 fallaron esas 4 en una máquina que sí tenía
+> Tesseract 5.5.3: el instalador no lo había agregado al PATH, así que `pytesseract` no lo
+> encontraba. El mismo problema hacía que `POST /api/lecturas/reconocer` respondiera 500 en vez
+> del 422 documentado, o sea que no era solo un ruido de las pruebas.
+>
+> **Las 9 de integración exigen la base al día.** Ese mismo día fallaron las 9 con
+> `UndefinedColumn: no existe la columna digitos_decimales`, porque la base local se había creado
+> antes de T-39 y nadie le había aplicado `database/migrations/002`. En CI no puede pasar: el job
+> `database` construye la base desde cero en cada corrida. Es justamente lo que estas pruebas
+> existen para detectar.
 
 ---
 

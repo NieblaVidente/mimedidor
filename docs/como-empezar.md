@@ -55,6 +55,17 @@ igual: las pruebas del servidor lo usan y sin él te van a fallar.
 winget install --id tesseract-ocr.tesseract
 ```
 
+**Comprobá que quedó en el PATH**, porque el instalador no siempre lo agrega y entonces `pytest`
+falla con `TesseractNotFoundError` aunque el programa esté instalado:
+
+```bash
+tesseract --version
+```
+
+Si el comando no se reconoce, agregá `C:\Program Files\Tesseract-OCR` al PATH y volvé a abrir la
+terminal. Nos pasó el día antes de la feria, y el efecto visible no fue en las pruebas sino en la
+aplicación: `POST /api/lecturas/reconocer` respondía 500 en vez del 422 documentado.
+
 **Cerrá y volvé a abrir PowerShell después de instalar todo**, para que reconozca los comandos
 nuevos.
 
@@ -430,6 +441,8 @@ Software II.
 | Las pruebas del cliente se cuelgan sin terminar | Ruta del proyecto con espacios | Cloná en una ruta sin espacios (`C:\dev\`) |
 | El CI falla instalando Pillow | Python distinto a 3.12 | Está fijado en `server/.python-version`; localmente usá `py -3.12` |
 | `pytest` falla en las pruebas de OCR | Falta Tesseract | `winget install --id tesseract-ocr.tesseract` |
+| `pytest` falla con `TesseractNotFoundError` **aunque Tesseract esté instalado** | El instalador no agrega Tesseract al PATH, así que Python no lo encuentra | Agregá `C:\Program Files\Tesseract-OCR` al PATH (o a la sesión, con `$env:Path += ';C:\Program Files\Tesseract-OCR'`) y reabrí la terminal |
+| Las pruebas de `test_integracion_db.py` fallan con `UndefinedColumn` (por ejemplo, `no existe la columna digitos_decimales`) | Tu base local se creó antes de una migración y nadie se la aplicó. El CI no lo ve porque crea la base desde cero en cada corrida | Aplicá las migraciones pendientes de `database/migrations/` en orden, con el usuario dueño de las tablas |
 | `gh: command not found` después de instalarlo | La terminal no recargó el PATH | Cerrá y reabrí PowerShell |
 | Tu aprobación de un PR "desapareció" | Se subió un commit nuevo después de aprobar | Es a propósito (regla de la rama); hay que aprobar de nuevo |
 
