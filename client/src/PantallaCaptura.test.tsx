@@ -209,4 +209,29 @@ describe('PantallaCaptura', () => {
       screen.getByText(/Escribí los dígitos tal como se ven en el odómetro/),
     ).toBeInTheDocument()
   })
+
+  it('la guía de encuadre es un círculo, no un óvalo (T-54)', async () => {
+    const usuario = userEvent.setup()
+    const { container } = render(<PantallaCaptura />)
+    await usuario.type(screen.getByLabelText('Medidor'), 'medidor-1')
+    await usuario.click(screen.getByRole('button', { name: 'Abrir cámara' }))
+    await screen.findByRole('button', { name: 'Tomar foto' })
+
+    // jsdom no calcula layout, así que no se puede medir el círculo en pantalla. Lo que sí se
+    // puede fijar es lo que lo garantiza: un viewBox cuadrado escalado con «meet» se ajusta al
+    // lado menor del visor sin deformarse, y un <circle> dentro de él no puede ser elipse.
+    const guia = container.querySelector('svg.guia-encuadre')
+    expect(guia).not.toBeNull()
+    expect(guia).toHaveAttribute('aria-hidden', 'true')
+    expect(guia).toHaveAttribute('viewBox', '0 0 100 100')
+    expect(guia).toHaveAttribute('preserveAspectRatio', 'xMidYMid meet')
+
+    const circulo = guia!.querySelector('circle')
+    expect(circulo).not.toBeNull()
+    expect(guia!.querySelector('ellipse')).toBeNull()
+    // Centrado, y con el radio dentro del viewBox: la guía no se sale del visor.
+    expect(circulo).toHaveAttribute('cx', '50')
+    expect(circulo).toHaveAttribute('cy', '50')
+    expect(Number(circulo!.getAttribute('r'))).toBeLessThan(50)
+  })
 })

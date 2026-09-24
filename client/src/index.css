@@ -203,12 +203,27 @@ p[role='alert'] {
   display: block;
 }
 
+/* Cubre todo el visor; el círculo lo dibuja el SVG de adentro (T-54). Antes era un div con
+   `inset: 12% 25%` y `border-radius: 50%`: sobre una caja más alta que ancha, eso dibuja una
+   elipse, y le enseñaba al abonado a encuadrar de una forma que el detector de la carátula
+   (T-09, que busca un círculo) no espera. El radio 38 sobre 100 deja el diámetro en el 76 % del
+   lado menor del visor, con margen para que la guía nunca se salga. */
 .guia-encuadre {
   position: absolute;
-  inset: 12% 25%;
-  border: 3px dashed rgba(255, 255, 255, 0.85);
-  border-radius: 50%;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   pointer-events: none;
+}
+
+.guia-encuadre circle {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.85);
+  stroke-width: 3px;
+  stroke-dasharray: 10 7;
+  /* El grosor y los trazos se miden en píxeles de pantalla, no en unidades del viewBox:
+     sin esto, el trazo se engrosa o adelgaza según el tamaño del visor. */
+  vector-effect: non-scaling-stroke;
 }
 
 /* Pie con la versión del build (T-50). Discreto a propósito: sirve para diagnosticar, no es

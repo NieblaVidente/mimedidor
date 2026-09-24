@@ -154,7 +154,17 @@ function PantallaCaptura() {
         <section>
           <div className="visor-camara">
             <video ref={videoRef} autoPlay playsInline muted />
-            <div aria-hidden="true" className="guia-encuadre" />
+            {/* SVG y no un div redondeado: el visor toma la proporción del video, que cambia
+                según el teléfono y la orientación. Un viewBox cuadrado con «meet» escala parejo
+                contra el lado menor del visor, así que la guía es siempre un círculo (T-54). */}
+            <svg
+              aria-hidden="true"
+              className="guia-encuadre"
+              viewBox="0 0 100 100"
+              preserveAspectRatio="xMidYMid meet"
+            >
+              <circle cx="50" cy="50" r="38" />
+            </svg>
           </div>
           <p>Encuadrá la carátula del hidrómetro dentro de la guía.</p>
           <button type="button" onClick={manejarTomarFoto}>
